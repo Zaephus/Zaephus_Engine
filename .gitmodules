@@ -1,0 +1,9 @@
+[submodule "include/Zaephus_Math"]
+	path = include/Zaephus_Math
+	url = https://github.com/Zaephus/Zaephus_Math.git
+[submodule "include/assimp"]
+	path = include/assimp
+	url = https://github.com/assimp/assimp.git
+[submodule "include/glfw"]
+	path = include/glfw
+	url = https://github.com/glfw/glfw.git
