@@ -6,6 +6,14 @@ set_property(GLOBAL PROPERTY LINKER_LANGUAGE CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+function(CopyResources target dir)
+    add_custom_command(
+        TARGET ${target}
+        PRE_BUILD
+        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/CopyResources.py ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/source ${dir}
+    )
+endfunction()
+
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
 
@@ -30,8 +38,12 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/include/glad include/glad)
 add_subdirectory(${PROJECT_SOURCE_DIR}/include/assimp include/assimp)
 add_subdirectory(${PROJECT_SOURCE_DIR}/include/Zaephus_Math include/Zaephus_Math)
 
+message(before adding subdirectories)
+
 add_subdirectory(source)
 add_subdirectory(examples)
+
+message(after adding subdirectories)
 
 target_link_libraries(Zaephus_Engine glfw)
 target_link_libraries(Zaephus_Engine glad)

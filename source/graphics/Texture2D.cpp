@@ -20,7 +20,8 @@ void Texture2D::destroy() {
 }
 
 void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
-    texture->path = texturePath;
+    const std::string path = "resources/textures/" + texturePath;
+    texture->path = path;
 
     int loadedTextureIndex = checkForMatch(texture);
     if(loadedTextureIndex >= 0) {
@@ -30,7 +31,7 @@ void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
 
     int width, height, channelAmount;
     stbi_set_flip_vertically_on_load(texture->flipVerticallyOnLoad);
-    unsigned char* data = stbi_load(texturePath.c_str(), &width, &height, &channelAmount, 0);
+    unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelAmount, 0);
 
     glGenTextures(1, &texture->id);
     glBindTexture(GL_TEXTURE_2D, texture->id);
@@ -56,7 +57,7 @@ void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
     }
     else {
         std::cout << "Failed to load texture!" << std::endl;
-        std::cout << "Path: " << texturePath << std::endl;
+        std::cout << "Path: " << path << std::endl;
     }
 
     stbi_image_free(data);

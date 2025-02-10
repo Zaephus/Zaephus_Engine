@@ -63,7 +63,7 @@ class Shader {
         std::map<std::string, Color> assignedColors;
          std::vector<Texture2D*> boundTextures;
 
-        static std::string load(const char* path);
+        static std::string load(const std::string& _fileName);
         static unsigned int compile(const std::string& code, GLenum shaderType);
         static unsigned int createProgram(const unsigned int& vertexShader, const unsigned int& fragmentShader);
 };

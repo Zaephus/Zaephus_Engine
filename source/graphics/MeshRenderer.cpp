@@ -115,22 +115,22 @@ MeshRenderer* MeshRenderer::loadModel(const primitiveType _type, Shader* _overri
     MeshRenderer* renderer = nullptr;
     switch(_type) {
         case cube:
-            renderer = loadModel("source/resources/primitives/cube.obj", _overrideShader);
+            renderer = loadModel("cube.obj", _overrideShader);
             break;
         case quad:
-            renderer = loadModel("source/resources/primitives/quad.obj", _overrideShader);
+            renderer = loadModel("quad.obj", _overrideShader);
             break;
         case cylinder:
-            renderer = loadModel("source/resources/primitives/cylinder.obj", _overrideShader);
+            renderer = loadModel("cylinder.obj", _overrideShader);
             break;
         case capsule:
-            renderer = loadModel("source/resources/primitives/capsule.obj", _overrideShader);
+            renderer = loadModel("capsule.obj", _overrideShader);
             break;
         case sphere:
-            renderer = loadModel("source/resources/primitives/sphere.obj", _overrideShader);
+            renderer = loadModel("sphere.obj", _overrideShader);
             break;
         case torus:
-            renderer = loadModel("source/resources/primitives/torus.obj", _overrideShader);
+            renderer = loadModel("torus.obj", _overrideShader);
             break;
         default:
             std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
@@ -140,9 +140,11 @@ MeshRenderer* MeshRenderer::loadModel(const primitiveType _type, Shader* _overri
     return renderer;
 }
 
-MeshRenderer* MeshRenderer::loadModel(const std::string& _path, Shader* _overrideShader) {
+MeshRenderer* MeshRenderer::loadModel(const std::string& _fileName, Shader* _overrideShader) {
+    const std::string path = "resources/models/" + _fileName;
+
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(_path, aiProcess_Triangulate | aiProcess_FlipUVs);
+    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
@@ -150,7 +152,7 @@ MeshRenderer* MeshRenderer::loadModel(const std::string& _path, Shader* _overrid
     }
 
     MeshRenderer* model = new MeshRenderer();
-    model->directory = _path.substr(0, _path.find_last_of('/'));
+    model->directory = path.substr(0, path.find_last_of('/'));
 
     if(_overrideShader != nullptr) {
         model->setOverrideShader(_overrideShader);

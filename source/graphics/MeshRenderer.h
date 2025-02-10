@@ -58,7 +58,7 @@ class MeshRenderer : public Component {
         bool isTransparent() const;
 
         static MeshRenderer* loadModel(primitiveType _type, Shader* _overrideShader = nullptr);
-        static MeshRenderer* loadModel(const std::string& _path, Shader* _overrideShader = nullptr);
+        static MeshRenderer* loadModel(const std::string& _fileName, Shader* _overrideShader = nullptr);
 
     private:
         std::vector<Mesh*> meshes;

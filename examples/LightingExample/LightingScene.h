@@ -63,8 +63,8 @@ class LightingScene final : public Scene {
 
             crate = new GameObject();
             crate->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::textureShader(
-                "examples/LightingExample/container2.png",
-                "examples/LightingExample/container2_specular.png",
+                "container2.png",
+                "container2_specular.png",
                 32.0f
             )));
             crate->name = "crate";

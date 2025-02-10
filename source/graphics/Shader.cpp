@@ -117,7 +117,7 @@ Shader *Shader::unlitShader(const float r, const float g, const float b, const f
 
 
 Shader* Shader::unlitShader(const Color& c) {
-    Shader* shader = new Shader("source/resources/shaders/BaseVertex.glsl", "source/resources/shaders/UnlitFragment.glsl");
+    Shader* shader = new Shader("BaseVertex.glsl", "UnlitFragment.glsl");
     shader->use();
 
     shader->setColor("objectColor", c);
@@ -135,7 +135,7 @@ Shader* Shader::diffuseShader(const Color& c) {
     return diffuseShader(c, 32.0f);
 }
 Shader* Shader::diffuseShader(const Color& c, const float shininess) {
-    Shader* shader = new Shader("source/resources/shaders/BaseVertex.glsl", "source/resources/shaders/DiffuseFragment.glsl");
+    Shader* shader = new Shader("BaseVertex.glsl", "DiffuseFragment.glsl");
     shader->use();
 
     if(c.a < 1.0f) { shader->order = transparents; }
@@ -158,7 +158,7 @@ Shader* Shader::textureShader(const std::string& diffusePath, const std::string&
 }
 
 Shader* Shader::textureShader(Texture2D* diffuse, Texture2D* specular, const float shininess) {
-    Shader* shader = new Shader("source/resources/shaders/BaseVertex.glsl", "source/resources/shaders/TextureFragment.glsl");
+    Shader* shader = new Shader("BaseVertex.glsl", "TextureFragment.glsl");
     shader->use();
 
     shader->setTexture2D("material.diffuse", diffuse);
@@ -168,7 +168,9 @@ Shader* Shader::textureShader(Texture2D* diffuse, Texture2D* specular, const flo
     return shader;
 }
 
-std::string Shader::load(const char* path) {
+std::string Shader::load(const std::string& _fileName) {
+    const std::string path = "resources/shaders/" + _fileName;
+
     std::ifstream file;
     file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 

@@ -1,4 +1,6 @@
 
+message(hello world from source)
+
 add_library(Zaephus_Engine STATIC)
 
 target_sources(Zaephus_Engine PUBLIC
@@ -19,21 +21,3 @@ target_sources(Zaephus_Engine PUBLIC
     graphics/Texture2D.cpp
     graphics/Vertex.h
 )
-
-add_custom_target(copy_resources VERBATIM)
-
-add_custom_command(
-    TARGET copy_resources
-    COMMAND ${CMAKE_COMMAND} -E rm -r -f -- ${PROJECT_BINARY_DIR}/source/resources
-    COMMENT "Deleting old resources"
-    VERBATIM
-)
-
-add_custom_command(
-    TARGET copy_resources
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/source/resources ${PROJECT_BINARY_DIR}/source/resources
-    COMMENT "Copying resources"
-    VERBATIM
-)
-
-add_dependencies(Zaephus_Engine copy_resources)
