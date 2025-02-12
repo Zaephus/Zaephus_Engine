@@ -26,29 +26,37 @@ Bounds::Bounds(const Vector3& _scale) {
 }
 
 Vector3 Bounds::getTopRightFront() const {
-    return Vector3(right, top, front);
+    return {right, top, front};
 }
 Vector3 Bounds::getTopRightBack() const {
-    return Vector3(right, top, back);
+    return {right, top, back};
 }
 Vector3 Bounds::getTopLeftFront() const {
-    return Vector3(left, top, front);
+    return {left, top, front};
 }
 Vector3 Bounds::getTopLeftBack() const {
-    return Vector3(left, top, back);
+    return {left, top, back};
 }
 
 Vector3 Bounds::getBottomRightFront() const {
-    return Vector3(right, bottom, front);
+    return {right, bottom, front};
 }
 Vector3 Bounds::getBottomRightBack() const {
-    return Vector3(right, bottom, back);
+    return {right, bottom, back};
 }
 Vector3 Bounds::getBottomLeftFront() const {
-    return Vector3(left, bottom, front);
+    return {left, bottom, front};
 }
 Vector3 Bounds::getBottomLeftBack() const {
-    return Vector3(left, bottom, back);
+    return {left, bottom, back};
+}
+
+Vector3 Bounds::getCenter() const {
+    return {
+        (right + left) / 2,
+        (bottom + top) / 2,
+        (front + back) / 2
+    };
 }
 
 bool Bounds::containsPoint(const Vector3& _position) const {

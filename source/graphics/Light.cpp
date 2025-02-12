@@ -1,8 +1,11 @@
 
 #include "Light.h"
 
+#include <ZMath.h>
+
 #include "MeshRenderer.h"
 #include "Shader.h"
+#include "Transform.h"
 
 Action<void(Light*)> Light::lightCreatedCall = Action<void(Light*)>();
 

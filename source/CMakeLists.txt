@@ -1,7 +1,9 @@
 
 message(hello world from source)
 
-add_library(Zaephus_Engine STATIC)
+add_library(Zaephus_Engine STATIC
+    BoundsRenderer.cpp
+    BoundsRenderer.h)
 
 target_sources(Zaephus_Engine PUBLIC
     Bounds.cpp

@@ -9,10 +9,11 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include "Color.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Texture2D.h"
-#include "../Color.h"
+#include "Transform.h""
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
 

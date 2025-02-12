@@ -2,11 +2,13 @@
 #include "Camera.h"
 
 #include <iostream>
-#include <ZMath.h>
 #include <glad/gl.h>
+
+#include <ZMath.h>
 
 #include "Color.h"
 #include "TimeUtils.h"
+#include "Transform.h"
 #include "Window.h"
 
 Camera* Camera::activeCam = nullptr;

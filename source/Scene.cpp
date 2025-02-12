@@ -7,11 +7,12 @@
 #include "Camera.h"
 #include "Color.h"
 #include "TimeUtils.h"
+#include "Transform.h"
 #include "Window.h"
 
-#include "graphics/Light.h"
-#include "graphics/MeshRenderer.h"
-#include "graphics/Shader.h"
+#include "Light.h"
+#include "MeshRenderer.h"
+#include "Shader.h"
 
 Scene::~Scene() {
     delete window;

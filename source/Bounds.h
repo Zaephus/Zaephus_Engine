@@ -1,10 +1,12 @@
 
 #pragma once
 
+#include "Component.h"
+
 struct Matrix4x4;
 struct Vector3;
 
-class Bounds {
+class Bounds : public Component {
     public:
         float right;
         float left;
@@ -25,6 +27,8 @@ class Bounds {
         Vector3 getBottomRightBack() const;
         Vector3 getBottomLeftFront() const;
         Vector3 getBottomLeftBack() const;
+
+        Vector3 getCenter() const;
 
         bool containsPoint(const Vector3& _position) const;
         bool intersectsLine(const Vector3& _startingPoint, const Vector3& _direction) const;

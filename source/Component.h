@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "GameObject.h"
-#include "Transform.h"
+class GameObject;
+class Transform;
 
 class Component {
     public:

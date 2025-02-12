@@ -9,7 +9,7 @@ struct Vector4;
 struct Matrix4x4;
 
 struct Vertex;
-struct Color;
+class Color;
 
 class Shader;
 

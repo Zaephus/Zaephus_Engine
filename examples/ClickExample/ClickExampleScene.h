@@ -3,12 +3,14 @@
 
 #include <ZMath.h>
 
+#include "Bounds.h"
 #include "Camera.h"
 #include "ClickableObject.h"
 #include "Light.h"
 #include "MeshRenderer.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "Transform.h"
 
 class ClickExample final : public Scene {
     Light* light = nullptr;
@@ -20,7 +22,7 @@ class ClickExample final : public Scene {
 
     public:
         void start() override {
-            GameObject::renderBounds = false;
+            GameObject::renderBounds = true;
             shouldRenderAxis = false;
 
             light = new Light();
@@ -46,10 +48,10 @@ class ClickExample final : public Scene {
                 4.0f)
             ));
             donut->name = "donut";
-            donut->bounds.top = 0.15f;
-            donut->bounds.bottom = -0.15f;
+            donut->bounds->top = 0.15f;
+            donut->bounds->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
-            donut->transform->rotate(90.0f, 0.0f, 0.0f);
+            // donut->transform->rotate(90.0f, 0.0f, 0.0f);
         }
 
         void update() override {

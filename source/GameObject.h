@@ -2,10 +2,10 @@
 #pragma once
 
 #include "Action.h"
-#include "Bounds.h"
-#include "Transform.h"
 
 class Component;
+class Transform;
+class Bounds;
 struct Vector2;
 
 class GameObject {
@@ -15,9 +15,9 @@ class GameObject {
         static bool renderBounds;
 
         Transform* transform;
+        Bounds* bounds;
 
         std::string name;
-        Bounds bounds = Bounds();
 
         GameObject();
         virtual ~GameObject();
@@ -34,8 +34,6 @@ class GameObject {
             for(size_t i = 0; i < components.size(); i++) {
                 result = static_cast<T*>(components[i]);
                 if(result) { break; }
-                // if(typeid(components[i]) == typeid(T*)) {
-                // }
             }
 
             return result;

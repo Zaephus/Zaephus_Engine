@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "../Action.h"
-#include "../Color.h"
-#include "../GameObject.h"
+#include "Action.h"
+#include "Color.h"
+#include "GameObject.h"
 
 class MeshRenderer;
 

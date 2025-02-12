@@ -6,11 +6,13 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+
 #include <ZMath.h>
 
+#include "Color.h"
 #include "Light.h"
 #include "Texture2D.h"
-#include "../Color.h"
+#include "Transform.h"
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     const std::string vertexCode = load(vertexPath);

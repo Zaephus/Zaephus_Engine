@@ -5,8 +5,8 @@
 
 #include <assimp/material.h>
 
-#include "../Action.h"
-#include "../Component.h"
+#include "Action.h"
+#include "Component.h"
 
 class aiScene;
 class aiMesh;
@@ -17,6 +17,9 @@ class Shader;
 class Texture2D;
 class Light;
 class Color;
+
+struct Vector3;
+struct Matrix4x4;
 
 class MeshRenderer : public Component {
     public:
@@ -60,9 +63,10 @@ class MeshRenderer : public Component {
         static MeshRenderer* loadModel(primitiveType _type, Shader* _overrideShader = nullptr);
         static MeshRenderer* loadModel(const std::string& _fileName, Shader* _overrideShader = nullptr);
 
-    private:
+    protected:
         std::vector<Mesh*> meshes;
 
+    private:
         std::string directory;
 
         static void processNode(MeshRenderer* _model, const aiNode* _aiNode, const aiScene* _aiScene);
