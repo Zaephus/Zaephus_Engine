@@ -37,7 +37,7 @@ class MeshRenderer : public Component {
         Shader* overrideShader = nullptr;
 
         MeshRenderer() = default;
-        ~MeshRenderer();
+        virtual ~MeshRenderer();
 
         void render() const;
 

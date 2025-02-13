@@ -26,6 +26,7 @@ class ClickExample final : public Scene {
             shouldRenderAxis = false;
 
             light = new Light();
+            light->name = "light";
             light->transform->position = { 2.0f, 3.0f, 3.0f };
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 12.0f / 6.0f, 0.1f, 100.0f);
@@ -41,20 +42,25 @@ class ClickExample final : public Scene {
             box->name = "box";
             box->transform->position = { -0.8f, 0.0f, 0.0f };
             box->transform->scale = Vector3::one() * 0.5f;
+            // box->getComponent<MeshRenderer>()->overrideShader->drawAsWireframe = true;
 
             donut = new ClickableObject();
-            donut->addComponent(MeshRenderer::loadModel(MeshRenderer::torus, Shader::diffuseShader(
-                { 0.0f, 0.6f, 0.0f, 1.0f },
-                4.0f)
-            ));
+            // donut->addComponent(MeshRenderer::loadModel(MeshRenderer::torus, Shader::diffuseShader(
+            //     { 0.0f, 0.6f, 0.0f, 1.0f },
+            //     4.0f)
+            // ));
             donut->name = "donut";
             donut->bounds->top = 0.15f;
             donut->bounds->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
+            // donut->getComponent<MeshRenderer>()->overrideShader->drawAsWireframe = true;
             // donut->transform->rotate(90.0f, 0.0f, 0.0f);
         }
 
         void update() override {
+            box->update();
+            donut->update();
+
             // donut->transform->rotate(
             //     Time::deltaTime * 15.0f,
             //     0.0f,
@@ -63,6 +69,10 @@ class ClickExample final : public Scene {
         }
 
         ~ClickExample() override {
+            delete light;
             delete cam;
+
+            delete box;
+            delete donut;
         }
 };

@@ -38,9 +38,19 @@ GameObject::~GameObject() {
     std::cout << "Transform was deleted" << std::endl;
 }
 
+void GameObject::update() {
+    if(renderBounds) {
+        getComponent<BoundsRenderer>()->render();
+    }
+}
+
+
 void GameObject::addComponent(Component* _component) {
     _component->gameObject = this;
     _component->transform = transform;
+
+    const std::type_info& typeInfo = _component->getType();
+    std::cout << typeInfo.name() << std::endl;
 
     components.push_back(_component);
 }

@@ -13,14 +13,14 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     Mesh* mesh = new Mesh();
 
     const std::vector<Vector3> newVertices {
-        bounds->getTopRightFront(),
         bounds->getBottomLeftFront(),
-        bounds->getTopRightBack(),
-        bounds->getBottomRightBack(),
+        bounds->getBottomRightFront(),
         bounds->getTopLeftFront(),
-        bounds->getBottomLeftFront(),
+        bounds->getTopRightFront(),
+        bounds->getBottomLeftBack(),
+        bounds->getBottomRightBack(),
         bounds->getTopLeftBack(),
-        bounds->getBottomLeftFront()
+        bounds->getTopRightBack()
     };
     mesh->positions = newVertices;
 
@@ -52,7 +52,8 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     mesh->indices = newIndices;
 
     meshes.push_back(mesh);
+    mesh->initialize();
 
-    overrideShader = Shader::unlitShader(Color::yellow());
+    setOverrideShader(Shader::unlitShader(Color::yellow()));
     overrideShader->drawAsWireframe = true;
 }

@@ -1,6 +1,8 @@
 
 #include "ClickableObject.h"
 
+#include <typeinfo>
+
 #include "MeshRenderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
@@ -28,8 +30,10 @@ void ClickableObject::clicked(int _button) {
         timer = maxTime;
 
         const MeshRenderer* renderer = getComponent<MeshRenderer>();
-        oldColor = renderer->overrideShader->getColor("material.color");
+
+        std::cout << renderer << std::endl;
         if(renderer != nullptr) {
+            oldColor = renderer->overrideShader->getColor("material.color");
             renderer->setColor("material.color", clickedColor);
         }
     }

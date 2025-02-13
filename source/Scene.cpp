@@ -141,6 +141,7 @@ void Scene::onLightCreated(Light* _light) {
 }
 
 void Scene::onModelCreated(MeshRenderer* _model) {
+    std::cout << "Model created: " << _model->gameObject->name << std::endl;
     if(_model->isTransparent()) {
         transparents.push_back(_model);
     }
