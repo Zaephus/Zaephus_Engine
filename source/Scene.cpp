@@ -41,6 +41,8 @@ void Scene::initialize() {
     if(shouldRenderAxis) { setupAxis(); }
     setupLights();
 
+    startGameObjects();
+
     sortTransparents();
 
     while(!window->shouldClose()) {
@@ -108,6 +110,12 @@ void Scene::sortTransparents() {
     transparents = sortedModels;
 }
 
+void Scene::startGameObjects() const {
+    for(size_t i = 0; i < gameObjects.size(); i++) {
+        gameObjects[i]->start();
+    }
+}
+
 void Scene::updateGameObjects() const {
     for(size_t i = 0; i < gameObjects.size(); i++) {
         gameObjects[i]->update();
@@ -122,8 +130,6 @@ void Scene::render() {
     }
 
     sortTransparents();
-
-    // std::cout << transparents.size() << std::endl;
 
     for(size_t i = 0; i < transparents.size(); i++) {
         transparents[i]->setVector3("viewPos", Camera::activeCam->transform->position);
@@ -141,7 +147,6 @@ void Scene::onLightCreated(Light* _light) {
 }
 
 void Scene::onModelCreated(MeshRenderer* _model) {
-    std::cout << "Model created: " << _model->gameObject->name << std::endl;
     if(_model->isTransparent()) {
         transparents.push_back(_model);
     }

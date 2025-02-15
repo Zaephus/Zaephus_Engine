@@ -1,13 +1,13 @@
 
 #include "ClickableObject.h"
 
-#include <typeinfo>
-
 #include "MeshRenderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
 
 void ClickableObject::update() {
+    GameObject::update();
+
     if(isClicked) {
         if(timer > 0.0f) {
             timer -= Time::deltaTime;
@@ -30,8 +30,6 @@ void ClickableObject::clicked(int _button) {
         timer = maxTime;
 
         const MeshRenderer* renderer = getComponent<MeshRenderer>();
-
-        std::cout << renderer << std::endl;
         if(renderer != nullptr) {
             oldColor = renderer->overrideShader->getColor("material.color");
             renderer->setColor("material.color", clickedColor);

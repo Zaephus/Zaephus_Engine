@@ -18,8 +18,6 @@ Mesh::Mesh(Shader* _shader,
            const std::vector<Vector3>& _normals,
            const std::vector<unsigned int>& _indices) {
 
-    std::cout << "Created a mesh" << std::endl;
-
     shader = _shader;
 
     positions = _positions;

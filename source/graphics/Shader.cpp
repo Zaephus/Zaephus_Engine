@@ -18,8 +18,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
 
-    std::cout << "created a shader" << std::endl;
-
     const unsigned int vertexShader = compile(vertexCode, GL_VERTEX_SHADER);
     const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
 
@@ -31,7 +29,6 @@ Shader::~Shader() {
         boundTexture->destroy();
         delete boundTexture;
     }
-    std::cout << "destroyed a shader" << std::endl;
 }
 
 void Shader::use() const {

@@ -1,6 +1,7 @@
 
 #include "GameObject.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include <Vectors/Vector2.h>
@@ -8,7 +9,6 @@
 #include "Bounds.h"
 #include "BoundsRenderer.h"
 #include "Camera.h"
-#include "Color.h"
 #include "Component.h"
 #include "Transform.h"
 #include "Window.h"
@@ -24,18 +24,23 @@ GameObject::GameObject() {
 
     addComponent(bounds);
 
-    if(renderBounds) {
-        BoundsRenderer* boundsRenderer = new BoundsRenderer(bounds);
-        addComponent(boundsRenderer);
-    }
-
     Window::mousePressedCall.bind<GameObject, &GameObject::onMousePressed>(this);
     gameObjectCreatedCall.invoke(this);
 }
 
 GameObject::~GameObject() {
     delete transform;
-    std::cout << "Transform was deleted" << std::endl;
+
+    for(size_t i = 0; i < components.size(); i++) {
+        delete components[i];
+    }
+}
+
+void GameObject::start() {
+    if(renderBounds) {
+        BoundsRenderer* boundsRenderer = new BoundsRenderer(bounds);
+        addComponent(boundsRenderer);
+    }
 }
 
 void GameObject::update() {
@@ -44,15 +49,21 @@ void GameObject::update() {
     }
 }
 
-
 void GameObject::addComponent(Component* _component) {
     _component->gameObject = this;
     _component->transform = transform;
 
-    const std::type_info& typeInfo = _component->getType();
-    std::cout << typeInfo.name() << std::endl;
-
     components.push_back(_component);
+}
+
+void GameObject::removeComponent(const Component* _component) {
+    const auto it = std::ranges::find(components.begin(), components.end(), _component);
+    if(it == components.end()) {
+        std::cout << "Component does not exist in gameobject." << std::endl;
+        return;
+    }
+
+    components.erase(it);
 }
 
 // ReSharper disable once CppPassValueParameterByConstReference

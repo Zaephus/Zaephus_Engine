@@ -45,6 +45,7 @@ class Scene {
 
         void sortTransparents();
 
+        void startGameObjects() const;
         void updateGameObjects() const;
         void render();
 
