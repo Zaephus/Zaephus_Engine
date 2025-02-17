@@ -17,9 +17,7 @@
 Scene::~Scene() {
     delete window;
 
-    for(const Light* light : lights) { delete light; }
-    for(const MeshRenderer* opaque : opaques) { delete opaque; }
-    for(const MeshRenderer* transparent : transparents) { delete transparent; }
+    for(const GameObject* gameObject : gameObjects) { delete gameObject; }
 }
 
 void Scene::initialize() {

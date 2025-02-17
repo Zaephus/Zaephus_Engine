@@ -23,8 +23,6 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
-        static Scene* activeScene;
-
         std::vector<GameObject*> gameObjects;
 
         std::vector<Light*> lights;

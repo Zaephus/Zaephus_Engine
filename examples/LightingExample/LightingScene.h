@@ -5,6 +5,7 @@
 
 #include <ZMath.h>
 
+#include "Bounds.h"
 #include "Camera.h"
 #include "Light.h"
 #include "MeshRenderer.h"
@@ -12,6 +13,7 @@
 #include "Shader.h"
 #include "Texture2D.h"
 #include "TimeUtils.h"
+#include "Transform.h"
 
 class LightingScene final : public Scene {
 
@@ -110,9 +112,5 @@ class LightingScene final : public Scene {
                 Time::deltaTime * 5.0f,
                 Time::deltaTime * 15.0f
             );
-        }
-
-        ~LightingScene() override {
-            delete cam;
         }
 };

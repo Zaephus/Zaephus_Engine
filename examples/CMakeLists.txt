@@ -12,12 +12,16 @@ add_executable(clickExample
     ClickExample/ClickableObject.cpp
     ClickExample/main.cpp
 )
-
 add_dependencies(clickExample examples)
 
 add_executable(lightingExample
     LightingExample/LightingScene.h
     LightingExample/main.cpp
 )
-
 add_dependencies(lightingExample examples)
+
+add_executable(transformExample
+    TransformExample/TransformScene.h
+    TransformExample/main.cpp
+)
+add_dependencies(transformExample examples)

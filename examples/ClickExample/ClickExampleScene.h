@@ -63,12 +63,4 @@ class ClickExample final : public Scene {
             //     0.0f
             // );
         }
-
-        ~ClickExample() override {
-            delete light;
-            delete cam;
-
-            delete box;
-            delete donut;
-        }
 };
