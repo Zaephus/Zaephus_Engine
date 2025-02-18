@@ -10,7 +10,7 @@ function(CopyResources target dir)
     add_custom_command(
         TARGET ${target}
         PRE_BUILD
-        COMMAND ${Python_EXECUTABLE} ${CMAKE_SOURCE_DIR}/CopyResources.py ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/source ${dir}
+        COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/CopyResources.py ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/source ${dir}
     )
 endfunction()
 
