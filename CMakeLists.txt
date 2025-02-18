@@ -6,11 +6,13 @@ set_property(GLOBAL PROPERTY LINKER_LANGUAGE CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 
+set(ENGINE_PATH ${PROJECT_SOURCE_DIR} CACHE STRING "" FORCE)
+
 function(CopyResources target dir)
     add_custom_command(
         TARGET ${target}
         PRE_BUILD
-        COMMAND ${Python_EXECUTABLE} ${PROJECT_SOURCE_DIR}/CopyResources.py ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR}/source ${dir}
+        COMMAND ${Python_EXECUTABLE} ${ENGINE_PATH}/CopyResources.py ${CMAKE_BINARY_DIR} ${ENGINE_PATH}/source ${dir}
     )
 endfunction()
 
