@@ -37,7 +37,7 @@ void Transform::rotateAround(const Vector3& _point, const Vector3 &_axis, float 
     rotateAround(_point, _axis, _deg, false);
 }
 void Transform::rotateAround(const Vector3 &_point, const Vector3& _axis, float _deg, bool _lookAtAxis) {
-    Quaternion rot = Quaternion::fromAxisAngle(_axis, _deg * ZMath::deg2rad);
+    const Quaternion rot = Quaternion::fromAxisAngle(_axis, _deg * ZMath::deg2rad);
     position = rot * (position - _point) + _point;
 
     if(_lookAtAxis) { rotation *= rot; }
@@ -68,5 +68,9 @@ Matrix4x4 Transform::objectMatrix() const {
     const Matrix4x4 t = Matrix4x4::translateMatrix(position);
     const Matrix4x4 r = Matrix4x4::rotateMatrix(rotation);
     const Matrix4x4 s = Matrix4x4::scaleMatrix(scale);
-    return t * r * s;
+    Matrix4x4 result;
+
+    if(parent == nullptr) { result = t * r * s; }
+    else { result = parent->objectMatrix() * t * r * s; }
+    return result;
 }

@@ -8,6 +8,7 @@
 #include <MeshRenderer.h>
 #include <Scene.h>
 #include <Shader.h>
+#include <TimeUtils.h>
 #include <Transform.h>
 
 class TransformScene final : public Scene {
@@ -16,6 +17,7 @@ class TransformScene final : public Scene {
     Camera* cam = nullptr;
 
     GameObject* parent = nullptr;
+    GameObject* child = nullptr;
 
     public:
         void start() override {
@@ -28,7 +30,7 @@ class TransformScene final : public Scene {
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 12.0f / 6.0f, 0.1f, 100.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 2.0f };
+            cam->transform->position = { 0.0f, 0.0f, 3.5f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             parent = new GameObject();
@@ -37,9 +39,22 @@ class TransformScene final : public Scene {
                 4.0f)
             ));
             parent->name = "parent";
+            parent->transform->rotate(0.0f, 30.0f, 0.0f);
+
+            child = new GameObject();
+            child->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+                Color::blue(),
+                32.0f)
+            ));
+            child->name = "child";
+            child->transform->parent = parent->transform;
+            child->transform->position = { -0.75f, 0.0f, 0.0f };
+            child->transform->scale = Vector3::one() * 0.5f;
+
         }
 
         void update() override {
-
+            parent->transform->rotate(0.0f, 0.0f, 6.0f * Time::deltaTime);
+            child->transform->rotate(32.0f * Time::deltaTime, 0.0f, 0.0f);
         }
 };

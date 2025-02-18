@@ -14,6 +14,8 @@ class Transform {
         Quaternion rotation;
         Vector3 scale;
 
+        Transform* parent = nullptr;
+
         Transform();
         Transform(const Vector3 &_p, const Quaternion &_r, const Vector3 &_s);
 
