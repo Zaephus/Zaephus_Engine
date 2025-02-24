@@ -25,6 +25,7 @@ class Shader {
         bool depthTestEnabled = true;
         bool drawAsWireframe = false;
 
+        explicit Shader(const char* _fragmentPath);
         Shader(const char* vertexPath, const char* fragmentPath);
         ~Shader();
 

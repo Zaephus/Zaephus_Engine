@@ -14,6 +14,8 @@
 #include "Texture2D.h"
 #include "Transform.h"
 
+Shader::Shader(const char* _fragmentPath) : Shader("BaseVertex.glsl", _fragmentPath) {}
+
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
