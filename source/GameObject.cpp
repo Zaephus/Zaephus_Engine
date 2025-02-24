@@ -10,10 +10,10 @@
 #include "BoundsRenderer.h"
 #include "Camera.h"
 #include "Component.h"
+#include "MeshRenderer.h"
+#include "Scene.h"
 #include "Transform.h"
 #include "Window.h"
-#include "Graphics/MeshRenderer.h"
-#include "Graphics/Shader.h"
 
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();
 bool GameObject::renderBounds = false;
@@ -23,6 +23,9 @@ GameObject::GameObject() {
     bounds = new Bounds();
 
     addComponent(bounds);
+
+    Scene::startGameObjectCall.bind<GameObject, &GameObject::internalStart>(this);
+    Scene::updateGameObjectCall.bind<GameObject, &GameObject::internalUpdate>(this);
 
     Window::mousePressedCall.bind<GameObject, &GameObject::onMousePressed>(this);
     gameObjectCreatedCall.invoke(this);
@@ -36,16 +39,26 @@ GameObject::~GameObject() {
     }
 }
 
-void GameObject::start() {
+void GameObject::internalStart() {
     if(renderBounds) {
         BoundsRenderer* boundsRenderer = new BoundsRenderer(bounds);
         addComponent(boundsRenderer);
     }
+    start();
+
+    for(Component* c : components) {
+        c->start();
+    }
 }
 
-void GameObject::update() {
+void GameObject::internalUpdate() {
     if(renderBounds) {
         getComponent<BoundsRenderer>()->render();
+    }
+    update();
+
+    for(Component* c : components) {
+        c->update();
     }
 }
 

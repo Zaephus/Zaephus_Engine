@@ -6,13 +6,15 @@
 
 #include "Camera.h"
 #include "Color.h"
+#include "Light.h"
+#include "MeshRenderer.h"
+#include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
 #include "Window.h"
 
-#include "Light.h"
-#include "MeshRenderer.h"
-#include "Shader.h"
+Action<void()> Scene::startGameObjectCall = Action<void()>();
+Action<void()> Scene::updateGameObjectCall = Action<void()>();
 
 Scene::~Scene() {
     delete window;
@@ -21,8 +23,19 @@ Scene::~Scene() {
 }
 
 void Scene::initialize() {
+    handleSetup();
+
+    start();
+    internalStart();
+
+    while(!window->shouldClose()) {
+        internalUpdate();
+    }
+}
+
+void Scene::handleSetup() {
     window = new Window();
-    window->initialize(1200, 600, "Zaephus Renderer");
+    window->initialize(1200, 600, "Zaephus Engine");
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -33,28 +46,28 @@ void Scene::initialize() {
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
     Light::lightCreatedCall.bind<Scene, &Scene::onLightCreated>(this);
     MeshRenderer::modelCreatedCall.bind<Scene, &Scene::onModelCreated>(this);
+}
 
-    start();
-
+void Scene::internalStart() {
     if(shouldRenderAxis) { setupAxis(); }
     setupLights();
 
-    startGameObjects();
+    startGameObjectCall.invoke();
 
     sortTransparents();
+}
 
-    while(!window->shouldClose()) {
-        window->processInput();
+void Scene::internalUpdate() {
+    window->processInput();
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        updateGameObjects();
-        update();
-        render();
-        Time::tick();
+    updateGameObjectCall.invoke();
+    update();
+    render();
+    Time::tick();
 
-        window->presentFrame();
-    }
+    window->presentFrame();
 }
 
 void Scene::setupAxis() {
@@ -106,18 +119,6 @@ void Scene::sortTransparents() {
     }
 
     transparents = sortedModels;
-}
-
-void Scene::startGameObjects() const {
-    for(size_t i = 0; i < gameObjects.size(); i++) {
-        gameObjects[i]->start();
-    }
-}
-
-void Scene::updateGameObjects() const {
-    for(size_t i = 0; i < gameObjects.size(); i++) {
-        gameObjects[i]->update();
-    }
 }
 
 void Scene::render() {

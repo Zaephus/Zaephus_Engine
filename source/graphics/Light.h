@@ -26,5 +26,4 @@ class Light : public GameObject {
         float lightSize = 0.1f;
 
         MeshRenderer* model = nullptr;
-
 };

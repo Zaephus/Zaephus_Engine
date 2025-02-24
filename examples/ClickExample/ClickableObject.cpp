@@ -6,8 +6,6 @@
 #include "TimeUtils.h"
 
 void ClickableObject::update() {
-    GameObject::update();
-
     if(isClicked) {
         if(timer > 0.0f) {
             timer -= Time::deltaTime;

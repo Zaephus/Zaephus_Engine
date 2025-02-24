@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <Action.h>
 #include <vector>
 
 class Window;
@@ -16,10 +17,14 @@ class Scene {
         virtual ~Scene() = 0;
 
         void initialize();
+
+        static Action<void()> startGameObjectCall;
+        static Action<void()> updateGameObjectCall;
+
+    protected:
         virtual void start() = 0;
         virtual void update() = 0;
 
-    protected:
         bool shouldRenderAxis = false;
 
     private:
@@ -38,13 +43,15 @@ class Scene {
         MeshRenderer* zLine = nullptr;
         MeshRenderer* zCube = nullptr;
 
+        void handleSetup();
+        void internalStart();
+        void internalUpdate();
+
         void setupAxis();
         void setupLights() const;
 
         void sortTransparents();
 
-        void startGameObjects() const;
-        void updateGameObjects() const;
         void render();
 
         void onGameObjectCreated(GameObject* _gameObject);

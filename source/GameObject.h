@@ -2,7 +2,6 @@
 #pragma once
 
 #include <Component.h>
-#include <map>
 #include <typeinfo>
 
 #include "Action.h"
@@ -26,11 +25,6 @@ class GameObject {
         GameObject();
         virtual ~GameObject();
 
-        virtual void start();
-        virtual void update();
-
-        virtual void clicked(int _button) {}
-
         void addComponent(Component* _component);
         void removeComponent(const Component* _component);
 
@@ -46,8 +40,17 @@ class GameObject {
             return result;
         }
 
+    protected:
+        virtual void start() {}
+        virtual void update() {}
+
+        virtual void clicked(int _button) {}
+
     private:
         std::vector<Component*> components;
+
+        void internalStart();
+        void internalUpdate();
 
         void onMousePressed(int _button, Vector2 _pos);
 };
