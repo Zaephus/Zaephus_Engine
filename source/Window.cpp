@@ -7,10 +7,10 @@
 
 #include <ZMath.h>
 
-Action<void (int, int)> Window::sizeChangedCall = Action<void (int, int)>();
-Action<void (int, int)> Window::keyPressedCall = Action<void (int, int)>();
-Action<void (int, Vector2)> Window::mousePressedCall = Action<void (int, Vector2)>();
-Action<void (Vector2)> Window::cursorMovedCall = Action<void (Vector2)>();
+Action<void(int, int)> Window::sizeChangedCall      = Action<void(int, int)>();
+Action<void(int, int)> Window::keyPressedCall       = Action<void(int, int)>();
+Action<void(int, Vector2)> Window::mousePressedCall = Action<void(int, Vector2)>();
+Action<void(Vector2)> Window::cursorMovedCall       = Action<void(Vector2)>();
 
 Window* Window::activeWindow = nullptr;
 
@@ -53,15 +53,6 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
 void Window::presentFrame() const {
     glfwSwapBuffers(window);
     glfwPollEvents();
-}
-
-void Window::processInput() const {
-    keyPressedCall.invoke(GLFW_KEY_W, glfwGetKey(window, GLFW_KEY_W));
-    keyPressedCall.invoke(GLFW_KEY_S, glfwGetKey(window, GLFW_KEY_S));
-    keyPressedCall.invoke(GLFW_KEY_D, glfwGetKey(window, GLFW_KEY_D));
-    keyPressedCall.invoke(GLFW_KEY_A, glfwGetKey(window, GLFW_KEY_A));
-    keyPressedCall.invoke(GLFW_KEY_SPACE, glfwGetKey(window, GLFW_KEY_SPACE));
-    keyPressedCall.invoke(GLFW_KEY_LEFT_SHIFT, glfwGetKey(window, GLFW_KEY_LEFT_SHIFT));
 }
 
 Vector2Int Window::getSize() const {

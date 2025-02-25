@@ -3,7 +3,9 @@ message(hello world from source)
 
 add_library(Zaephus_Engine STATIC
     BoundsRenderer.cpp
-    BoundsRenderer.h)
+    BoundsRenderer.h
+    Input.cpp
+    Input.h)
 
 target_sources(Zaephus_Engine PUBLIC
     Bounds.cpp

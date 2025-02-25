@@ -14,12 +14,14 @@ struct Vector2Int;
 
 class Window {
     public:
-        static Action<void (int, int)> sizeChangedCall;
-        static Action<void (int, int)> keyPressedCall;
-        static Action<void (int, Vector2)> mousePressedCall;
-        static Action<void (Vector2)> cursorMovedCall;
+        static Action<void(int, int)> sizeChangedCall;
+        static Action<void(int, int)> keyPressedCall;
+        static Action<void(int, Vector2)> mousePressedCall;
+        static Action<void(Vector2)> cursorMovedCall;
 
         static Window* activeWindow;
+
+        GLFWwindow* window = nullptr;
 
         Window();
         ~Window();
@@ -27,7 +29,6 @@ class Window {
         void initialize(size_t _w, size_t _h, const std::string& _title);
 
         void presentFrame() const;
-        void processInput() const;
 
         Vector2Int getSize() const;
         void setSize(size_t _w, size_t _h) const;
@@ -37,11 +38,9 @@ class Window {
 
         bool shouldClose() const;
 
-        Vector2 screenToClip(const Vector2&  _pos) const;
+        Vector2 screenToClip(const Vector2& _pos) const;
 
     private:
-        GLFWwindow* window = nullptr;
-
         static Vector2 cursorPos;
         static Vector2 lastCursorPos;
 
