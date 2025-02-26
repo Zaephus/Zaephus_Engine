@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 #include <utility>
@@ -23,6 +24,17 @@ class Action<R()> {
             stubs.push_back(s);
         }
 
+        template <R (*Function)()>
+        void unbind() {
+            Stub s(nullptr, &functionStub<Function>);
+            if(containsStub(s)) {
+                markStubForDeletion(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
         template <class C, R (C::*Function)()>
         void bind(C* instance) {
             Stub s(instance, &classMethodStub<C, Function>);
@@ -34,7 +46,20 @@ class Action<R()> {
             stubs.push_back(s);
         }
 
-        void invoke() const {
+        template <class C, R (C::*Function)()>
+        void unbind(C* instance) {
+            Stub s(instance, &classMethodStub<C, Function>);
+            if(containsStub(s)) {
+                markStubForDeletion(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
+        void invoke() {
+            cleanStubs();
+
             for(Stub stub : stubs) {
                 assert(stub.second != nullptr);
                 stub.second(stub.first);
@@ -56,6 +81,24 @@ class Action<R()> {
             }
 
             return false;
+        }
+
+        void markStubForDeletion(Stub s) {
+            for(size_t i = 0; i < stubs.size(); i++) {
+                if(stubs[i].first == s.first && stubs[i].second == s.second) {
+                    stubs[i].first = nullptr;
+                    stubs[i].second = nullptr;
+                    return;
+                }
+            }
+        }
+
+        void cleanStubs() {
+            for(int i = stubs.size()-1; i >= 0; --i) {
+                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
+                    stubs.erase(stubs.begin() + i);
+                }
+            }
         }
 
         template <R (*Function)()>
@@ -83,6 +126,17 @@ class Action<R(PARAM1)> {
             stubs.push_back(s);
         }
 
+        template <R (*Function)(PARAM1)>
+        void unbind() {
+            Stub s(nullptr, &functionStub<Function>);
+            if(containsStub(s)) {
+                deleteStub(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
         template <class C, R (C::*Function)(PARAM1)>
         void bind(C* instance) {
             Stub s(instance, &classMethodStub<C, Function>);
@@ -94,7 +148,20 @@ class Action<R(PARAM1)> {
             stubs.push_back(s);
         }
 
-        void invoke(PARAM1 param1) const {
+        template <class C, R (C::*Function)(PARAM1)>
+        void unbind(C* instance) {
+            Stub s(instance, &classMethodStub<C, Function>);
+            if(containsStub(s)) {
+                deleteStub(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
+        void invoke(PARAM1 param1) {
+            cleanStubs();
+
             for(Stub stub : stubs) {
                 assert(stub.second != nullptr);
                 stub.second(stub.first, param1);
@@ -116,6 +183,24 @@ class Action<R(PARAM1)> {
             }
 
             return false;
+        }
+
+        void markStubForDeletion(Stub s) {
+            for(size_t i = 0; i < stubs.size(); i++) {
+                if(stubs[i].first == s.first && stubs[i].second == s.second) {
+                    stubs[i].first = nullptr;
+                    stubs[i].second = nullptr;
+                    return;
+                }
+            }
+        }
+
+        void cleanStubs() {
+            for(int i = stubs.size()-1; i >= 0; --i) {
+                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
+                    stubs.erase(stubs.begin() + i);
+                }
+            }
         }
 
         template <R (*Function)(PARAM1)>
@@ -143,6 +228,17 @@ class Action<R(PARAM1, PARAM2)> {
             stubs.push_back(s);
         }
 
+        template <R (*Function)(PARAM1, PARAM2)>
+        void unbind() {
+            Stub s(nullptr, &functionStub<Function>);
+            if(containsStub(s)) {
+                deleteStub(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
         template <class C, R (C::*Function)(PARAM1, PARAM2)>
         void bind(C* instance) {
             Stub s(instance, &classMethodStub<C, Function>);
@@ -154,7 +250,20 @@ class Action<R(PARAM1, PARAM2)> {
             stubs.push_back(s);
         }
 
-        void invoke(PARAM1 param1, PARAM2 param2) const {
+        template <class C, R (C::*Function)(PARAM1, PARAM2)>
+        void unbind(C* instance) {
+            Stub s(instance, &classMethodStub<C, Function>);
+            if(containsStub(s)) {
+                deleteStub(s);
+                return;
+            }
+
+            std::cout << "Cannot unbind Action that is not bound." << std::endl;
+        }
+
+        void invoke(PARAM1 param1, PARAM2 param2) {
+            cleanStubs();
+
             for(Stub stub : stubs) {
                 assert(stub.second != nullptr);
                 stub.second(stub.first, param1, param2);
@@ -176,6 +285,24 @@ class Action<R(PARAM1, PARAM2)> {
             }
 
             return false;
+        }
+
+        void markStubForDeletion(Stub s) {
+            for(size_t i = 0; i < stubs.size(); i++) {
+                if(stubs[i].first == s.first && stubs[i].second == s.second) {
+                    stubs[i].first = nullptr;
+                    stubs[i].second = nullptr;
+                    return;
+                }
+            }
+        }
+
+        void cleanStubs() {
+            for(int i = stubs.size()-1; i >= 0; --i) {
+                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
+                    stubs.erase(stubs.begin() + i);
+                }
+            }
         }
 
         template <R (*Function)(PARAM1, PARAM2)>
