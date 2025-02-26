@@ -16,6 +16,7 @@
 #include "Window.h"
 
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();
+Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(GameObject*)>();
 bool GameObject::renderBounds = false;
 
 GameObject::GameObject() {
@@ -32,14 +33,23 @@ GameObject::GameObject() {
 }
 
 GameObject::~GameObject() {
+    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
+    Scene::updateGameObjectCall.unbind<GameObject, &GameObject::internalUpdate>(this);
+
+    Window::mousePressedCall.unbind<GameObject, &GameObject::onMousePressed>(this);
+
     delete transform;
 
     for(size_t i = 0; i < components.size(); i++) {
         delete components[i];
     }
+
+    gameObjectDestroyedCall.invoke(this);
 }
 
 void GameObject::internalStart() {
+    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
+
     if(renderBounds) {
         BoundsRenderer* boundsRenderer = new BoundsRenderer(bounds);
         addComponent(boundsRenderer);

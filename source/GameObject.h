@@ -15,6 +15,7 @@ class GameObject {
 
     public:
         static Action<void(GameObject*)> gameObjectCreatedCall;
+        static Action<void(GameObject*)> gameObjectDestroyedCall;
         static bool renderBounds;
 
         Transform* transform;

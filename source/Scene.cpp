@@ -19,7 +19,10 @@ Action<void()> Scene::updateGameObjectCall = Action<void()>();
 Scene::~Scene() {
     delete window;
 
-    for(const GameObject* gameObject : gameObjects) { delete gameObject; }
+    for(int i = gameObjects.size()-1; i >= 0; --i) {
+        std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
+        delete gameObjects[i];
+    }
 }
 
 void Scene::initialize() {
@@ -44,15 +47,18 @@ void Scene::handleSetup() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
+    GameObject::gameObjectDestroyedCall.bind<Scene, &Scene::onGameObjectDestroyed>(this);
+
     Light::lightCreatedCall.bind<Scene, &Scene::onLightCreated>(this);
+    Light::lightDestroyedCall.bind<Scene, &Scene::onLightDestroyed>(this);
+
     MeshRenderer::modelCreatedCall.bind<Scene, &Scene::onModelCreated>(this);
+    MeshRenderer::modelDestroyedCall.bind<Scene, &Scene::onModelDestroyed>(this);
 }
 
 void Scene::internalStart() {
     if(shouldRenderAxis) { setupAxis(); }
     setupLights();
-
-    startGameObjectCall.invoke();
 
     sortTransparents();
 }
@@ -60,7 +66,9 @@ void Scene::internalStart() {
 void Scene::internalUpdate() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    startGameObjectCall.invoke();
     updateGameObjectCall.invoke();
+
     update();
     render();
     Time::tick();
@@ -139,9 +147,29 @@ void Scene::onGameObjectCreated(GameObject* _gameObject) {
     gameObjects.push_back(_gameObject);
 }
 
+void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
+    for(size_t i = 0; i < gameObjects.size(); i++) {
+        if(_gameObject == gameObjects[i]) {
+            gameObjects.erase(gameObjects.begin() + i);
+            gameObjects.shrink_to_fit();
+            return;
+        }
+    }
+}
+
 void Scene::onLightCreated(Light* _light) {
     lights.push_back(_light);
 }
+
+void Scene::onLightDestroyed(Light* _light) {
+    for(size_t i = 0; i < lights.size(); i++) {
+        if(_light == lights[i]) {
+            lights.erase(lights.begin() + i);
+            lights.shrink_to_fit();
+        }
+    }
+}
+
 
 void Scene::onModelCreated(MeshRenderer* _model) {
     if(_model->isTransparent()) {
@@ -149,5 +177,24 @@ void Scene::onModelCreated(MeshRenderer* _model) {
     }
     else {
         opaques.push_back(_model);
+    }
+}
+
+void Scene::onModelDestroyed(MeshRenderer* _model) {
+    if(!_model->isTransparent()) {
+        for(size_t i = 0; i < opaques.size(); i++) {
+            if(_model == opaques[i]) {
+                opaques.erase(opaques.begin() + i);
+                opaques.shrink_to_fit();
+            }
+        }
+    }
+    else {
+        for(size_t i = 0; i < transparents.size(); i++) {
+            if(_model == transparents[i]) {
+                transparents.erase(transparents.begin() + i);
+                transparents.shrink_to_fit();
+            }
+        }
     }
 }

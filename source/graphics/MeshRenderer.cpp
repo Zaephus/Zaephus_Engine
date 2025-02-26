@@ -16,11 +16,14 @@
 #include "Transform.h"
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
+Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
 
 MeshRenderer::~MeshRenderer() {
     for(const Mesh* mesh : meshes) {
         delete mesh;
     }
+
+    modelDestroyedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {

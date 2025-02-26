@@ -29,10 +29,7 @@ class Action<R()> {
             Stub s(nullptr, &functionStub<Function>);
             if(containsStub(s)) {
                 markStubForDeletion(s);
-                return;
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         template <class C, R (C::*Function)()>
@@ -51,10 +48,7 @@ class Action<R()> {
             Stub s(instance, &classMethodStub<C, Function>);
             if(containsStub(s)) {
                 markStubForDeletion(s);
-                return;
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         void invoke() {
@@ -130,11 +124,8 @@ class Action<R(PARAM1)> {
         void unbind() {
             Stub s(nullptr, &functionStub<Function>);
             if(containsStub(s)) {
-                deleteStub(s);
-                return;
+                markStubForDeletion(s);
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         template <class C, R (C::*Function)(PARAM1)>
@@ -152,11 +143,8 @@ class Action<R(PARAM1)> {
         void unbind(C* instance) {
             Stub s(instance, &classMethodStub<C, Function>);
             if(containsStub(s)) {
-                deleteStub(s);
-                return;
+                markStubForDeletion(s);
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         void invoke(PARAM1 param1) {
@@ -232,11 +220,8 @@ class Action<R(PARAM1, PARAM2)> {
         void unbind() {
             Stub s(nullptr, &functionStub<Function>);
             if(containsStub(s)) {
-                deleteStub(s);
-                return;
+                markStubForDeletion(s);
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         template <class C, R (C::*Function)(PARAM1, PARAM2)>
@@ -254,11 +239,8 @@ class Action<R(PARAM1, PARAM2)> {
         void unbind(C* instance) {
             Stub s(instance, &classMethodStub<C, Function>);
             if(containsStub(s)) {
-                deleteStub(s);
-                return;
+                markStubForDeletion(s);
             }
-
-            std::cout << "Cannot unbind Action that is not bound." << std::endl;
         }
 
         void invoke(PARAM1 param1, PARAM2 param2) {

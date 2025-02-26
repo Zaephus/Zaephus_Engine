@@ -55,6 +55,11 @@ class Scene {
         void render();
 
         void onGameObjectCreated(GameObject* _gameObject);
+        void onGameObjectDestroyed(GameObject* _gameObject);
+
         void onLightCreated(Light* _light);
+        void onLightDestroyed(Light* _light);
+
         void onModelCreated(MeshRenderer* _model);
+        void onModelDestroyed(MeshRenderer* _model);
 };

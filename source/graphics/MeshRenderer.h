@@ -32,7 +32,8 @@ class MeshRenderer : public Component {
             torus
         };
 
-        static Action<void (MeshRenderer*)> modelCreatedCall;
+        static Action<void(MeshRenderer*)> modelCreatedCall;
+        static Action<void(MeshRenderer*)> modelDestroyedCall;
 
         Shader* overrideShader = nullptr;
 

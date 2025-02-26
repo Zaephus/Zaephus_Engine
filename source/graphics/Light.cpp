@@ -8,6 +8,7 @@
 #include "Transform.h"
 
 Action<void(Light*)> Light::lightCreatedCall = Action<void(Light*)>();
+Action<void(Light*)> Light::lightDestroyedCall = Action<void(Light*)>();
 
 Light::Light() {
     lightCreatedCall.invoke(this);
@@ -23,6 +24,10 @@ Light::Light(const Color& _c, const float _ambientStrength, const float _specula
     specularStrength = _specularStrength;
 
     lightCreatedCall.invoke(this);
+}
+
+Light::~Light() {
+    lightDestroyedCall.invoke(this);
 }
 
 void Light::initialize() {

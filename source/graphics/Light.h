@@ -10,6 +10,7 @@ class MeshRenderer;
 class Light : public GameObject {
     public:
         static Action<void(Light*)> lightCreatedCall;
+        static Action<void(Light*)> lightDestroyedCall;
 
         Color color = Color::white();
 
@@ -19,6 +20,8 @@ class Light : public GameObject {
         Light();
         explicit Light(const Color& _c);
         Light(const Color& _c, float _ambientStrength, float _specularStrength);
+
+        ~Light() override;
 
         void initialize();
 
