@@ -91,9 +91,7 @@ void GameObject::removeComponent(const Component* _component) {
 
 // ReSharper disable once CppPassValueParameterByConstReference
 void GameObject::onMousePressed(const int _button, const Vector2 _pos) { // NOLINT(*-unnecessary-value-param)
-    const Vector2 clipPos = Window::activeWindow->screenToClip(_pos);
-    const Vector3 viewPos = Camera::activeCam->projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
-    const Vector3 worldPos = Camera::activeCam->viewMatrix().inverse() * viewPos;
+    const Vector3 worldPos = Camera::activeCam->screenToWorldPos(_pos);
 
     const Vector3 localPos = transform->objectMatrix().inverse() * worldPos;
     const Vector3 localDir = localPos - transform->objectMatrix().inverse() * Camera::activeCam->transform->position;

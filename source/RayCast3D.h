@@ -1,26 +1,35 @@
 
 #pragma once
 
+#include <vector>
+
 #include <ZMath.h>
 
-#include <GameObject.h>
-
 class Bounds;
+class GameObject;
 
-class RayCast3D : public GameObject {
+class RayCast3D {
     public:
         bool canHitFromInside = false;
+
+        Vector3 position = Vector3::zero();
         Vector3 direction = Vector3::back();
+
+        RayCast3D(const Vector3& _pos, const Vector3& _dir);
+        ~RayCast3D();
 
         bool isColliding() const;
         Bounds* getCollider() const;
         Vector3 getCollisionPoint() const;
 
-    protected:
-        void update() override;
+        static void update(std::vector<GameObject*> _gameObjects);
 
     private:
         bool hasCollided = false;
         Bounds* hitCollider = nullptr;
         Vector3 collisionPoint = Vector3::zero();
+
+        void resetHitInfo();
+
+        static std::vector<RayCast3D*> rayCasts;
 };

@@ -7,6 +7,7 @@
 #include "GameObject.h"
 
 class Color;
+struct Vector3;
 struct Matrix4x4;
 
 class Camera : public GameObject {
@@ -39,6 +40,8 @@ class Camera : public GameObject {
 
         void setAsActive();
         void onWindowResized(int _w, int _h);
+
+        Vector3 screenToWorldPos(const Vector2& _screenPos) const;
 
         void onKeyPressed(int _key, int _action);
         void onCursorMovement(Vector2 _mouseDelta);

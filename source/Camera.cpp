@@ -50,6 +50,12 @@ void Camera::onWindowResized(const int _w, const int _h) {
     }
 }
 
+Vector3 Camera::screenToWorldPos(const Vector2& _screenPos) const {
+    const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
+    const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
+    return viewMatrix().inverse() * viewPos;
+}
+
 void Camera::onKeyPressed(int _key, int _action) {
     // if(_action == GLFW_PRESS) {
     //     switch(_key) {
