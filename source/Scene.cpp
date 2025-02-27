@@ -181,20 +181,14 @@ void Scene::onModelCreated(MeshRenderer* _model) {
 }
 
 void Scene::onModelDestroyed(MeshRenderer* _model) {
-    if(!_model->isTransparent()) {
-        for(size_t i = 0; i < opaques.size(); i++) {
-            if(_model == opaques[i]) {
-                opaques.erase(opaques.begin() + i);
-                opaques.shrink_to_fit();
-            }
-        }
-    }
-    else {
-        for(size_t i = 0; i < transparents.size(); i++) {
-            if(_model == transparents[i]) {
-                transparents.erase(transparents.begin() + i);
-                transparents.shrink_to_fit();
-            }
+    std::vector<MeshRenderer*>* modelList;
+    if(!_model->isTransparent()) { modelList = &transparents; }
+    else { modelList = &opaques; }
+
+    for(size_t i = 0; i < modelList->size(); i++) {
+        if(_model == modelList->at(i)) {
+            modelList->erase(modelList->begin() + i);
+            modelList->shrink_to_fit();
         }
     }
 }

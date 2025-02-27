@@ -18,23 +18,23 @@ class Bounds : public Component {
         Bounds();
         explicit Bounds(const Vector3& _scale);
 
-        Vector3 getTopRightFront() const;
-        Vector3 getTopRightBack() const;
-        Vector3 getTopLeftFront() const;
-        Vector3 getTopLeftBack() const;
+        [[nodiscard]] Vector3 getTopRightFront() const;
+        [[nodiscard]] Vector3 getTopRightBack() const;
+        [[nodiscard]] Vector3 getTopLeftFront() const;
+        [[nodiscard]] Vector3 getTopLeftBack() const;
 
-        Vector3 getBottomRightFront() const;
-        Vector3 getBottomRightBack() const;
-        Vector3 getBottomLeftFront() const;
-        Vector3 getBottomLeftBack() const;
+        [[nodiscard]] Vector3 getBottomRightFront() const;
+        [[nodiscard]] Vector3 getBottomRightBack() const;
+        [[nodiscard]] Vector3 getBottomLeftFront() const;
+        [[nodiscard]] Vector3 getBottomLeftBack() const;
 
-        Vector3 getCenter() const;
+        [[nodiscard]] Vector3 getCenter() const;
 
-        bool containsPoint(const Vector3& _position) const;
-        bool intersectsLine(const Vector3& _startingPoint, const Vector3& _direction) const;
+        [[nodiscard]] bool containsPoint(const Vector3& _position) const;
+        [[nodiscard]] bool intersectsLine(const Vector3& _startingPoint, const Vector3& _direction) const;
 
     private:
-        bool intersectsXPlane(float _y, float _z) const;
-        bool intersectsYPlane(float _x, float _z) const;
-        bool intersectsZPlane(float _x, float _y) const;
+        [[nodiscard]] bool intersectsXPlane(float _y, float _z) const;
+        [[nodiscard]] bool intersectsYPlane(float _x, float _z) const;
+        [[nodiscard]] bool intersectsZPlane(float _x, float _y) const;
 };

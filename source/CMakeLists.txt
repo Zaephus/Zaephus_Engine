@@ -5,7 +5,9 @@ add_library(Zaephus_Engine STATIC
     BoundsRenderer.cpp
     BoundsRenderer.h
     Input.cpp
-    Input.h)
+    Input.h
+    RayCast3D.cpp
+    RayCast3D.h)
 
 target_sources(Zaephus_Engine PUBLIC
     Bounds.cpp
