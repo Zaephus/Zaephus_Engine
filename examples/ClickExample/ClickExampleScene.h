@@ -31,6 +31,7 @@ class ClickExample final : public Scene {
             light->transform->position = { 2.0f, 3.0f, 3.0f };
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 12.0f / 6.0f, 0.1f, 100.0f);
+            // cam = Camera::createOrthographicCamera(3.0f, 12.0f / 6.0f, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 2.0f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
@@ -54,6 +55,8 @@ class ClickExample final : public Scene {
             donut->bounds->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
             donut->transform->rotate(90.0f, 0.0f, 0.0f);
+
+            // std::cout << donut->bounds->intersectsLine({ 0.0f, 0.0f, 1.0f }, Vector3::forward()) << std::endl;
         }
 
         void update() override {

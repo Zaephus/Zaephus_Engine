@@ -1,7 +1,11 @@
 
 #include "Bounds.h"
 
-#include <Vectors/Vector3.h>
+#include <iostream>
+
+#include <ZMath.h>
+
+#include <Transform.h>
 
 Bounds::Bounds() {
     right = 0.5f;
@@ -65,52 +69,94 @@ bool Bounds::containsPoint(const Vector3& _position) const {
         && front <= _position.z && _position.z <= back;
 }
 
-bool Bounds::intersectsLine(const Vector3& _startingPoint, const Vector3& _direction) const {
+bool Bounds::intersectsLine(const Vector3& _worldPos, const Vector3& _dir, Vector3& _hit) const {
+    const Vector3 pos = transform->objectMatrix().inverse() * _worldPos;
+    const Vector3 dir = (transform->directionMatrix().inverse() * _dir.normalized()).normalized();
+
     float x, y, z;
-    // front check
-    if(_direction.x == 0.0f) {
-        y = _startingPoint.y;
-        z = _startingPoint.z;
-        if(intersectsXPlane(y, z)) { return true; }
-    }
-    else {
-        y = _startingPoint.y + _direction.y * (right - _startingPoint.x) / _direction.x;
-        z = _startingPoint.z + _direction.z * (right - _startingPoint.x) / _direction.x;
-        if(intersectsXPlane(y, z)) { return true; }
 
-        y = _startingPoint.y + _direction.y * (left - _startingPoint.x) / _direction.x;
-        z = _startingPoint.z + _direction.z * (left - _startingPoint.x) / _direction.x;
-        if(intersectsXPlane(y, z)) { return true; }
+    // right-left check
+    if(dir.y == 0.0f && dir.z == 0.0f) {
+        y = pos.y;
+        z = pos.z;
+        if(intersectsXPlane(y, z)) {
+            std::cout << "Intersect on X" <<std::endl;
+            _hit = transform->objectMatrix() * Vector3(pos.x, y, z);
+            return true;
+        }
     }
+    else if(dir.x != 0.0f) {
+        y = pos.y + dir.y * (right - pos.x) / dir.x;
+        z = pos.z + dir.z * (right - pos.x) / dir.x;
+        if(intersectsXPlane(y, z)) {
+            std::cout << "Intersect on X" <<std::endl;
+            _hit = transform->objectMatrix() * Vector3(right, y, z);
+            return true;
+        }
 
-    if(_direction.y == 0.0f) {
-        x = _startingPoint.x;
-        z = _startingPoint.z;
-        if(intersectsYPlane(x, z)) { return true; }
-    }
-    else {
-        x = _startingPoint.x + _direction.x * (top - _startingPoint.y) / _direction.y;
-        z = _startingPoint.z + _direction.z * (top - _startingPoint.y) / _direction.y;
-        if(intersectsYPlane(x, z)) { return true; }
-
-        x = _startingPoint.x + _direction.x * (bottom - _startingPoint.y) / _direction.y;
-        z = _startingPoint.z + _direction.z * (bottom - _startingPoint.y) / _direction.y;
-        if(intersectsYPlane(x, z)) { return true; }
+        y = pos.y + dir.y * (left - pos.x) / dir.x;
+        z = pos.z + dir.z * (left - pos.x) / dir.x;
+        if(intersectsXPlane(y, z)) {
+            std::cout << "Intersect on X" <<std::endl;
+            _hit = transform->objectMatrix() * Vector3(left, y, z);
+            return true;
+        }
     }
 
-    if(_direction.z == 0.0f) {
-        x = _startingPoint.x;
-        y = _startingPoint.y;
-        if(intersectsZPlane(x, y)) { return true; }
+    // top-bottom check
+    if(dir.x == 0.0f && dir.z == 0.0f) {
+        x = pos.x;
+        z = pos.z;
+        if(intersectsYPlane(x, z)) {
+            std::cout << "Intersect on Y" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, pos.y, z);
+            return true;
+        }
     }
-    else {
-        x = _startingPoint.x + _direction.x * (front - _startingPoint.z) / _direction.z;
-        y = _startingPoint.y + _direction.y * (front - _startingPoint.z) / _direction.z;
-        if(intersectsZPlane(x, y)) { return true; }
+    else if(dir.y != 0.0f) {
+        x = pos.x + dir.x * (top - pos.y) / dir.y;
+        z = pos.z + dir.z * (top - pos.y) / dir.y;
+        if(intersectsYPlane(x, z)) {
+            std::cout << "Intersect on Y" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, top, z);
+            return true;
+        }
 
-        x = _startingPoint.x + _direction.x * (back - _startingPoint.z) / _direction.z;
-        y = _startingPoint.y + _direction.y * (back - _startingPoint.z) / _direction.z;
-        if(intersectsZPlane(x, y)) { return true; }
+        x = pos.x + dir.x * (bottom - pos.y) / dir.y;
+        z = pos.z + dir.z * (bottom - pos.y) / dir.y;
+        if(intersectsYPlane(x, z)) {
+            std::cout << "Intersect on Y" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, bottom, z);
+            return true;
+        }
+    }
+
+    // front-back check
+    if(dir.x == 0.0f && dir.y == 0.0f) {
+        x = pos.x;
+        y = pos.y;
+        if(intersectsZPlane(x, y)) {
+            std::cout << "Intersect on Z" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, y, pos.z);
+            return true;
+        }
+    }
+    else if(dir.z != 0.0f) {
+        x = pos.x + dir.x * (front - pos.z) / dir.z;
+        y = pos.y + dir.y * (front - pos.z) / dir.z;
+        if(intersectsZPlane(x, y)) {
+            std::cout << "Intersect on Z" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, y, front);
+            return true;
+        }
+
+        x = pos.x + dir.x * (back - pos.z) / dir.z;
+        y = pos.y + dir.y * (back - pos.z) / dir.z;
+        if(intersectsZPlane(x, y)) {
+            std::cout << "Intersect on Z" << std::endl;
+            _hit = transform->objectMatrix() * Vector3(x, y, back);
+            return true;
+        }
     }
 
     return false;

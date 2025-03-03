@@ -51,7 +51,7 @@ void Mesh::render(const Matrix4x4& _model) const {
 
     shader->setMatrix4x4("modelMatrix", _model);
 
-    Matrix4x4 normalMatrix = _model.inverse().transposed();
+    const Matrix4x4 normalMatrix = _model.inverse().transposed();
     shader->setMatrix4x4("normalMatrix", normalMatrix);
 
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());

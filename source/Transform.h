@@ -36,4 +36,5 @@ class Transform {
         [[nodiscard]] Vector3 up() const;
 
         [[nodiscard]] Matrix4x4 objectMatrix() const;
+        [[nodiscard]] Matrix4x4 directionMatrix() const;
 };

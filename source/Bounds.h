@@ -31,7 +31,7 @@ class Bounds : public Component {
         [[nodiscard]] Vector3 getCenter() const;
 
         [[nodiscard]] bool containsPoint(const Vector3& _position) const;
-        [[nodiscard]] bool intersectsLine(const Vector3& _startingPoint, const Vector3& _direction) const;
+        [[nodiscard]] bool intersectsLine(const Vector3& _worldPos, const Vector3& _dir, Vector3& _hit) const;
 
     private:
         [[nodiscard]] bool intersectsXPlane(float _y, float _z) const;

@@ -74,3 +74,13 @@ Matrix4x4 Transform::objectMatrix() const {
     else { result = parent->objectMatrix() * t * r * s; }
     return result;
 }
+
+Matrix4x4 Transform::directionMatrix() const {
+    const Matrix4x4 r = Matrix4x4::rotateMatrix(rotation);
+    const Matrix4x4 s = Matrix4x4::scaleMatrix(scale);
+    Matrix4x4 result;
+
+    if(parent == nullptr) { result = r * s; }
+    else { result = parent->directionMatrix() * r * s; }
+    return result;
+}

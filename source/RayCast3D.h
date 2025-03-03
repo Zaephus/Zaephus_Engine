@@ -18,11 +18,11 @@ class RayCast3D {
         RayCast3D(const Vector3& _pos, const Vector3& _dir);
         ~RayCast3D();
 
-        bool isColliding() const;
-        Bounds* getCollider() const;
-        Vector3 getCollisionPoint() const;
+        [[nodiscard]] bool isColliding() const;
+        [[nodiscard]] Bounds* getCollider() const;
+        [[nodiscard]] Vector3 getCollisionPoint() const;
 
-        static void update(std::vector<GameObject*> _gameObjects);
+        static void update(const std::vector<GameObject*>& _gameObjects);
 
     private:
         bool hasCollided = false;
@@ -31,5 +31,5 @@ class RayCast3D {
 
         void resetHitInfo();
 
-        static std::vector<RayCast3D*> rayCasts;
+        static std::vector<RayCast3D*> rays;
 };
