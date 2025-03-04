@@ -1,9 +1,16 @@
 
 #include "ClickableObject.h"
 
+#include <Bounds.h>
+
 #include "MeshRenderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
+
+ClickableObject::ClickableObject() {
+    addComponent(new Bounds());
+}
+
 
 void ClickableObject::update() {
     if(isClicked) {
@@ -22,7 +29,7 @@ void ClickableObject::update() {
     }
 }
 
-void ClickableObject::clicked(int _button) {
+void ClickableObject::clicked(int _button, const Vector3& _hitPos) {
     if(!isClicked) {
         isClicked = true;
         timer = maxTime;

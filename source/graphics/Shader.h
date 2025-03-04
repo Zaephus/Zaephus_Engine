@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include "glad/gl.h"
+#include <glad/gl.h>
 
 #include <map>
 #include <string>

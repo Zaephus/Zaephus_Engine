@@ -1,44 +1,49 @@
 
 #include "RayCast3D.h"
 
+#include <ZMath.h>
+
 #include <Bounds.h>
 #include <GameObject.h>
+#include <Scene.h>
 
-RayCast3D::RayCast3D(const Vector3& _pos, const Vector3& _dir) {
+RayCast3D::RayCast3D(const Vector3& _pos, const Vector3& _dir) : RayCast3D(_pos, _dir, false) {}
+RayCast3D::RayCast3D(const Vector3& _pos, const Vector3& _dir, const bool _oneShot) {
     position = _pos;
     direction = _dir;
 
-    rays.push_back(this);
-}
-
-RayCast3D::~RayCast3D() {
-    for(int i = rays.size()-1; i >= 0; --i) {
-        if(rays[i] == this) {
-            rays.erase(rays.begin() + i);
-            rays.shrink_to_fit();
-            return;
-        }
-    }
+    if(_oneShot) { update(); }
 }
 
 bool RayCast3D::isColliding() const { return hasCollided; }
 Bounds* RayCast3D::getCollider() const { return hitCollider; }
 Vector3 RayCast3D::getCollisionPoint() const { return collisionPoint; }
 
-void RayCast3D::update(const std::vector<GameObject*>& _gameObjects) {
-    for(RayCast3D* ray : rays) {
-        ray->resetHitInfo();
-        for(GameObject* gameObject : _gameObjects) {
-            const Bounds* bounds = gameObject->getComponent<Bounds>();
-            if(bounds == nullptr) { continue; }
-            if(bounds->containsPoint(ray->position)) { continue; }
+void RayCast3D::update() {
+    bool hasHit = false;
+    Bounds* hitBounds = nullptr;
+    Vector3 hitPos;
 
+    for(GameObject* gameObject : Scene::activeScene->gameObjects) {
+        Bounds* bounds = gameObject->getComponent<Bounds>();
+        if(bounds == nullptr) { continue; }
+        if(bounds->containsPoint(position)) { continue; }
+
+        Vector3 hit;
+        if(bounds->intersectsLine(position, direction, hit)) {
+            if(hasHit) {
+                if(Vector3::distance(hit, position) > Vector3::distance(hitPos, position)) {
+                    continue;
+                }
+            }
+
+            hasHit = true;
+            hitBounds = bounds;
+            hitPos = hit;
         }
     }
-}
 
-void RayCast3D::resetHitInfo() {
-    hasCollided = false;
-    hitCollider = nullptr;
-    collisionPoint = Vector3::zero();
+    hasCollided = hasHit;
+    hitCollider = hitBounds;
+    collisionPoint = hitPos;
 }

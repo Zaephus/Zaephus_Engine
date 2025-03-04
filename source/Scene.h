@@ -12,8 +12,11 @@ class Light;
 class Scene {
     public:
         Window* window = nullptr;
+        std::vector<GameObject*> gameObjects;
 
-        Scene() = default;
+        static Scene* activeScene;
+
+        Scene();
         virtual ~Scene() = 0;
 
         void initialize();
@@ -28,8 +31,6 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
-        std::vector<GameObject*> gameObjects;
-
         std::vector<Light*> lights;
         std::vector<MeshRenderer*> opaques;
         std::vector<MeshRenderer*> transparents;

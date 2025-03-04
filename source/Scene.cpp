@@ -6,6 +6,7 @@
 
 #include "Camera.h"
 #include "Color.h"
+#include "Input.h"
 #include "Light.h"
 #include "MeshRenderer.h"
 #include "Shader.h"
@@ -13,8 +14,14 @@
 #include "Transform.h"
 #include "Window.h"
 
+Scene* Scene::activeScene = nullptr;
+
 Action<void()> Scene::startGameObjectCall = Action<void()>();
 Action<void()> Scene::updateGameObjectCall = Action<void()>();
+
+Scene::Scene() {
+    activeScene = this;
+}
 
 Scene::~Scene() {
     delete window;
@@ -45,6 +52,8 @@ void Scene::handleSetup() {
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    Input::initialize();
 
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.bind<Scene, &Scene::onGameObjectDestroyed>(this);

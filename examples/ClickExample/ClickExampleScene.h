@@ -23,7 +23,7 @@ class ClickExample final : public Scene {
 
     public:
         void start() override {
-            GameObject::renderBounds = true;
+            Bounds::shouldRender = true;
             shouldRenderAxis = false;
 
             light = new Light();
@@ -51,8 +51,8 @@ class ClickExample final : public Scene {
                 4.0f)
             ));
             donut->name = "donut";
-            donut->bounds->top = 0.15f;
-            donut->bounds->bottom = -0.15f;
+            donut->getComponent<Bounds>()->top = 0.15f;
+            donut->getComponent<Bounds>()->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
             donut->transform->rotate(90.0f, 0.0f, 0.0f);
 

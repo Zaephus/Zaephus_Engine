@@ -5,6 +5,9 @@
 #include "GameObject.h"
 
 class ClickableObject : public GameObject {
+    public:
+        ClickableObject();
+
     private:
         Color oldColor;
         Color clickedColor = Color::magenta();
@@ -16,5 +19,5 @@ class ClickableObject : public GameObject {
 
         void update() override;
 
-        void clicked(int _button) override;
+        void clicked(int _button, const Vector3& _hitPos) override;
 };

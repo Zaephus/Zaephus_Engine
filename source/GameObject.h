@@ -2,12 +2,12 @@
 #pragma once
 
 #include <Component.h>
+#include <Transform.h>
 #include <typeinfo>
 
 #include "Action.h"
 
 class Component;
-class Transform;
 class Bounds;
 struct Vector2;
 
@@ -16,10 +16,8 @@ class GameObject {
     public:
         static Action<void(GameObject*)> gameObjectCreatedCall;
         static Action<void(GameObject*)> gameObjectDestroyedCall;
-        static bool renderBounds;
 
-        Transform* transform;
-        Bounds* bounds;
+        Transform* transform = new Transform();
 
         std::string name;
 
@@ -41,17 +39,15 @@ class GameObject {
             return result;
         }
 
+        virtual void clicked(int _button, const Vector3& _hitPos) {}
+
     protected:
         virtual void start() {}
         virtual void update() {}
-
-        virtual void clicked(int _button) {}
 
     private:
         std::vector<Component*> components;
 
         void internalStart();
         void internalUpdate();
-
-        void onMousePressed(int _button, Vector2 _pos);
 };
