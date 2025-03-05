@@ -31,6 +31,9 @@ Shader::~Shader() {
         boundTexture->destroy();
         delete boundTexture;
     }
+
+    glUseProgram(id);
+    glDeleteProgram(id);
 }
 
 void Shader::use() const {

@@ -19,11 +19,11 @@ Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRen
 Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
 
 MeshRenderer::~MeshRenderer() {
+    modelDestroyedCall.invoke(this);
+
     for(const Mesh* mesh : meshes) {
         delete mesh;
     }
-
-    modelDestroyedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {

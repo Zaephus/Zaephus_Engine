@@ -24,6 +24,8 @@ class GameObject {
         GameObject();
         virtual ~GameObject();
 
+        void destroy();
+
         void addComponent(Component* _component);
         void removeComponent(const Component* _component);
 

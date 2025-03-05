@@ -82,7 +82,17 @@ void Scene::internalUpdate() {
     render();
     Time::tick();
 
+    handleDestroyingGameObjects();
+
     window->presentFrame();
+}
+
+void Scene::handleDestroyingGameObjects() {
+    for(size_t i = 0; i < gameObjectsToDestroy.size(); i++) {
+        delete gameObjectsToDestroy[i];
+    }
+
+    gameObjectsToDestroy.clear();
 }
 
 void Scene::setupAxis() {
@@ -157,6 +167,8 @@ void Scene::onGameObjectCreated(GameObject* _gameObject) {
 }
 
 void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
+    gameObjectsToDestroy.push_back(_gameObject);
+
     for(size_t i = 0; i < gameObjects.size(); i++) {
         if(_gameObject == gameObjects[i]) {
             gameObjects.erase(gameObjects.begin() + i);
@@ -191,7 +203,7 @@ void Scene::onModelCreated(MeshRenderer* _model) {
 
 void Scene::onModelDestroyed(MeshRenderer* _model) {
     std::vector<MeshRenderer*>* modelList;
-    if(!_model->isTransparent()) { modelList = &transparents; }
+    if(_model->isTransparent()) { modelList = &transparents; }
     else { modelList = &opaques; }
 
     for(size_t i = 0; i < modelList->size(); i++) {

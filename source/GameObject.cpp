@@ -22,14 +22,17 @@ GameObject::GameObject() {
 }
 
 GameObject::~GameObject() {
-    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
-    Scene::updateGameObjectCall.unbind<GameObject, &GameObject::internalUpdate>(this);
-
     delete transform;
 
     for(size_t i = 0; i < components.size(); i++) {
         delete components[i];
     }
+
+}
+
+void GameObject::destroy() {
+    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
+    Scene::updateGameObjectCall.unbind<GameObject, &GameObject::internalUpdate>(this);
 
     gameObjectDestroyedCall.invoke(this);
 }

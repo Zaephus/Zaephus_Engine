@@ -31,6 +31,8 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
+        std::vector<GameObject*> gameObjectsToDestroy;
+
         std::vector<Light*> lights;
         std::vector<MeshRenderer*> opaques;
         std::vector<MeshRenderer*> transparents;
@@ -47,6 +49,8 @@ class Scene {
         void handleSetup();
         void internalStart();
         void internalUpdate();
+
+        void handleDestroyingGameObjects();
 
         void setupAxis();
         void setupLights() const;

@@ -13,6 +13,7 @@ class Input {
 
         static bool isKeyDown(int _key);
         static bool isMouseDown(int _button);
+        static bool isMouseUp(int _button);
 
         static Vector2 getMousePosition();
 

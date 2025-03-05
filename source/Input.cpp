@@ -20,6 +20,10 @@ bool Input::isMouseDown(const int _button) {
     return glfwGetMouseButton(Window::activeWindow->window, _button) == GLFW_PRESS;
 }
 
+bool Input::isMouseUp(const int _button) {
+    return glfwGetMouseButton(Window::activeWindow->window, _button) == GLFW_RELEASE;
+}
+
 Vector2 Input::getMousePosition() {
     double x = 0;
     double y = 0;
