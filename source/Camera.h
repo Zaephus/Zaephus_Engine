@@ -6,6 +6,7 @@
 
 #include "GameObject.h"
 
+class RayCast3D;
 class Color;
 struct Vector3;
 struct Matrix4x4;
@@ -33,7 +34,7 @@ class Camera : public GameObject {
         Camera();
 
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
-        Matrix4x4 viewMatrix() const;
+        [[nodiscard]] Matrix4x4 viewMatrix() const;
 
         void setClearColor(float _r, float _g, float _b, float _a);
         void setClearColor(Color _c);
@@ -41,7 +42,9 @@ class Camera : public GameObject {
         void setAsActive();
         void onWindowResized(int _w, int _h);
 
-        Vector3 screenToWorldPos(const Vector2& _screenPos) const;
+        [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos) const;
+        [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos) const;
+        [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos, bool _oneShot) const;
 
         void onKeyPressed(int _key, int _action);
         void onCursorMovement(Vector2 _mouseDelta);

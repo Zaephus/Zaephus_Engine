@@ -10,6 +10,7 @@
 #include "TimeUtils.h"
 #include "Transform.h"
 #include "Window.h"
+#include "RayCast3D.h"
 
 Camera* Camera::activeCam = nullptr;
 
@@ -54,6 +55,17 @@ Vector3 Camera::screenToWorldPos(const Vector2& _screenPos) const {
     const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
     const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
     return viewMatrix().inverse() * viewPos;
+}
+
+RayCast3D Camera::screenToRay(const Vector2& _screenPos) const {
+    return screenToRay(_screenPos, false);
+}
+
+RayCast3D Camera::screenToRay(const Vector2& _screenPos, const bool _oneShot) const {
+    const Vector3 pos = screenToWorldPos(_screenPos);
+    const Vector3 dir = pos - transform->position;
+
+    return { pos, dir, _oneShot };
 }
 
 void Camera::onKeyPressed(int _key, int _action) {

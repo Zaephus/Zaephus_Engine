@@ -16,11 +16,21 @@ bool Input::isKeyDown(const int _key) {
     return glfwGetKey(Window::activeWindow->window, _key) == GLFW_PRESS;
 }
 
-void Input::onMousePressed(const int _button, const Vector2 _pos) {
-    const Vector3 pos = Camera::activeCam->screenToWorldPos(_pos);
-    const Vector3 dir = pos - Camera::activeCam->transform->position;
+bool Input::isMouseDown(const int _button) {
+    return glfwGetMouseButton(Window::activeWindow->window, _button) == GLFW_PRESS;
+}
 
-    RayCast3D ray = RayCast3D(pos, dir, true);
+Vector2 Input::getMousePosition() {
+    double x = 0;
+    double y = 0;
+
+    glfwGetCursorPos(Window::activeWindow->window, &x, &y);
+    Vector2 pos = { static_cast<float>(x), static_cast<float>(y) };
+    return pos;
+}
+
+void Input::onMousePressed(const int _button, const Vector2 _pos) {
+    RayCast3D ray = Camera::activeCam->screenToRay(_pos, true);
 
     if(ray.isColliding()) {
         ray.getCollider()->gameObject->clicked(_button, ray.getCollisionPoint());

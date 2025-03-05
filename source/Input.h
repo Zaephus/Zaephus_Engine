@@ -12,5 +12,9 @@ class Input {
         static void initialize();
 
         static bool isKeyDown(int _key);
-        static void onMousePressed(const int _button, const Vector2 _pos);
+        static bool isMouseDown(int _button);
+
+        static Vector2 getMousePosition();
+
+        static void onMousePressed(int _button, Vector2 _pos);
 };
