@@ -3,11 +3,10 @@ message(hello world from source)
 
 add_library(Zaephus_Engine STATIC
     BoundsRenderer.cpp
-    BoundsRenderer.h
     Input.cpp
-    Input.h
     RayCast3D.cpp
-    RayCast3D.h)
+    Random.h
+)
 
 target_sources(Zaephus_Engine PUBLIC
     Bounds.cpp
