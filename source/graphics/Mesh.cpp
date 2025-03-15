@@ -37,6 +37,9 @@ Mesh::~Mesh() {
 }
 
 void Mesh::initialize() {
+    if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
+    else { drawType = GL_STATIC_DRAW; }
+
     processData();
 
     initializeArrayObject();
@@ -46,7 +49,15 @@ void Mesh::initialize() {
     setVertexAttributes();
 }
 
-void Mesh::render(const Matrix4x4& _model) const {
+void Mesh::render(const Matrix4x4& _model) {
+    if(isDynamic) {
+        processData();
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+
+        const int verticesSize = vertices.size() * sizeof(Vertex);
+        glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
+    }
+
     shader->use();
 
     shader->setMatrix4x4("modelMatrix", _model);
@@ -59,7 +70,6 @@ void Mesh::render(const Matrix4x4& _model) const {
     shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
 
     glBindVertexArray(vertexArrayObject);
-//    glDrawArrays(GL_TRIANGLES, 0, 36);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
 }
 
@@ -84,20 +94,21 @@ void Mesh::initializeVertexBuffer() {
     glGenBuffers(1, &vertexBufferObject);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 
-    int verticesSize = vertices.size() * sizeof(Vertex);
-    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), GL_STATIC_DRAW);
+    const int verticesSize = vertices.size() * sizeof(Vertex);
+    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
 }
 
 void Mesh::initializeElementBuffer() {
     glGenBuffers(1, &elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
 
-    int indicesSize = indices.size() * sizeof(unsigned int);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, indices.data(), GL_STATIC_DRAW);
+    const int indicesSize = indices.size() * sizeof(unsigned int);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, indices.data(), drawType);
 }
 
-void Mesh::setVertexAttributes() {
+void Mesh::setVertexAttributes() const {
     // Vertex Positions
+    // ReSharper disable once CppZeroValuedExpressionUsedAsNullPointer
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
     glEnableVertexAttribArray(0);
 

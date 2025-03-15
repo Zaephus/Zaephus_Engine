@@ -27,7 +27,7 @@ MeshRenderer::~MeshRenderer() {
 }
 
 void MeshRenderer::render() const {
-    for(const Mesh* mesh : meshes) {
+    for(Mesh* mesh : meshes) {
         mesh->shader->use();
         mesh->render(transform->objectMatrix());
     }

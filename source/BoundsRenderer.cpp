@@ -10,7 +10,8 @@
 BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     bounds = _bounds;
 
-    Mesh* mesh = new Mesh();
+    mesh = new Mesh();
+    mesh->isDynamic = true;
 
     const std::vector<Vector3> newVertices {
         bounds->getBottomLeftFront(),
@@ -56,4 +57,18 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
 
     setOverrideShader(Shader::unlitShader(Color::yellow()));
     overrideShader->drawAsWireframe = true;
+}
+
+void BoundsRenderer::update() {
+    const std::vector<Vector3> newVertices {
+        bounds->getBottomLeftFront(),
+        bounds->getBottomRightFront(),
+        bounds->getTopLeftFront(),
+        bounds->getTopRightFront(),
+        bounds->getBottomLeftBack(),
+        bounds->getBottomRightBack(),
+        bounds->getTopLeftBack(),
+        bounds->getTopRightBack()
+    };
+    mesh->positions = newVertices;
 }

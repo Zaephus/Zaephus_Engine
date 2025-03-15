@@ -25,6 +25,8 @@ class Mesh {
 
         std::vector<unsigned int> indices;
 
+        bool isDynamic = false;
+
         Mesh();
         Mesh(Shader* _shader,
              const std::vector<Vector3>& _positions,
@@ -36,13 +38,15 @@ class Mesh {
         ~Mesh();
 
         void initialize();
-        void render(const Matrix4x4& _model) const;
+        void render(const Matrix4x4& _model);
 
     private:
         unsigned int vertexArrayObject = 0;
 
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
+
+        int drawType = 0;
 
         std::vector<Vertex> vertices;
 
@@ -52,6 +56,6 @@ class Mesh {
         void initializeVertexBuffer();
         void initializeElementBuffer();
 
-        void setVertexAttributes();
+        void setVertexAttributes() const;
 
 };
