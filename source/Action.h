@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <algorithm>
-#include <cassert>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -55,7 +53,7 @@ class Action<R()> {
             cleanStubs();
 
             for(Stub stub : stubs) {
-                assert(stub.second != nullptr);
+                if(stub.first == nullptr || stub.second == nullptr) { return; }
                 stub.second(stub.first);
             }
         }
@@ -96,12 +94,12 @@ class Action<R()> {
         }
 
         template <R (*Function)()>
-        static inline R functionStub(InstancePtr) {
+        static R functionStub(InstancePtr) {
             return (Function)();
         }
 
         template <class C, R (C::*Function)()>
-        static inline void classMethodStub(InstancePtr instance) {
+        static void classMethodStub(InstancePtr instance) {
             return (static_cast<C*>(instance)->*Function)();
         }
 };
@@ -151,7 +149,8 @@ class Action<R(PARAM1)> {
             cleanStubs();
 
             for(Stub stub : stubs) {
-                assert(stub.second != nullptr);
+                if(stub.first == nullptr || stub.second == nullptr) { return; }
+
                 stub.second(stub.first, param1);
             }
         }
@@ -192,12 +191,12 @@ class Action<R(PARAM1)> {
         }
 
         template <R (*Function)(PARAM1)>
-        static inline R functionStub(InstancePtr, PARAM1 param1) {
+        static R functionStub(InstancePtr, PARAM1 param1) {
             return (Function)(param1);
         }
 
         template <class C, R (C::*Function)(PARAM1)>
-        static inline void classMethodStub(InstancePtr instance, PARAM1 param1) {
+        static void classMethodStub(InstancePtr instance, PARAM1 param1) {
             return (static_cast<C*>(instance)->*Function)(param1);
         }
 };
@@ -247,7 +246,8 @@ class Action<R(PARAM1, PARAM2)> {
             cleanStubs();
 
             for(Stub stub : stubs) {
-                assert(stub.second != nullptr);
+                if(stub.first == nullptr || stub.second == nullptr) { return; }
+
                 stub.second(stub.first, param1, param2);
             }
         }
@@ -288,12 +288,12 @@ class Action<R(PARAM1, PARAM2)> {
         }
 
         template <R (*Function)(PARAM1, PARAM2)>
-        static inline R functionStub(InstancePtr, PARAM1 param1, PARAM2 param2) {
+        static R functionStub(InstancePtr, PARAM1 param1, PARAM2 param2) {
             return (Function)(param1, param2);
         }
 
         template <class C, R (C::*Function)(PARAM1, PARAM2)>
-        static inline void classMethodStub(InstancePtr instance, PARAM1 param1, PARAM2 param2) {
+        static void classMethodStub(InstancePtr instance, PARAM1 param1, PARAM2 param2) {
             return (static_cast<C*>(instance)->*Function)(param1, param2);
         }
 };
