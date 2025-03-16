@@ -42,16 +42,16 @@ void GameObject::internalStart() {
 
     start();
 
-    for(Component* c : components) {
-        c->start();
+    for(size_t i = 0; i < components.size(); i++) {
+        components[i]->start();
     }
 }
 
 void GameObject::internalUpdate() {
     update();
 
-    for(Component* c : components) {
-        c->update();
+    for(size_t i = 0; i < components.size(); i++) {
+        components[i]->update();
     }
 }
 
