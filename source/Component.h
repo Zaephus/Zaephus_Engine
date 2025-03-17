@@ -1,19 +1,18 @@
 
 #pragma once
 
-namespace std { class type_info; }
+#include "Object.h"
+
 class GameObject;
 class Transform;
 
-class Component {
+class Component : public Object {
     public:
         GameObject* gameObject = nullptr;
         Transform* transform = nullptr;
 
-        virtual ~Component() = default;
+        ~Component() override = default;
 
-        virtual void start() {}
-        virtual void update() {}
-
-        virtual const std::type_info& getType();
+        void start() override {}
+        void update() override {}
 };

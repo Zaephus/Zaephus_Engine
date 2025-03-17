@@ -15,8 +15,7 @@ Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameOb
 Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(GameObject*)>();
 
 GameObject::GameObject() {
-    Scene::startGameObjectCall.bind<GameObject, &GameObject::internalStart>(this);
-    Scene::updateGameObjectCall.bind<GameObject, &GameObject::internalUpdate>(this);
+    transform = new Transform();
 
     gameObjectCreatedCall.invoke(this);
 }
@@ -27,32 +26,10 @@ GameObject::~GameObject() {
     for(size_t i = 0; i < components.size(); i++) {
         delete components[i];
     }
-
 }
 
 void GameObject::destroy() {
-    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
-    Scene::updateGameObjectCall.unbind<GameObject, &GameObject::internalUpdate>(this);
-
     gameObjectDestroyedCall.invoke(this);
-}
-
-void GameObject::internalStart() {
-    Scene::startGameObjectCall.unbind<GameObject, &GameObject::internalStart>(this);
-
-    start();
-
-    for(size_t i = 0; i < components.size(); i++) {
-        components[i]->start();
-    }
-}
-
-void GameObject::internalUpdate() {
-    update();
-
-    for(size_t i = 0; i < components.size(); i++) {
-        components[i]->update();
-    }
 }
 
 void GameObject::addComponent(Component* _component) {
@@ -65,7 +42,7 @@ void GameObject::addComponent(Component* _component) {
 void GameObject::removeComponent(const Component* _component) {
     const auto it = std::ranges::find(components.begin(), components.end(), _component);
     if(it == components.end()) {
-        std::cout << "Component does not exist in gameobject." << std::endl;
+        std::cout << "Component does not exist in game object." << std::endl;
         return;
     }
 

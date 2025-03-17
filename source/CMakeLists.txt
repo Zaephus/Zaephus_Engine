@@ -5,6 +5,9 @@ add_library(Zaephus_Engine STATIC
     BoundsRenderer.cpp
     Input.cpp
     RayCast3D.cpp
+    RayCast3D.h
+    Object.cpp
+    Object.h
     Random.h
 )
 

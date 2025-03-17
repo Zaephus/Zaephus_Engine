@@ -6,23 +6,24 @@
 #include <typeinfo>
 
 #include "Action.h"
+#include "Object.h"
 
 class Component;
 class Bounds;
 struct Vector2;
 
-class GameObject {
+class GameObject : public Object {
 
     public:
         static Action<void(GameObject*)> gameObjectCreatedCall;
         static Action<void(GameObject*)> gameObjectDestroyedCall;
 
-        Transform* transform = new Transform();
+        Transform* transform = nullptr;
 
         std::string name;
 
         GameObject();
-        virtual ~GameObject();
+        ~GameObject() override;
 
         void destroy();
 
@@ -44,12 +45,9 @@ class GameObject {
         virtual void clicked(int _button, const Vector3& _hitPos) {}
 
     protected:
-        virtual void start() {}
-        virtual void update() {}
+        void start() override {}
+        void update() override {}
 
     private:
         std::vector<Component*> components;
-
-        void internalStart();
-        void internalUpdate();
 };

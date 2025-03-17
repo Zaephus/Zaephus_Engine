@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <Bounds.h>
 #include <ZMath.h>
 
 #include <Camera.h>
@@ -21,7 +22,7 @@ class TransformScene final : public Scene {
 
     public:
         void start() override {
-            GameObject::renderBounds = false;
+            Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
             light = new Light();
