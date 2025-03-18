@@ -32,7 +32,10 @@ void Bounds::start() {
 
 void Bounds::update() {
     if(shouldRender) {
-        gameObject->getComponent<BoundsRenderer>()->render();
+        const BoundsRenderer* renderer = gameObject->getComponent<BoundsRenderer>();
+        if(renderer != nullptr) {
+            renderer->render();
+        }
     }
 }
 

@@ -52,9 +52,9 @@ class Action<R()> {
         void invoke() {
             cleanStubs();
 
-            for(Stub stub : stubs) {
-                if(stub.first == nullptr || stub.second == nullptr) { return; }
-                stub.second(stub.first);
+            for(int i = stubs.size()-1; i >= 0; --i) {
+                if(stubs[i].first == nullptr || stubs[i].second == nullptr) { return; }
+                stubs[i].second(stubs[i].first);
             }
         }
 
@@ -78,8 +78,7 @@ class Action<R()> {
         void markStubForDeletion(Stub s) {
             for(size_t i = 0; i < stubs.size(); i++) {
                 if(stubs[i].first == s.first && stubs[i].second == s.second) {
-                    stubs[i].first = nullptr;
-                    stubs[i].second = nullptr;
+                    stubs.erase(stubs.begin() + i);
                     return;
                 }
             }
