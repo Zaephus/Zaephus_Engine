@@ -42,8 +42,6 @@ class GameObject : public Object {
             return result;
         }
 
-        virtual void clicked(int _button, const Vector3& _hitPos) {}
-
     protected:
         void start() override {}
         void update() override {}

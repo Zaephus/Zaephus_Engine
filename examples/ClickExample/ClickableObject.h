@@ -8,6 +8,8 @@ class ClickableObject : public GameObject {
     public:
         ClickableObject();
 
+        void clicked();
+
     private:
         Color oldColor;
         Color clickedColor = Color::magenta();
@@ -18,6 +20,4 @@ class ClickableObject : public GameObject {
         bool isClicked = false;
 
         void update() override;
-
-        void clicked(int _button, const Vector3& _hitPos) override;
 };

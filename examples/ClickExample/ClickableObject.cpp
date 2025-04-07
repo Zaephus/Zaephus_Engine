@@ -29,7 +29,7 @@ void ClickableObject::update() {
     }
 }
 
-void ClickableObject::clicked(int _button, const Vector3& _hitPos) {
+void ClickableObject::clicked() {
     if(!isClicked) {
         isClicked = true;
         timer = maxTime;

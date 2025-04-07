@@ -34,9 +34,9 @@ Vector2 Input::getMousePosition() {
 }
 
 void Input::onMousePressed(const int _button, const Vector2 _pos) {
-    RayCast3D ray = Camera::activeCam->screenToRay(_pos, true);
-
-    if(ray.isColliding()) {
-        ray.getCollider()->gameObject->clicked(_button, ray.getCollisionPoint());
-    }
+    // RayCast3D ray = Camera::activeCam->screenToRay(_pos, true);
+    //
+    // if(ray.isColliding()) {
+    //     ray.getCollider()->gameObject->clicked(_button, ray.getCollisionPoint());
+    // }
 }

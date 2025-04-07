@@ -12,6 +12,8 @@
 #include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
+#include "Input.h"
+#include "RayCast3D.h"
 
 class ClickExample final : public Scene {
     Light* light = nullptr;
@@ -21,9 +23,11 @@ class ClickExample final : public Scene {
     ClickableObject* box = nullptr;
     ClickableObject* donut = nullptr;
 
+    bool isMouseDown = false;
+
     public:
         void start() override {
-            Bounds::shouldRender = true;
+            Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
             light = new Light();
@@ -65,5 +69,25 @@ class ClickExample final : public Scene {
             //     0.0f,
             //     0.0f
             // );
+
+            if(!isMouseDown && Input::isMouseDown(GLFW_MOUSE_BUTTON_LEFT)) {
+                isMouseDown = true;
+                const RayCast3D ray = cam->screenToRay(Input::getMousePosition(), true);
+
+                if(ray.isColliding()) {
+                    const GameObject* hitObject = ray.getCollider()->gameObject;
+
+                    if(hitObject == donut) {
+                        donut->clicked();
+                    }
+                    if(hitObject == box) {
+                        box->clicked();
+                    }
+                }
+            }
+
+            if(isMouseDown && Input::isMouseUp(GLFW_MOUSE_BUTTON_LEFT)) {
+                isMouseDown = false;
+            }
         }
 };
