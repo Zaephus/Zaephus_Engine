@@ -30,7 +30,7 @@ class ClickExample final : public Scene {
             light->name = "light";
             light->transform->position = { 2.0f, 3.0f, 3.0f };
 
-            cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 12.0f / 6.0f, 0.1f, 100.0f);
+            cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             // cam = Camera::createOrthographicCamera(3.0f, 12.0f / 6.0f, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 2.0f };

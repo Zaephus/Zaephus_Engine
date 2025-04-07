@@ -51,8 +51,8 @@ class Camera : public GameObject {
 
         static Camera* activeCam;
 
-        static Camera* createPerspectiveCamera(float _fovY, float _aspect, float _near, float _far);
-        static Camera* createOrthographicCamera(float _sizeY, float _aspect, float _near, float _far);
+        static Camera* createPerspectiveCamera(float _fovY, float _near, float _far);
+        static Camera* createOrthographicCamera(float _sizeY, float _near, float _far);
 
     private:
         Vector2 camRotation;

@@ -29,7 +29,7 @@ class TransformScene final : public Scene {
             light-> name = "main_light";
             light->transform->position = {1.0f, 2.0f, 3.0f };
 
-            cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 12.0f / 6.0f, 0.1f, 100.0f);
+            cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 3.5f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);

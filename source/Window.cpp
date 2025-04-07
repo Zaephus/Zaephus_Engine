@@ -31,7 +31,11 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    window = glfwCreateWindow(1200, 600, "Zaephus Renderer", nullptr, nullptr);
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    const int width = mode->width;
+    const int height = mode->height;
+
+    window = glfwCreateWindow(width, height, "Zaephus Renderer", glfwGetPrimaryMonitor(), nullptr);
     if(window == nullptr) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
         return;
@@ -60,8 +64,8 @@ Vector2Int Window::getSize() const {
     glfwGetWindowSize(window, &size.x, &size.y);
     return size;
 }
-void Window::setSize(const size_t _w, const size_t _h) const {
-    glfwSetWindowSize(window, static_cast<int>(_w), static_cast<int>(_h));
+void Window::setSize(const int _w, const int _h) const {
+    glfwSetWindowSize(window, _w, _h);
 }
 
 std::string Window::getTitle() const {
@@ -87,8 +91,49 @@ Vector2 Window::screenToClip(const Vector2& _pos) const {
     return pos;
 }
 
+void Window::createContext(int _w, int _h, std::string& _title, bool _isFullscreen) {
+    glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    int width = 0;
+    int height = 0;
+    GLFWmonitor* monitor = nullptr;
+
+    if(_isFullscreen) {
+        monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        width = mode->width;
+        height = mode->height;
+    }
+    else {
+        width = _w;
+        height = _h;
+    }
+
+    window = glfwCreateWindow(width, height, _title.c_str(), monitor, nullptr);
+    if(window == nullptr) {
+        std::cerr << "Failed to create GLFW window!" << std::endl;
+        return;
+    }
+    glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, onScreenSizeChange);
+    glfwSetKeyCallback(window, onKeyPressed);
+    glfwSetMouseButtonCallback(window, onMouseButtonPressed);
+    glfwSetCursorPosCallback(window, onCursorMoved);
+    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPos(window, 0.0f, 0.0f);
+
+    if(!gladLoaderLoadGL((GLADloadfunc) glfwGetProcAddress)) {
+        std::cerr << "Failed to initialize GLAD!" << std::endl;
+        return;
+    }
+}
 
 void Window::onScreenSizeChange(GLFWwindow* window, const int width, const int height) {
+    std::cout << width << ", " << height << std::endl;
+
     glViewport(0, 0, width, height);
     sizeChangedCall.invoke(width, height);
 }

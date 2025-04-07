@@ -117,28 +117,34 @@ void Camera::onCursorMovement(const Vector2 _mouseDelta) { // NOLINT(*-unnecessa
 // //    std::cout << "Current camera rotation: " << transform->rotation.toEuler().toString() << std::endl;
 }
 
-Camera* Camera::createPerspectiveCamera(const float _fovY, const float _aspect, const float _near, const float _far) {
+Camera* Camera::createPerspectiveCamera(const float _fovY, const float _near, const float _far) {
+    const Vector2Int windowSize = Window::activeWindow->getSize();
+    const float aspect = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+
     Camera* cam = new Camera();
     cam->fovY = _fovY;
-    cam->aspect = _aspect;
+    cam->aspect = aspect;
     cam->near = _near;
     cam->far = _far;
     cam->projectionType = ProjectionType::perspective;
 
-    cam->projectionMatrix = perspectiveMatrix(_fovY, _aspect, _near, _far);
+    cam->projectionMatrix = perspectiveMatrix(_fovY, aspect, _near, _far);
 
     return cam;
 }
 
-Camera* Camera::createOrthographicCamera(const float _sizeY, const float _aspect, const float _near, const float _far) {
+Camera* Camera::createOrthographicCamera(const float _sizeY, const float _near, const float _far) {
+    const Vector2Int windowSize = Window::activeWindow->getSize();
+    const float aspect = static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+
     Camera* cam = new Camera();
     cam->size = _sizeY;
-    cam->aspect = _aspect;
+    cam->aspect = aspect;
     cam->near = _near;
     cam->far = _far;
     cam->projectionType = ProjectionType::orthographic;
 
-    cam->projectionMatrix = orthographicMatrix(_sizeY, _aspect, _near, _far);
+    cam->projectionMatrix = orthographicMatrix(_sizeY, aspect, _near, _far);
 
     return cam;
 }

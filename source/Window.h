@@ -26,12 +26,14 @@ class Window {
         Window();
         ~Window();
 
+        // void createWindowed(int _w, int _h, std::string& _title);
+        // void createFullscreen(std::string& _title);
         void initialize(size_t _w, size_t _h, const std::string& _title);
 
         void presentFrame() const;
 
         Vector2Int getSize() const;
-        void setSize(size_t _w, size_t _h) const;
+        void setSize(int _w, int _h) const;
 
         std::string getTitle() const;
         void setTitle(const std::string& _title) const;
@@ -43,6 +45,8 @@ class Window {
     private:
         static Vector2 cursorPos;
         static Vector2 lastCursorPos;
+
+        void createContext(int _w, int _h, std::string& _title, bool _isFullscreen);
 
         static void onScreenSizeChange(GLFWwindow* window, int width, int height);
         static void onKeyPressed(GLFWwindow* window, int key, int scanCode, int action, int mods);
