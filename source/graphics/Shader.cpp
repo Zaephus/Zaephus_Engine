@@ -14,6 +14,8 @@
 #include "Texture2D.h"
 #include "Transform.h"
 
+Shader* Shader::activeShader = nullptr;
+
 Shader::Shader(const char* _fragmentPath) : Shader("BaseVertex.glsl", _fragmentPath) {}
 
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
@@ -36,27 +38,44 @@ Shader::~Shader() {
     glDeleteProgram(id);
 }
 
-void Shader::use() const {
+void Shader::use() {
+    if(activeShader == this) { return; }
+
+    activeShader = this;
+
     glUseProgram(id);
 
     if(glIsEnabled(GL_DEPTH_TEST) && !depthTestEnabled) { glDisable(GL_DEPTH_TEST); }
     else if(!glIsEnabled(GL_DEPTH_TEST) && depthTestEnabled) { glEnable(GL_DEPTH_TEST); }
 
-    if(drawAsWireframe) { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
-    else { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
+    GLint polygonMode[2];
+    glGetIntegerv(GL_POLYGON_MODE, polygonMode);
+
+    if(drawAsWireframe && polygonMode[1] == GL_FILL) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else if(!drawAsWireframe && polygonMode[1] == GL_LINE) {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 
     for(const Texture2D* boundTexture : boundTextures) {
         boundTexture->use();
     }
 }
 
-void Shader::setBool(const std::string &name, const bool value) const {
+void Shader::setBool(const std::string &name, const bool value) {
+    use();
+
     glUniform1i(glGetUniformLocation(id, name.c_str()), static_cast<int>(value));
 }
-void Shader::setInt(const std::string &name, const int value) const {
+void Shader::setInt(const std::string &name, const int value) {
+    use();
+
     glUniform1i(glGetUniformLocation(id, name.c_str()), value);
 }
-void Shader::setFloat(const std::string &name, const float value) const {
+void Shader::setFloat(const std::string &name, const float value) {
+    use();
+
     glUniform1f(glGetUniformLocation(id, name.c_str()), value);
 }
 
@@ -65,31 +84,39 @@ void Shader::setColor(const std::string& name, const float r, const float g, con
     setColor(name, c);
 }
 void Shader::setColor(const std::string& name, const Color& color) {
+    use();
+
     assignedColors[name] = color;
     const float* colorPtr = &color.r;
     glUniform4fv(glGetUniformLocation(id, name.c_str()), 1, colorPtr);
 }
 
-Color Shader::getColor(const std::string &name) const {
+Color Shader::getColor(const std::string &name) {
     return assignedColors.at(name);
 }
 
-void Shader::setVector3(const std::string& name, const float x, const float y, const float z) const {
+void Shader::setVector3(const std::string& name, const float x, const float y, const float z) {
     const Vector3 v = { x, y, z };
     setVector3(name, v);
 }
-void Shader::setVector3(const std::string& name, const Vector3& vector) const {
+void Shader::setVector3(const std::string& name, const Vector3& vector) {
+    use();
+
     const float* vectorPtr = &vector.x;
     glUniform3fv(glGetUniformLocation(id, name.c_str()), 1, vectorPtr);
 }
 
-void Shader::setMatrix4x4(const std::string &name, const Matrix4x4& matrix) const {
+void Shader::setMatrix4x4(const std::string &name, const Matrix4x4& matrix) {
+    use();
+
     const int location = glGetUniformLocation(id, name.c_str());
     const float* matrixPtr = &matrix.m00;
     glUniformMatrix4fv(location, 1, GL_TRUE, matrixPtr);
 }
 
 void Shader::setTexture2D(const std::string &name, Texture2D* texture) {
+    use();
+
     const int textureIndex = static_cast<int>(boundTextures.size());
     glUniform1i(glGetUniformLocation(id, name.c_str()), static_cast<int>(textureIndex));
 
@@ -107,7 +134,9 @@ void Shader::setTexture2D(const std::string &name, Texture2D* texture) {
     texture->boundUniform = name;
 }
 
-void Shader::setLight(const std::string& name, const Light* light) const {
+void Shader::setLight(const std::string& name, const Light* light) {
+    use();
+
     glUniform3fv(glGetUniformLocation(id, (name + ".position").c_str()), 1, &light->transform->position.x);
 
     glUniform4fv(glGetUniformLocation(id, (name + ".color").c_str()), 1, &light->color.r);

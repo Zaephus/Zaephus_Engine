@@ -41,6 +41,7 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
         return;
     }
     glfwMakeContextCurrent(window);
+    glfwSwapInterval(0);
     glfwSetFramebufferSizeCallback(window, onScreenSizeChange);
     glfwSetKeyCallback(window, onKeyPressed);
     glfwSetMouseButtonCallback(window, onMouseButtonPressed);

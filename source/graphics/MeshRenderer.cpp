@@ -28,7 +28,6 @@ MeshRenderer::~MeshRenderer() {
 
 void MeshRenderer::render() const {
     for(Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->render(transform->objectMatrix());
     }
 }
@@ -42,65 +41,55 @@ void MeshRenderer::setOverrideShader(Shader* _shader) {
 
 void MeshRenderer::setBool(const std::string &name, const bool value) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setBool(name, value);
     }
 }
 void MeshRenderer::setInt(const std::string &name, const int value) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setInt(name, value);
     }
 }
 void MeshRenderer::setFloat(const std::string &name, const float value) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setFloat(name, value);
     }
 }
 
 void MeshRenderer::setColor(const std::string &name, const float r, const float g, const float b, const float a) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setColor(name, r, g, b, a);
     }
 }
 void MeshRenderer::setColor(const std::string &name, const Color& color) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setColor(name, color);
     }
 }
 
 void MeshRenderer::setVector3(const std::string &name, const float x, const float y, const float z) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setVector3(name, x, y, z);
     }
 }
 void MeshRenderer::setVector3(const std::string &name, const Vector3& vector) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setVector3(name, vector);
     }
 }
 
 void MeshRenderer::setMatrix4x4(const std::string &name, const Matrix4x4& matrix) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setMatrix4x4(name, matrix);
     }
 }
 void MeshRenderer::setTexture2D(const std::string &name, Texture2D* texture) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setTexture2D(name, texture);
     }
 }
 
 void MeshRenderer::setLight(const std::string &name, const Light* light) const {
     for(const Mesh* mesh : meshes) {
-        mesh->shader->use();
         mesh->shader->setLight(name, light);
     }
 }

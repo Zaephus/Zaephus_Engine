@@ -58,8 +58,6 @@ void Mesh::render(const Matrix4x4& _model) {
         glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
     }
 
-    shader->use();
-
     shader->setMatrix4x4("modelMatrix", _model);
 
     const Matrix4x4 normalMatrix = _model.inverse().transposed();
