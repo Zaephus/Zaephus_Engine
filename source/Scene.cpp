@@ -27,7 +27,7 @@ Scene::~Scene() {
     delete window;
 
     for(int i = gameObjects.size()-1; i >= 0; --i) {
-        std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
+        // std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
         delete gameObjects[i];
     }
 }

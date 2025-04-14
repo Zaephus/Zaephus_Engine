@@ -25,3 +25,9 @@ add_executable(transformExample
     TransformExample/main.cpp
 )
 add_dependencies(transformExample examples)
+
+add_executable(cubesExample
+    CubesExample/CubesScene.h
+    CubesExample/main.cpp
+)
+add_dependencies(cubesExample examples)
