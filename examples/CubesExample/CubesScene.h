@@ -19,9 +19,11 @@ class CubesScene final : public Scene {
 
     Camera* cam = nullptr;
 
+    Shader* cubeShader = nullptr;
+
     std::vector<GameObject*> cubes;
 
-    int cubeAmount = 1000;
+    int cubeAmount = 10;
     float size = 10.0f;
 
     public:
@@ -38,12 +40,13 @@ class CubesScene final : public Scene {
             cam->transform->position = { 0.0f, 0.0f, 35.0f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
+            cubeShader = Shader::diffuseShader(
+                { 0.0f, 0.6f, 0.0f, 1.0f },
+                4.0f
+            );
             for(int i = 0; i < cubeAmount; i++) {
                 GameObject* cube = new GameObject();
-                cube->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
-                    { 0.0f, 0.6f, 0.0f, 1.0f },
-                    4.0f)
-                ));
+                cube->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, cubeShader));
                 cube->name = std::format("Cube {0}", i);
                 cube->transform->position = {
                     Random::range(-size, size),

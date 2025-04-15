@@ -35,14 +35,14 @@ class MeshRenderer : public Component {
         static Action<void(MeshRenderer*)> modelCreatedCall;
         static Action<void(MeshRenderer*)> modelDestroyedCall;
 
-        Shader* overrideShader = nullptr;
+        Shader* shader = nullptr;
 
         MeshRenderer() = default;
         virtual ~MeshRenderer();
 
         void render() const;
 
-        void setOverrideShader(Shader* _shader);
+        void setShader(Shader* _shader);
 
         void setBool(const std::string &name, bool value) const;
         void setInt(const std::string &name, int value) const;
@@ -69,6 +69,9 @@ class MeshRenderer : public Component {
 
     private:
         std::string directory;
+        std::string path;
+
+        static std::vector<Mesh*> loadedMeshes;
 
         static void processNode(MeshRenderer* _model, const aiNode* _aiNode, const aiScene* _aiScene);
         static void processMesh(MeshRenderer* _model, const aiMesh* _aiMesh, const aiScene* _aiScene);

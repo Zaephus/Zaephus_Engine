@@ -55,8 +55,8 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     meshes.push_back(mesh);
     mesh->initialize();
 
-    setOverrideShader(Shader::unlitShader(Color::yellow()));
-    overrideShader->drawAsWireframe = true;
+    setShader(Shader::unlitShader(Color::yellow()));
+    shader->drawAsWireframe = true;
 }
 
 void BoundsRenderer::update() {

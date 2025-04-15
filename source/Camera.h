@@ -31,6 +31,8 @@ class Camera : public GameObject {
         float speed = 3.0f;
         float mouseSensitivity = 75.0f;
 
+        bool projectionChanged = false;
+
         Camera();
 
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
@@ -56,6 +58,10 @@ class Camera : public GameObject {
 
     private:
         Vector2 camRotation;
+
+        Matrix4x4 lastProjMatrix;
+
+        void update() override;
 
         static Matrix4x4 perspectiveMatrix(float _fovY, float _aspect, float _near, float _far);
         static Matrix4x4 orthographicMatrix(float _sizeY, float _aspect, float _near, float _far);

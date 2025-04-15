@@ -5,16 +5,19 @@
 
 #include <Quaternion.h>
 #include <Vectors/Vector3.h>
+#include <Component.h>
 
 struct Matrix4x4;
 
-class Transform {
+class Transform : public Component {
     public:
         Vector3 position;
         Quaternion rotation;
         Vector3 scale;
 
         Transform* parent = nullptr;
+
+        bool hasChanged = false;
 
         Transform();
         Transform(const Vector3 &_p, const Quaternion &_r, const Vector3 &_s);
@@ -37,4 +40,12 @@ class Transform {
 
         [[nodiscard]] Matrix4x4 objectMatrix() const;
         [[nodiscard]] Matrix4x4 directionMatrix() const;
+
+    protected:
+        void update() override;
+
+    private:
+        Vector3 lastPos;
+        Quaternion lastRot;
+        Vector3 lastScale;
 };

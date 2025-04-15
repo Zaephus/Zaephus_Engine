@@ -24,6 +24,13 @@ Camera::Camera() {
     }
 }
 
+void Camera::update() {
+    if(lastProjMatrix != projectionMatrix) { projectionChanged = true; }
+    else { projectionChanged = false; }
+
+    lastProjMatrix = projectionMatrix;
+}
+
 Matrix4x4 Camera::viewMatrix() const {
     const Matrix4x4 t = Matrix4x4::translateMatrix(transform->position).inverse();
     const Matrix4x4 r = Matrix4x4::rotateMatrix(transform->rotation).inverse();

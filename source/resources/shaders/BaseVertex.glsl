@@ -17,9 +17,10 @@ uniform mat4 projectionMatrix;
 
 void main() {
     gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(aPos, 1.0);
+
     fragPos = vec3(modelMatrix * vec4(aPos, 1.0));
     normal = vec3(normalMatrix * vec4(aNormal, 0.0));
-//    gl_Position = vec4(aPos, 1.0);
+
     vertexColor = aColor;
     uv = aUV;
 }

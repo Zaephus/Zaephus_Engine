@@ -97,29 +97,29 @@ void Scene::handleDestroyingGameObjects() {
 
 void Scene::setupAxis() {
     xLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    xLine->setOverrideShader(Shader::unlitShader(Color::red()));
+    xLine->setShader(Shader::unlitShader(Color::red()));
     xLine->transform->scale = { 100.0f, 0.01f, 0.01f };
 
     xCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    xCube->setOverrideShader(Shader::unlitShader(Color::red()));
+    xCube->setShader(Shader::unlitShader(Color::red()));
     xCube->transform->position = { 1.0f, 0.0f, 0.0f };
     xCube->transform->scale = { 0.05f, 0.05f, 0.05f };
 
     yLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    yLine->setOverrideShader(Shader::unlitShader(Color::green()));
+    yLine->setShader(Shader::unlitShader(Color::green()));
     yLine->transform->scale = { 0.01f, 100.0f, 0.01f };
 
     yCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    yCube->setOverrideShader(Shader::unlitShader(Color::green()));
+    yCube->setShader(Shader::unlitShader(Color::green()));
     yCube->transform->position = { 0.0f, 1.0f, 0.0f };
     yCube->transform->scale = { 0.05f, 0.05f, 0.05f };
 
     zLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    zLine->setOverrideShader(Shader::unlitShader(Color::blue()));
+    zLine->setShader(Shader::unlitShader(Color::blue()));
     zLine->transform->scale = { 0.01f, 0.01f, 100.0f };
 
     zCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    zCube->setOverrideShader(Shader::unlitShader(Color::blue()));
+    zCube->setShader(Shader::unlitShader(Color::blue()));
     zCube->transform->position = { 0.0f, 0.0f, 1.0f };
     zCube->transform->scale = { 0.05f, 0.05f, 0.05f };
 }
@@ -148,16 +148,24 @@ void Scene::sortTransparents() {
 
 void Scene::render() {
     for(size_t i = 0; i < opaques.size(); i++) {
-        opaques[i]->setVector3("viewPos", Camera::activeCam->transform->position);
-        if(!lights.empty()) { opaques[i]->setLight("light", lights[0]); }
+        if(Camera::activeCam->transform->hasChanged) {
+            opaques[i]->setVector3("viewPos", Camera::activeCam->transform->position);
+        }
+        if(!lights.empty() && lights[0]->transform->hasChanged) {
+            opaques[i]->setLight("light", lights[0]);
+        }
         opaques[i]->render();
     }
 
     sortTransparents();
 
     for(size_t i = 0; i < transparents.size(); i++) {
-        transparents[i]->setVector3("viewPos", Camera::activeCam->transform->position);
-        if(!lights.empty()) { transparents[i]->setLight("light", lights[0]); }
+        if(Camera::activeCam->transform->hasChanged) {
+            transparents[i]->setVector3("viewPos", Camera::activeCam->transform->position);
+        }
+        if(!lights.empty() && lights[0]->transform->hasChanged) {
+            transparents[i]->setLight("light", lights[0]);
+        }
         transparents[i]->render();
     }
 }

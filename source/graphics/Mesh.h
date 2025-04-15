@@ -3,6 +3,8 @@
 
 #include <vector>
 
+struct aiMesh;
+
 struct Vector2;
 struct Vector3;
 struct Vector4;
@@ -16,8 +18,6 @@ class Shader;
 class Mesh {
 
     public:
-        Shader* shader;
-
         std::vector<Vector3> positions;
         std::vector<Color> colors;
         std::vector<Vector2> uvs;
@@ -28,8 +28,7 @@ class Mesh {
         bool isDynamic = false;
 
         Mesh();
-        Mesh(Shader* _shader,
-             const std::vector<Vector3>& _positions,
+        Mesh(const std::vector<Vector3>& _positions,
              const std::vector<Color>& _colors,
              const std::vector<Vector2>& _uvs,
              const std::vector<Vector3>& _normals,
@@ -38,7 +37,13 @@ class Mesh {
         ~Mesh();
 
         void initialize();
-        void render(const Matrix4x4& _model);
+        void render();
+
+        friend bool operator==(const Mesh& _lhs, const Mesh& _rhs);
+        friend bool operator!=(const Mesh& _lhs, const Mesh& _rhs);
+
+        friend bool operator==(const Mesh& _lhs, const aiMesh& _rhs);
+        friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
     private:
         unsigned int vertexArrayObject = 0;
@@ -50,12 +55,14 @@ class Mesh {
 
         std::vector<Vertex> vertices;
 
+        static Mesh* activeMesh;
+
         void processData();
 
         void initializeArrayObject();
         void initializeVertexBuffer();
         void initializeElementBuffer();
 
-        void setVertexAttributes() const;
+        static void setVertexAttributes();
 
 };

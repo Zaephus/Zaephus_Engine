@@ -30,7 +30,7 @@ class LightingScene final : public Scene {
 
     public:
         void start() override {
-            GameObject::renderBounds = false;
+            Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
             light = new Light();
@@ -49,8 +49,6 @@ class LightingScene final : public Scene {
                 4.0f)
             ));
             floor->name = "floor";
-            floor->bounds->top = 0.01f;
-            floor->bounds->bottom = -0.01f;
             floor->transform->position = { 0.0f, -0.5f, 0.0f };
             floor->transform->scale = { 10.0f, 1.0f, 10.0f };
 
@@ -60,8 +58,6 @@ class LightingScene final : public Scene {
                 4.0f)
             ));
             donut->name = "donut";
-            donut->bounds->top = 0.15f;
-            donut->bounds->bottom = -0.15f;
 
             crate = new GameObject();
             crate->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::textureShader(

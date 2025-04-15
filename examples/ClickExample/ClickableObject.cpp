@@ -36,7 +36,7 @@ void ClickableObject::clicked() {
 
         const MeshRenderer* renderer = getComponent<MeshRenderer>();
         if(renderer != nullptr) {
-            oldColor = renderer->overrideShader->getColor("material.color");
+            oldColor = renderer->shader->getColor("material.color");
             renderer->setColor("material.color", clickedColor);
         }
     }

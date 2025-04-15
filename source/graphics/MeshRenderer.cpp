@@ -9,11 +9,14 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <Camera.h>
 #include "Color.h"
 #include "Mesh.h"
 #include "Shader.h"
 #include "Texture2D.h"
 #include "Transform.h"
+
+std::vector<Mesh*> MeshRenderer::loadedMeshes = std::vector<Mesh*>();
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
@@ -27,80 +30,65 @@ MeshRenderer::~MeshRenderer() {
 }
 
 void MeshRenderer::render() const {
+    const Matrix4x4 modelMatrix = transform->objectMatrix();
+    shader->setMatrix4x4("modelMatrix", modelMatrix);
+
+    const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
+    shader->setMatrix4x4("normalMatrix", normalMatrix);
+
+    if(Camera::activeCam->transform->hasChanged) {
+        shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
+    }
+    if(Camera::activeCam->projectionChanged) {
+        shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
+    }
+
     for(Mesh* mesh : meshes) {
-        mesh->render(transform->objectMatrix());
+        mesh->render();
     }
 }
 
-void MeshRenderer::setOverrideShader(Shader* _shader) {
-    overrideShader = _shader;
-    for(Mesh* mesh : meshes) {
-        mesh->shader = _shader;
-    }
+void MeshRenderer::setShader(Shader* _shader) {
+    shader = _shader;
 }
 
 void MeshRenderer::setBool(const std::string &name, const bool value) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setBool(name, value);
-    }
+    shader->setBool(name, value);
 }
 void MeshRenderer::setInt(const std::string &name, const int value) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setInt(name, value);
-    }
+    shader->setInt(name, value);
 }
 void MeshRenderer::setFloat(const std::string &name, const float value) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setFloat(name, value);
-    }
+    shader->setFloat(name, value);
 }
 
 void MeshRenderer::setColor(const std::string &name, const float r, const float g, const float b, const float a) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setColor(name, r, g, b, a);
-    }
+    shader->setColor(name, r, g, b, a);
 }
 void MeshRenderer::setColor(const std::string &name, const Color& color) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setColor(name, color);
-    }
+    shader->setColor(name, color);
 }
 
 void MeshRenderer::setVector3(const std::string &name, const float x, const float y, const float z) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setVector3(name, x, y, z);
-    }
+    shader->setVector3(name, x, y, z);
 }
 void MeshRenderer::setVector3(const std::string &name, const Vector3& vector) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setVector3(name, vector);
-    }
+    shader->setVector3(name, vector);
 }
 
 void MeshRenderer::setMatrix4x4(const std::string &name, const Matrix4x4& matrix) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setMatrix4x4(name, matrix);
-    }
+    shader->setMatrix4x4(name, matrix);
 }
 void MeshRenderer::setTexture2D(const std::string &name, Texture2D* texture) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setTexture2D(name, texture);
-    }
+    shader->setTexture2D(name, texture);
 }
 
 void MeshRenderer::setLight(const std::string &name, const Light* light) const {
-    for(const Mesh* mesh : meshes) {
-        mesh->shader->setLight(name, light);
-    }
+    shader->setLight(name, light);
 }
 
 bool MeshRenderer::isTransparent() const {
-    for(const Mesh* mesh : meshes) {
-        if(mesh->shader->order == Shader::transparents) {
-            return true;
-        }
-    }
-    return false;
+    return shader->order == Shader::transparents;
 }
 
 
@@ -147,9 +135,7 @@ MeshRenderer* MeshRenderer::loadModel(const std::string& _fileName, Shader* _ove
     MeshRenderer* model = new MeshRenderer();
     model->directory = path.substr(0, path.find_last_of('/'));
 
-    if(_overrideShader != nullptr) {
-        model->setOverrideShader(_overrideShader);
-    }
+    model->shader = _overrideShader;
 
     processNode(model, scene->mRootNode, scene);
 
@@ -172,6 +158,13 @@ void MeshRenderer::processNode(MeshRenderer* _model, const aiNode* _aiNode, cons
 }
 
 void MeshRenderer::processMesh(MeshRenderer* _model, const aiMesh* _aiMesh, const aiScene* _aiScene) {
+    for(size_t i = 0; i < loadedMeshes.size(); i++) {
+        if(*loadedMeshes[i] == *_aiMesh) {
+            _model->meshes.push_back(loadedMeshes[i]);
+            return;
+        }
+    }
+
     Mesh* mesh = new Mesh();
 
     for(unsigned int i = 0; i < _aiMesh->mNumVertices; i++) {
@@ -213,10 +206,7 @@ void MeshRenderer::processMesh(MeshRenderer* _model, const aiMesh* _aiMesh, cons
         }
     }
 
-    if(_model->overrideShader != nullptr) {
-        mesh->shader = _model->overrideShader;
-    }
-    else {
+    if(_model->shader == nullptr) {
         const aiMaterial* material = _aiScene->mMaterials[_aiMesh->mMaterialIndex];
 
         if(material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
@@ -226,11 +216,12 @@ void MeshRenderer::processMesh(MeshRenderer* _model, const aiMesh* _aiMesh, cons
         else {
             aiColor3D color(0.0f, 0.0f, 0.0f);
             material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-            mesh->shader = Shader::diffuseShader({color.r, color.g, color.b, 1.0f});
+            _model->shader = Shader::diffuseShader({color.r, color.g, color.b, 1.0f});
         }
     }
 
     _model->meshes.push_back(mesh);
+    loadedMeshes.push_back(mesh);
 }
 
 Texture2D* MeshRenderer::loadTexture(const MeshRenderer* _model, const aiMaterial* _material, const aiTextureType _type) {
