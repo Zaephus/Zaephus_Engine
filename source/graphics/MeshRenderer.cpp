@@ -16,6 +16,7 @@
 #include "Texture2D.h"
 #include "Transform.h"
 
+std::map<std::string, MeshRenderer*> MeshRenderer::loadedModels = std::map<std::string, MeshRenderer*>();
 std::vector<Mesh*> MeshRenderer::loadedMeshes = std::vector<Mesh*>();
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
@@ -91,38 +92,38 @@ bool MeshRenderer::isTransparent() const {
     return shader->order == Shader::transparents;
 }
 
-
 MeshRenderer* MeshRenderer::loadModel(const primitiveType _type, Shader* _overrideShader) {
-    MeshRenderer* renderer = nullptr;
     switch(_type) {
-        case cube:
-            renderer = loadModel("cube.obj", _overrideShader);
-            break;
-        case quad:
-            renderer = loadModel("quad.obj", _overrideShader);
-            break;
-        case cylinder:
-            renderer = loadModel("cylinder.obj", _overrideShader);
-            break;
-        case capsule:
-            renderer = loadModel("capsule.obj", _overrideShader);
-            break;
-        case sphere:
-            renderer = loadModel("sphere.obj", _overrideShader);
-            break;
-        case torus:
-            renderer = loadModel("torus.obj", _overrideShader);
-            break;
+        case cube:     return loadModel("cube.obj", _overrideShader);
+        case quad:     return loadModel("quad.obj", _overrideShader);
+        case cylinder: return loadModel("cylinder.obj", _overrideShader);
+        case capsule:  return loadModel("capsule.obj", _overrideShader);
+        case sphere:   return loadModel("sphere.obj", _overrideShader);
+        case torus:    return loadModel("torus.obj", _overrideShader);
         default:
             std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
-            break;
+            return nullptr;
     }
-
-    return renderer;
 }
 
 MeshRenderer* MeshRenderer::loadModel(const std::string& _fileName, Shader* _overrideShader) {
+    MeshRenderer* model = new MeshRenderer();
+
     const std::string path = "resources/models/" + _fileName;
+
+    if(loadedModels.contains(path)) {
+        model->shader = _overrideShader;
+        model->meshes = loadedModels[path]->meshes;
+        model->directory = loadedModels[path]->directory;
+
+        modelCreatedCall.invoke(model);
+
+        return model;
+    }
+
+    model->directory = path.substr(0, path.find_last_of('/'));
+
+    loadedModels[path] = model;
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -132,16 +133,9 @@ MeshRenderer* MeshRenderer::loadModel(const std::string& _fileName, Shader* _ove
         return nullptr;
     }
 
-    MeshRenderer* model = new MeshRenderer();
-    model->directory = path.substr(0, path.find_last_of('/'));
-
     model->shader = _overrideShader;
 
     processNode(model, scene->mRootNode, scene);
-
-    for(Mesh* mesh : model->meshes) {
-        mesh->initialize();
-    }
 
     modelCreatedCall.invoke(model);
     return model;

@@ -35,7 +35,7 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &elementBufferObject);
 }
 
-void Mesh::initialize() {
+void Mesh::start() {
     if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
     else { drawType = GL_STATIC_DRAW; }
 

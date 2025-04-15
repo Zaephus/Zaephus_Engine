@@ -53,7 +53,6 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     mesh->indices = newIndices;
 
     meshes.push_back(mesh);
-    mesh->initialize();
 
     setShader(Shader::unlitShader(Color::yellow()));
     shader->drawAsWireframe = true;

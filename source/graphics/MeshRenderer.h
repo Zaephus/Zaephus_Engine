@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <map>
 #include <vector>
 
 #include <assimp/material.h>
@@ -69,8 +70,8 @@ class MeshRenderer : public Component {
 
     private:
         std::string directory;
-        std::string path;
 
+        static std::map<std::string, MeshRenderer*> loadedModels;
         static std::vector<Mesh*> loadedMeshes;
 
         static void processNode(MeshRenderer* _model, const aiNode* _aiNode, const aiScene* _aiScene);
