@@ -46,6 +46,8 @@ class Shader {
 
         void setLight(const std::string& name, const Light* light);
 
+        bool isTransparent() const;
+
         static Shader* unlitShader(float r, float g, float b, float a);
         static Shader* unlitShader(const Color& c);
 

@@ -4,6 +4,7 @@
 #include <iterator>
 #include <map>
 
+#include "Action.h"
 #include "Camera.h"
 #include "Color.h"
 #include "Input.h"
@@ -96,32 +97,32 @@ void Scene::handleDestroyingGameObjects() {
 }
 
 void Scene::setupAxis() {
-    xLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    xLine->setShader(Shader::unlitShader(Color::red()));
-    xLine->transform->scale = { 100.0f, 0.01f, 0.01f };
-
-    xCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    xCube->setShader(Shader::unlitShader(Color::red()));
-    xCube->transform->position = { 1.0f, 0.0f, 0.0f };
-    xCube->transform->scale = { 0.05f, 0.05f, 0.05f };
-
-    yLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    yLine->setShader(Shader::unlitShader(Color::green()));
-    yLine->transform->scale = { 0.01f, 100.0f, 0.01f };
-
-    yCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    yCube->setShader(Shader::unlitShader(Color::green()));
-    yCube->transform->position = { 0.0f, 1.0f, 0.0f };
-    yCube->transform->scale = { 0.05f, 0.05f, 0.05f };
-
-    zLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    zLine->setShader(Shader::unlitShader(Color::blue()));
-    zLine->transform->scale = { 0.01f, 0.01f, 100.0f };
-
-    zCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    zCube->setShader(Shader::unlitShader(Color::blue()));
-    zCube->transform->position = { 0.0f, 0.0f, 1.0f };
-    zCube->transform->scale = { 0.05f, 0.05f, 0.05f };
+    // xLine = MeshRenderer::loadModel(MeshRenderer::cube);
+    // xLine->setShader(Shader::unlitShader(Color::red()));
+    // xLine->transform->scale = { 100.0f, 0.01f, 0.01f };
+    //
+    // xCube = MeshRenderer::loadModel(MeshRenderer::cube);
+    // xCube->setShader(Shader::unlitShader(Color::red()));
+    // xCube->transform->position = { 1.0f, 0.0f, 0.0f };
+    // xCube->transform->scale = { 0.05f, 0.05f, 0.05f };
+    //
+    // yLine = MeshRenderer::loadModel(MeshRenderer::cube);
+    // yLine->setShader(Shader::unlitShader(Color::green()));
+    // yLine->transform->scale = { 0.01f, 100.0f, 0.01f };
+    //
+    // yCube = MeshRenderer::loadModel(MeshRenderer::cube);
+    // yCube->setShader(Shader::unlitShader(Color::green()));
+    // yCube->transform->position = { 0.0f, 1.0f, 0.0f };
+    // yCube->transform->scale = { 0.05f, 0.05f, 0.05f };
+    //
+    // zLine = MeshRenderer::loadModel(MeshRenderer::cube);
+    // zLine->setShader(Shader::unlitShader(Color::blue()));
+    // zLine->transform->scale = { 0.01f, 0.01f, 100.0f };
+    //
+    // zCube = MeshRenderer::loadModel(MeshRenderer::cube);
+    // zCube->setShader(Shader::unlitShader(Color::blue()));
+    // zCube->transform->position = { 0.0f, 0.0f, 1.0f };
+    // zCube->transform->scale = { 0.05f, 0.05f, 0.05f };
 }
 
 void Scene::setupLights() const {
@@ -149,10 +150,10 @@ void Scene::sortTransparents() {
 void Scene::render() {
     for(size_t i = 0; i < opaques.size(); i++) {
         if(Camera::activeCam->transform->hasChanged) {
-            opaques[i]->setVector3("viewPos", Camera::activeCam->transform->position);
+            opaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
         }
         if(!lights.empty() && lights[0]->transform->hasChanged) {
-            opaques[i]->setLight("light", lights[0]);
+            opaques[i]->getShader()->setLight("light", lights[0]);
         }
         opaques[i]->render();
     }
@@ -161,10 +162,10 @@ void Scene::render() {
 
     for(size_t i = 0; i < transparents.size(); i++) {
         if(Camera::activeCam->transform->hasChanged) {
-            transparents[i]->setVector3("viewPos", Camera::activeCam->transform->position);
+            transparents[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
         }
         if(!lights.empty() && lights[0]->transform->hasChanged) {
-            transparents[i]->setLight("light", lights[0]);
+            transparents[i]->getShader()->setLight("light", lights[0]);
         }
         transparents[i]->render();
     }
@@ -201,7 +202,7 @@ void Scene::onLightDestroyed(Light* _light) {
 
 
 void Scene::onModelCreated(MeshRenderer* _model) {
-    if(_model->isTransparent()) {
+    if(_model->getShader()->isTransparent()) {
         transparents.push_back(_model);
     }
     else {
@@ -211,7 +212,7 @@ void Scene::onModelCreated(MeshRenderer* _model) {
 
 void Scene::onModelDestroyed(MeshRenderer* _model) {
     std::vector<MeshRenderer*>* modelList;
-    if(_model->isTransparent()) { modelList = &transparents; }
+    if(_model->getShader()->isTransparent()) { modelList = &transparents; }
     else { modelList = &opaques; }
 
     for(size_t i = 0; i < modelList->size(); i++) {

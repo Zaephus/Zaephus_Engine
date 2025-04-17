@@ -28,6 +28,8 @@ class GameObject : public Object {
         void destroy();
 
         void addComponent(Component* _component);
+        void addComponents(const std::vector<Component*>& _components);
+
         void removeComponent(const Component* _component);
 
         template<typename T>

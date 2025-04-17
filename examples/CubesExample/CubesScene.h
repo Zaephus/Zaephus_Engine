@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include <Bounds.h>
 #include <ZMath.h>
 
@@ -12,6 +14,7 @@
 #include <TimeUtils.h>
 #include <Transform.h>
 
+#include "ModelLoader.h"
 #include "Random.h"
 
 class CubesScene final : public Scene {
@@ -24,7 +27,7 @@ class CubesScene final : public Scene {
     std::vector<GameObject*> cubes;
 
     int cubeAmount = 100000;
-    float size = 50.0f;
+    float size = 25.0f;
 
     public:
         void start() override {
@@ -33,11 +36,10 @@ class CubesScene final : public Scene {
 
             light = new Light();
             light-> name = "main_light";
-            // light->transform->position = {1.0f, 2.0f, 3.0f };
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 135.0f };
+            cam->transform->position = { 0.0f, 0.0f, 75.0f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             cubeShader = Shader::diffuseShader(
@@ -45,16 +47,13 @@ class CubesScene final : public Scene {
                 4.0f
             );
 
-            long long int startTime = Time::microseconds();
-            for(int i = 0; i < 100; i++) {
-                Random::range(-size, size);
-            }
-            long long int duration = Time::microseconds() - startTime;
-            std::cout << "Time was: " << duration << std::endl;
-
             for(int i = 0; i < cubeAmount; i++) {
                 GameObject* cube = new GameObject();
-                cube->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, cubeShader));
+                std::vector<MeshRenderer*> renderers = ModelLoader::load(ModelLoader::cube);
+                for(size_t mr = 0; mr < renderers.size(); mr++) {
+                    renderers[mr]->setShader(cubeShader);
+                    cube->addComponent(renderers[mr]);
+                }
                 cube->name = std::format("Cube {0}", i);
                 cube->transform->position = {
                     Random::range(-size, size),

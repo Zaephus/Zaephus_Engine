@@ -11,6 +11,5 @@ class BoundsRenderer : public MeshRenderer {
         void update() override;
 
     private:
-        Mesh* mesh;
         Bounds* bounds;
 };

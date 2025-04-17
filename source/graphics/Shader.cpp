@@ -144,6 +144,10 @@ void Shader::setLight(const std::string& name, const Light* light) {
     glUniform1f(glGetUniformLocation(id, (name + ".specularStrength").c_str()), light->specularStrength);
 }
 
+bool Shader::isTransparent() const {
+    return order == transparents;
+}
+
 Shader *Shader::unlitShader(const float r, const float g, const float b, const float a) {
     return unlitShader({ r, g, b, a } );
 }

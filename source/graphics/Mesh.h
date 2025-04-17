@@ -3,8 +3,6 @@
 
 #include <vector>
 
-#include <Object.h>
-
 struct aiMesh;
 
 struct Vector2;
@@ -17,7 +15,7 @@ class Color;
 
 class Shader;
 
-class Mesh : public Object {
+class Mesh {
 
     public:
         std::vector<Vector3> positions;
@@ -38,7 +36,10 @@ class Mesh : public Object {
 
         ~Mesh();
 
-        void render();
+        void initialize();
+        void bind() const;
+
+        void updateVertexData() const;
 
         friend bool operator==(const Mesh& _lhs, const Mesh& _rhs);
         friend bool operator!=(const Mesh& _lhs, const Mesh& _rhs);
@@ -46,27 +47,16 @@ class Mesh : public Object {
         friend bool operator==(const Mesh& _lhs, const aiMesh& _rhs);
         friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
-    protected:
-        void start() override;
-
     private:
-        unsigned int vertexArrayObject = 0;
+        int drawType = 0;
 
+        unsigned int vertexArrayObject = 0;
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
 
-        int drawType = 0;
-
-        std::vector<Vertex> vertices;
-
-        static Mesh* activeMesh;
-
-        void processData();
+        std::vector<Vertex> combineData() const;
 
         void initializeArrayObject();
         void initializeVertexBuffer();
         void initializeElementBuffer();
-
-        static void setVertexAttributes();
-
 };

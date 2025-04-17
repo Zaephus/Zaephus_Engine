@@ -7,11 +7,8 @@
 
 #include <assimp/mesh.h>
 
-#include "Camera.h"
 #include "Shader.h"
 #include "Vertex.h"
-
-Mesh* Mesh::activeMesh = nullptr;
 
 Mesh::Mesh() : Mesh({}, {}, {}, {}, {}) {}
 
@@ -35,46 +32,34 @@ Mesh::~Mesh() {
     glDeleteBuffers(1, &elementBufferObject);
 }
 
-void Mesh::start() {
+void Mesh::initialize() {
     if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
     else { drawType = GL_STATIC_DRAW; }
-
-    processData();
 
     initializeArrayObject();
     initializeVertexBuffer();
     initializeElementBuffer();
-
-    setVertexAttributes();
 }
 
-void Mesh::render() {
-    if(isDynamic) {
-        processData();
-        glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-
-        const int verticesSize = vertices.size() * sizeof(Vertex);
-        glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
-    }
-
-    if(activeMesh != this) {
-        glBindVertexArray(vertexArrayObject);
-        activeMesh = this;
-    }
-
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, nullptr);
+void Mesh::bind() const {
+    glBindVertexArray(vertexArrayObject);
 }
 
-void Mesh::processData() {
-    vertices.resize(positions.size());
+std::vector<Vertex> Mesh::combineData() const {
+    std::vector<Vertex> vertices;
 
     for(size_t i = 0; i < positions.size(); i++) {
-        vertices[i].position = positions[i];
+        Vertex v {
+            .position = positions[i],
 
-        vertices[i].color  = i < colors.size()  ? colors[i]  : Color::white();
-        vertices[i].uv     = i < uvs.size()     ? uvs[i]     : Vector2::one();
-        vertices[i].normal = i < normals.size() ? normals[i] : Vector3::one();
+            .color  = i < colors.size()  ? colors[i]  : Color::white(),
+            .uv     = i < uvs.size()     ? uvs[i]     : Vector2::one(),
+            .normal = i < normals.size() ? normals[i] : Vector3::one()
+        };
+        vertices.push_back(v);
     }
+
+    return vertices;
 }
 
 void Mesh::initializeArrayObject() {
@@ -84,10 +69,7 @@ void Mesh::initializeArrayObject() {
 
 void Mesh::initializeVertexBuffer() {
     glGenBuffers(1, &vertexBufferObject);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
-
-    const int verticesSize = vertices.size() * sizeof(Vertex);
-    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
+    updateVertexData();
 }
 
 void Mesh::initializeElementBuffer() {
@@ -98,23 +80,13 @@ void Mesh::initializeElementBuffer() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize, indices.data(), drawType);
 }
 
-void Mesh::setVertexAttributes() {
-    // Vertex Positions
-    // ReSharper disable once CppZeroValuedExpressionUsedAsNullPointer
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
-    glEnableVertexAttribArray(0);
+void Mesh::updateVertexData() const {
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
 
-    // Vertex Colors
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
-    glEnableVertexAttribArray(1);
+    const std::vector<Vertex> vertices = combineData();
 
-    // Vertex UVs
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
-    glEnableVertexAttribArray(2);
-
-    // Vertex Normals
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
-    glEnableVertexAttribArray(3);
+    const int verticesSize = vertices.size() * sizeof(Vertex);
+    glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
 }
 
 bool operator==(const Mesh& _lhs, const Mesh& _rhs) {

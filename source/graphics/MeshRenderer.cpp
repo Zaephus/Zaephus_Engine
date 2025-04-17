@@ -1,36 +1,51 @@
 
 #include "MeshRenderer.h"
 
-#include <iostream>
 #include <string>
 
 #include <ZMath.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
 
+#include <Action.h>
 #include <Camera.h>
-#include "Color.h"
+#include <Vertex.h>
 #include "Mesh.h"
 #include "Shader.h"
-#include "Texture2D.h"
 #include "Transform.h"
-
-std::map<std::string, MeshRenderer*> MeshRenderer::loadedModels = std::map<std::string, MeshRenderer*>();
-std::vector<Mesh*> MeshRenderer::loadedMeshes = std::vector<Mesh*>();
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
 
+Mesh* MeshRenderer::activeMesh = nullptr;
+
+MeshRenderer::MeshRenderer(Mesh* _mesh) {
+    setMesh(_mesh);
+}
+
+MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
+    setMesh(_mesh);
+    setShader(_shader);
+}
+
 MeshRenderer::~MeshRenderer() {
     modelDestroyedCall.invoke(this);
 
-    for(const Mesh* mesh : meshes) {
-        delete mesh;
-    }
+    delete mesh;
+}
+
+void MeshRenderer::start() {
+    setVertexAttributes();
+
+    modelCreatedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
+    if(mesh->isDynamic) { mesh->updateVertexData(); }
+
+    if(activeMesh != mesh) {
+        mesh->bind();
+        activeMesh = mesh;
+    }
+
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
 
@@ -44,189 +59,34 @@ void MeshRenderer::render() const {
         shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
     }
 
-    for(Mesh* mesh : meshes) {
-        mesh->render();
-    }
+    glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
 }
+
+void MeshRenderer::setMesh(Mesh* _mesh) {
+    mesh = _mesh;
+}
+Mesh* MeshRenderer::getMesh() const { return mesh; }
 
 void MeshRenderer::setShader(Shader* _shader) {
     shader = _shader;
 }
+Shader* MeshRenderer::getShader() const { return shader; }
 
-void MeshRenderer::setBool(const std::string &name, const bool value) const {
-    shader->setBool(name, value);
-}
-void MeshRenderer::setInt(const std::string &name, const int value) const {
-    shader->setInt(name, value);
-}
-void MeshRenderer::setFloat(const std::string &name, const float value) const {
-    shader->setFloat(name, value);
-}
+void MeshRenderer::setVertexAttributes() {
+    // Vertex Positions
+    // ReSharper disable once CppZeroValuedExpressionUsedAsNullPointer
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glEnableVertexAttribArray(0);
 
-void MeshRenderer::setColor(const std::string &name, const float r, const float g, const float b, const float a) const {
-    shader->setColor(name, r, g, b, a);
-}
-void MeshRenderer::setColor(const std::string &name, const Color& color) const {
-    shader->setColor(name, color);
-}
+    // Vertex Colors
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, color)));
+    glEnableVertexAttribArray(1);
 
-void MeshRenderer::setVector3(const std::string &name, const float x, const float y, const float z) const {
-    shader->setVector3(name, x, y, z);
-}
-void MeshRenderer::setVector3(const std::string &name, const Vector3& vector) const {
-    shader->setVector3(name, vector);
-}
+    // Vertex UVs
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, uv)));
+    glEnableVertexAttribArray(2);
 
-void MeshRenderer::setMatrix4x4(const std::string &name, const Matrix4x4& matrix) const {
-    shader->setMatrix4x4(name, matrix);
-}
-void MeshRenderer::setTexture2D(const std::string &name, Texture2D* texture) const {
-    shader->setTexture2D(name, texture);
-}
-
-void MeshRenderer::setLight(const std::string &name, const Light* light) const {
-    shader->setLight(name, light);
-}
-
-bool MeshRenderer::isTransparent() const {
-    return shader->order == Shader::transparents;
-}
-
-MeshRenderer* MeshRenderer::loadModel(const primitiveType _type, Shader* _overrideShader) {
-    switch(_type) {
-        case cube:     return loadModel("cube.obj", _overrideShader);
-        case quad:     return loadModel("quad.obj", _overrideShader);
-        case cylinder: return loadModel("cylinder.obj", _overrideShader);
-        case capsule:  return loadModel("capsule.obj", _overrideShader);
-        case sphere:   return loadModel("sphere.obj", _overrideShader);
-        case torus:    return loadModel("torus.obj", _overrideShader);
-        default:
-            std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
-            return nullptr;
-    }
-}
-
-MeshRenderer* MeshRenderer::loadModel(const std::string& _fileName, Shader* _overrideShader) {
-    MeshRenderer* model = new MeshRenderer();
-
-    const std::string path = "resources/models/" + _fileName;
-
-    if(loadedModels.contains(path)) {
-        model->shader = _overrideShader;
-        model->meshes = loadedModels[path]->meshes;
-        model->directory = loadedModels[path]->directory;
-
-        modelCreatedCall.invoke(model);
-
-        return model;
-    }
-
-    model->directory = path.substr(0, path.find_last_of('/'));
-
-    loadedModels[path] = model;
-
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
-
-    if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        std::cerr << "ERROR::ASSIMP::" << importer.GetErrorString() << std::endl;
-        return nullptr;
-    }
-
-    model->shader = _overrideShader;
-
-    processNode(model, scene->mRootNode, scene);
-
-    modelCreatedCall.invoke(model);
-    return model;
-}
-
-void MeshRenderer::processNode(MeshRenderer* _model, const aiNode* _aiNode, const aiScene* _aiScene) { // NOLINT(*-no-recursion)
-    for(unsigned int i = 0; i < _aiNode->mNumMeshes; i++) {
-        const aiMesh* mesh = _aiScene->mMeshes[_aiNode->mMeshes[i]];
-        processMesh(_model, mesh, _aiScene);
-    }
-    for(unsigned int i = 0; i < _aiNode->mNumChildren; i++) {
-        processNode(_model, _aiNode->mChildren[i], _aiScene);
-    }
-}
-
-void MeshRenderer::processMesh(MeshRenderer* _model, const aiMesh* _aiMesh, const aiScene* _aiScene) {
-    for(size_t i = 0; i < loadedMeshes.size(); i++) {
-        if(*loadedMeshes[i] == *_aiMesh) {
-            _model->meshes.push_back(loadedMeshes[i]);
-            return;
-        }
-    }
-
-    Mesh* mesh = new Mesh();
-
-    for(unsigned int i = 0; i < _aiMesh->mNumVertices; i++) {
-        mesh->positions.emplace_back(
-            _aiMesh->mVertices[i].x,
-            _aiMesh->mVertices[i].y,
-            _aiMesh->mVertices[i].z
-        );
-
-        if(_aiMesh->HasVertexColors(0)) {
-            mesh->colors.emplace_back(
-                _aiMesh->mColors[0][i].r,
-                _aiMesh->mColors[0][i].g,
-                _aiMesh->mColors[0][i].b,
-                _aiMesh->mColors[0][i].a
-            );
-        }
-
-        if(_aiMesh->HasTextureCoords(0)) {
-            mesh->uvs.emplace_back(
-                _aiMesh->mTextureCoords[0][i].x,
-                _aiMesh->mTextureCoords[0][i].y
-            );
-        }
-
-        if(_aiMesh->HasNormals()) {
-            mesh->normals.emplace_back(
-                _aiMesh->mNormals[i].x,
-                _aiMesh->mNormals[i].y,
-                _aiMesh->mNormals[i].z
-            );
-        }
-    }
-
-    for(unsigned int i = 0; i < _aiMesh->mNumFaces; i++) {
-        const aiFace face = _aiMesh->mFaces[i];
-        for(unsigned int j = 0; j < face.mNumIndices; j++) {
-            mesh->indices.emplace_back(face.mIndices[j]);
-        }
-    }
-
-    if(_model->shader == nullptr) {
-        const aiMaterial* material = _aiScene->mMaterials[_aiMesh->mMaterialIndex];
-
-        if(material->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-// TODO: add texture loading support back in
-//            mesh->shader = Shader::textureShader(loadTexture(_model, material, aiTextureType_DIFFUSE));
-        }
-        else {
-            aiColor3D color(0.0f, 0.0f, 0.0f);
-            material->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-            _model->shader = Shader::diffuseShader({color.r, color.g, color.b, 1.0f});
-        }
-    }
-
-    _model->meshes.push_back(mesh);
-    loadedMeshes.push_back(mesh);
-}
-
-Texture2D* MeshRenderer::loadTexture(const MeshRenderer* _model, const aiMaterial* _material, const aiTextureType _type) {
-    aiString aiPath;
-    _material->GetTexture(_type, 0, &aiPath);
-
-    const std::string path = _model->directory + "/" + aiPath.C_Str();
-
-    Texture2D* texture = new Texture2D();
-    texture->flipVerticallyOnLoad = true;
-    Texture2D::load(texture, path);
-
-    return texture;
+    // Vertex Normals
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    glEnableVertexAttribArray(3);
 }

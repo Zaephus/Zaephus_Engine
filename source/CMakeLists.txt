@@ -9,6 +9,8 @@ add_library(Zaephus_Engine STATIC
     Object.cpp
     Object.h
     Random.h
+        ModelLoader.cpp
+        ModelLoader.h
 )
 
 target_sources(Zaephus_Engine PUBLIC

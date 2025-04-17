@@ -10,8 +10,9 @@
 BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     bounds = _bounds;
 
-    mesh = new Mesh();
-    mesh->isDynamic = true;
+    Mesh* boundsMesh = new Mesh();
+
+    boundsMesh->isDynamic = true;
 
     const std::vector<Vector3> newVertices {
         bounds->getBottomLeftFront(),
@@ -23,7 +24,7 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
         bounds->getTopLeftBack(),
         bounds->getTopRightBack()
     };
-    mesh->positions = newVertices;
+    boundsMesh->positions = newVertices;
 
     const std::vector<unsigned int> newIndices {
         //Top
@@ -50,9 +51,9 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
         4, 6, 7,
         4, 5, 7
     };
-    mesh->indices = newIndices;
+    boundsMesh->indices = newIndices;
 
-    meshes.push_back(mesh);
+    setMesh(boundsMesh);
 
     setShader(Shader::unlitShader(Color::yellow()));
     shader->drawAsWireframe = true;
