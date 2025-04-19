@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 class aiMaterial;
 class aiMesh;
@@ -16,6 +16,8 @@ class MeshRenderer;
 class Shader;
 class Texture2D;
 
+struct Model;
+
 class ModelLoader {
     public:
         enum primitiveType {
@@ -27,15 +29,17 @@ class ModelLoader {
             torus
         };
 
-        static std::vector<MeshRenderer*> load(primitiveType _type);
-        static std::vector<MeshRenderer*> load(const std::string& _fileName);
+        static std::vector<Model> load(primitiveType _type);
+        static std::vector<Model> load(primitiveType _type, bool _loadUnique);
+        static std::vector<Model> load(const std::string& _fileName);
+        static std::vector<Model> load(const std::string& _fileName, bool _loadUnique);
 
     private:
-        static std::map<std::string, std::vector<MeshRenderer*>> loadedModels;
+        static std::map<std::string, std::vector<Model>> loadedModels;
 
         static bool isSceneValid(const aiScene* _scene, const Assimp::Importer* _importer);
 
-        static void processNode(std::vector<MeshRenderer*>* _meshes, const aiNode* _aiNode, const aiScene* _aiScene);
+        static void processNode(std::vector<Model>* _models, const aiNode* _aiNode, const aiScene* _aiScene);
         static Mesh* processMesh(const aiMesh* _aiMesh);
         static Shader* processMaterial(const aiMaterial* _aiMaterial);
 

@@ -184,6 +184,28 @@ Shader* Shader::diffuseShader(const Color& c, const float shininess) {
     return shader;
 }
 
+Shader* Shader::instancedDiffuseShader(const float r, const float g, const float b, const float a) {
+    return diffuseShader({ r, g, b, a });
+}
+Shader* Shader::instancedDiffuseShader(const float r, const float g, const float b, const float a, const float shininess) {
+    return diffuseShader({ r, g, b, a }, shininess);
+}
+Shader* Shader::instancedDiffuseShader(const Color& c) {
+    return diffuseShader(c, 32.0f);
+}
+Shader* Shader::instancedDiffuseShader(const Color& c, const float shininess) {
+    Shader* shader = new Shader("InstancedVertex.glsl", "DiffuseFragment.glsl");
+    shader->use();
+
+    if(c.a < 1.0f) { shader->order = transparents; }
+    else { shader->order = opaques; }
+
+    shader->setColor("material.color", c);
+    shader->setFloat("material.shininess", shininess);
+
+    return shader;
+}
+
 Shader* Shader::textureShader(const std::string& diffusePath, const std::string& specularPath, const float shininess) {
     Texture2D* diffuse = new Texture2D();
     Texture2D::load(diffuse, diffusePath);

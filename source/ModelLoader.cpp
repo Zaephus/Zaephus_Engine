@@ -3,56 +3,58 @@
 
 #include <iostream>
 
+#include <ZMath.h>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <ZMath.h>
 
 #include <Color.h>
 #include <Mesh.h>
-#include <MeshRenderer.h>
+#include <Model.h>
 #include <Shader.h>
 
-std::map<std::string, std::vector<MeshRenderer*>> ModelLoader::loadedModels = std::map<std::string, std::vector<MeshRenderer*>>();
+std::map<std::string, std::vector<Model>> ModelLoader::loadedModels = std::map<std::string, std::vector<Model>>();
 
-std::vector<MeshRenderer*> ModelLoader::load(const primitiveType _type) {
+std::vector<Model> ModelLoader::load(const primitiveType _type) { return load(_type, false); }
+std::vector<Model> ModelLoader::load(primitiveType _type, const bool _loadUnique) {
     switch(_type) {
-    case cube:     return load("cube.obj");
-    case quad:     return load("quad.obj");
-    case cylinder: return load("cylinder.obj");
-    case capsule:  return load("capsule.obj");
-    case sphere:   return load("sphere.obj");
-    case torus:    return load("torus.obj");
+    case cube:     return load("cube.obj", _loadUnique);
+    case quad:     return load("quad.obj", _loadUnique);
+    case cylinder: return load("cylinder.obj", _loadUnique);
+    case capsule:  return load("capsule.obj", _loadUnique);
+    case sphere:   return load("sphere.obj", _loadUnique);
+    case torus:    return load("torus.obj", _loadUnique);
     default:
         std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
-        return std::vector<MeshRenderer*>();
+        return {};
     }
 }
 
-std::vector<MeshRenderer*> ModelLoader::load(const std::string& _fileName) {
+std::vector<Model> ModelLoader::load(const std::string& _fileName) { return load(_fileName, false); }
+std::vector<Model> ModelLoader::load(const std::string& _fileName, const bool _loadUnique) {
     const std::string path = "resources/models/" + _fileName;
 
-    std::vector<MeshRenderer*> renderers;
+    std::vector<Model> models;
 
-    if(loadedModels.contains(path)) {
+    if(!_loadUnique && loadedModels.contains(path)) {
         for(size_t i = 0; i < loadedModels.size(); i++) {
-            renderers.push_back(new MeshRenderer(loadedModels[path][i]->getMesh()));
+            models.emplace_back(loadedModels[path][i]);
         }
-        return renderers;
+        return models;
     }
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 
     if(!isSceneValid(scene, &importer)) {
-        return renderers;
+        return models;
     }
 
-    processNode(&renderers, scene->mRootNode, scene);
+    processNode(&models, scene->mRootNode, scene);
 
-    loadedModels[path] = renderers;
+    loadedModels[path] = models;
 
-    return renderers;
+    return models;
 }
 
 bool ModelLoader::isSceneValid(const aiScene* _scene, const Assimp::Importer* _importer) {
@@ -64,7 +66,7 @@ bool ModelLoader::isSceneValid(const aiScene* _scene, const Assimp::Importer* _i
     return true;
 }
 
-void ModelLoader::processNode(std::vector<MeshRenderer*>* _meshes, const aiNode* _aiNode, const aiScene* _aiScene) {
+void ModelLoader::processNode(std::vector<Model>* _models, const aiNode* _aiNode, const aiScene* _aiScene) {
     for(size_t i = 0; i < _aiNode->mNumMeshes; i++) {
         const aiMesh* loadedAiMesh = _aiScene->mMeshes[_aiNode->mMeshes[i]];
         Mesh* mesh = processMesh(loadedAiMesh);
@@ -78,11 +80,11 @@ void ModelLoader::processNode(std::vector<MeshRenderer*>* _meshes, const aiNode*
             shader = processMaterial(loadedMaterial);
         }
 
-        _meshes->push_back(new MeshRenderer(mesh, shader));
+        _models->emplace_back(mesh, shader);
     }
 
     for(size_t i = 0; i < _aiNode->mNumChildren; i++) {
-        processNode(_meshes, _aiNode->mChildren[i], _aiScene);
+        processNode(_models, _aiNode->mChildren[i], _aiScene);
     }
 }
 
@@ -90,34 +92,34 @@ Mesh* ModelLoader::processMesh(const aiMesh* _aiMesh) {
     Mesh* mesh = new Mesh();
 
     for(size_t i = 0; i < _aiMesh->mNumVertices; i++) {
-        mesh->positions.push_back({
+        mesh->positions.emplace_back(
             _aiMesh->mVertices[i].x,
             _aiMesh->mVertices[i].y,
             _aiMesh->mVertices[i].z
-        });
+        );
 
         if(_aiMesh->HasVertexColors(0)) {
-            mesh->colors.push_back({
+            mesh->colors.emplace_back(
                 _aiMesh->mColors[0][i].r,
                 _aiMesh->mColors[0][i].g,
                 _aiMesh->mColors[0][i].b,
                 _aiMesh->mColors[0][i].a
-            });
+            );
         }
 
         if(_aiMesh->HasTextureCoords(0)) {
-            mesh->uvs.push_back({
+            mesh->uvs.emplace_back(
                 _aiMesh->mTextureCoords[0][i].x,
                 _aiMesh->mTextureCoords[0][i].y
-            });
+            );
         }
 
         if(_aiMesh->HasNormals()) {
-            mesh->normals.push_back({
+            mesh->normals.emplace_back(
                 _aiMesh->mNormals[i].x,
                 _aiMesh->mNormals[i].y,
                 _aiMesh->mNormals[i].z
-            });
+            );
         }
     }
 

@@ -56,6 +56,11 @@ class Shader {
         static Shader* diffuseShader(const Color& c);
         static Shader* diffuseShader(const Color& c, float shininess);
 
+        static Shader* instancedDiffuseShader(float r, float g, float b, float a);
+        static Shader* instancedDiffuseShader(float r, float g, float b, float a, float shininess);
+        static Shader* instancedDiffuseShader(const Color& c);
+        static Shader* instancedDiffuseShader(const Color& c, float shininess);
+
         static Shader* textureShader(const std::string& diffusePath, const std::string& specularPath, float shininess);
         static Shader* textureShader(Texture2D* diffuse, Texture2D* specular, float shininess);
 

@@ -10,6 +10,8 @@
 #include "Shader.h"
 #include "Vertex.h"
 
+Mesh* Mesh::activeMesh = nullptr;
+
 Mesh::Mesh() : Mesh({}, {}, {}, {}, {}) {}
 
 Mesh::Mesh(const std::vector<Vector3>& _positions,
@@ -39,6 +41,8 @@ void Mesh::initialize() {
     initializeArrayObject();
     initializeVertexBuffer();
     initializeElementBuffer();
+
+    setVertexAttributes();
 }
 
 void Mesh::bind() const {
@@ -87,6 +91,25 @@ void Mesh::updateVertexData() const {
 
     const int verticesSize = vertices.size() * sizeof(Vertex);
     glBufferData(GL_ARRAY_BUFFER, verticesSize, vertices.data(), drawType);
+}
+
+void Mesh::setVertexAttributes() {
+    // Vertex Positions
+    // ReSharper disable once CppZeroValuedExpressionUsedAsNullPointer
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
+    glEnableVertexAttribArray(0);
+
+    // Vertex Colors
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, color)));
+    glEnableVertexAttribArray(1);
+
+    // Vertex UVs
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, uv)));
+    glEnableVertexAttribArray(2);
+
+    // Vertex Normals
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
+    glEnableVertexAttribArray(3);
 }
 
 bool operator==(const Mesh& _lhs, const Mesh& _rhs) {

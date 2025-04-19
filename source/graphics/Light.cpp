@@ -1,6 +1,7 @@
 
 #include "Light.h"
 
+#include <Model.h>
 #include <ZMath.h>
 
 #include "MeshRenderer.h"
@@ -32,9 +33,9 @@ Light::~Light() {
 }
 
 void Light::initialize() {
-    MeshRenderer* model = ModelLoader::load(ModelLoader::cube)[0];
-    model->setShader(Shader::unlitShader(color));
-    addComponent(model);
+    Model model = ModelLoader::load(ModelLoader::cube)[0];
+    model.shader = Shader::unlitShader(color);
+    addComponent(new MeshRenderer(model));
 
     transform->scale = Vector3(lightSize);
 }

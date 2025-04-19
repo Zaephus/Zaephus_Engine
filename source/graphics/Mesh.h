@@ -26,6 +26,9 @@ class Mesh {
         std::vector<unsigned int> indices;
 
         bool isDynamic = false;
+        int drawType = 0;
+
+        static Mesh* activeMesh;
 
         Mesh();
         Mesh(const std::vector<Vector3>& _positions,
@@ -48,15 +51,15 @@ class Mesh {
         friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
     private:
-        int drawType = 0;
-
         unsigned int vertexArrayObject = 0;
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
 
-        std::vector<Vertex> combineData() const;
+        [[nodiscard]] std::vector<Vertex> combineData() const;
 
         void initializeArrayObject();
         void initializeVertexBuffer();
         void initializeElementBuffer();
+
+        static void setVertexAttributes();
 };

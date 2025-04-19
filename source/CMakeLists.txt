@@ -11,6 +11,10 @@ add_library(Zaephus_Engine STATIC
     Random.h
         ModelLoader.cpp
         ModelLoader.h
+    graphics/MultiMeshRenderer.cpp
+    graphics/MultiMeshRenderer.h
+    Model.cpp
+    Model.h
 )
 
 target_sources(Zaephus_Engine PUBLIC

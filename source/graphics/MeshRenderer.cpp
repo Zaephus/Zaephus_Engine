@@ -9,16 +9,20 @@
 #include <Camera.h>
 #include <Vertex.h>
 #include "Mesh.h"
+#include "Model.h"
 #include "Shader.h"
 #include "Transform.h"
 
 Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
 
-Mesh* MeshRenderer::activeMesh = nullptr;
-
 MeshRenderer::MeshRenderer(Mesh* _mesh) {
     setMesh(_mesh);
+}
+
+MeshRenderer::MeshRenderer(const Model _model) {
+    setMesh(_model.mesh);
+    setShader(_model.shader);
 }
 
 MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
@@ -30,20 +34,19 @@ MeshRenderer::~MeshRenderer() {
     modelDestroyedCall.invoke(this);
 
     delete mesh;
+    delete shader;
 }
 
 void MeshRenderer::start() {
-    setVertexAttributes();
-
     modelCreatedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
     if(mesh->isDynamic) { mesh->updateVertexData(); }
 
-    if(activeMesh != mesh) {
+    if(Mesh::activeMesh != mesh) {
         mesh->bind();
-        activeMesh = mesh;
+        Mesh::activeMesh = mesh;
     }
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
@@ -71,22 +74,3 @@ void MeshRenderer::setShader(Shader* _shader) {
     shader = _shader;
 }
 Shader* MeshRenderer::getShader() const { return shader; }
-
-void MeshRenderer::setVertexAttributes() {
-    // Vertex Positions
-    // ReSharper disable once CppZeroValuedExpressionUsedAsNullPointer
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, position)));
-    glEnableVertexAttribArray(0);
-
-    // Vertex Colors
-    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, color)));
-    glEnableVertexAttribArray(1);
-
-    // Vertex UVs
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, uv)));
-    glEnableVertexAttribArray(2);
-
-    // Vertex Normals
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, normal)));
-    glEnableVertexAttribArray(3);
-}
