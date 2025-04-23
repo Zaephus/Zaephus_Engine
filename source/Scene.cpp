@@ -86,6 +86,8 @@ void Scene::internalUpdate() {
     handleDestroyingGameObjects();
 
     window->presentFrame();
+
+    FrameMark;
 }
 
 void Scene::handleDestroyingGameObjects() {

@@ -30,7 +30,7 @@ class CubesScene final : public Scene {
 
     std::vector<GameObject*> cubes;
 
-    int cubeAmount = 1000000;
+    int cubeAmount = 10000;
     float size = 25.0f;
 
     public:

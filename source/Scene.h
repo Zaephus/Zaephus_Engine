@@ -4,6 +4,8 @@
 #include <Action.h>
 #include <vector>
 
+#include <tracy/Tracy.hpp>
+
 class Window;
 class GameObject;
 class MeshRenderer;
