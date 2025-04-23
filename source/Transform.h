@@ -3,9 +3,9 @@
 
 #include <string>
 
+#include <Component.h>
 #include <Quaternion.h>
 #include <Vectors/Vector3.h>
-#include <Component.h>
 
 struct Matrix4x4;
 

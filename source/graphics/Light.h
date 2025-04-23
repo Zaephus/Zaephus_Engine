@@ -1,10 +1,11 @@
 
 #pragma once
 
-#include "Action.h"
 #include "Color.h"
 #include "GameObject.h"
 
+template <typename T>
+class Action;
 class MeshRenderer;
 
 class Light : public GameObject {

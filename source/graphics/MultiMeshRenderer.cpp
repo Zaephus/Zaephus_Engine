@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include <ZMath.h>
+#include <glad/gl.h>
 
 #include <Camera.h>
 #include <Mesh.h>

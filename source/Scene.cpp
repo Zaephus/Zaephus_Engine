@@ -4,6 +4,8 @@
 #include <iterator>
 #include <map>
 
+#include <glad/gl.h>
+
 #include "Action.h"
 #include "Camera.h"
 #include "Color.h"

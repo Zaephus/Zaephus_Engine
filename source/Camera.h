@@ -9,7 +9,6 @@
 class RayCast3D;
 class Color;
 struct Vector3;
-struct Matrix4x4;
 
 class Camera : public GameObject {
 

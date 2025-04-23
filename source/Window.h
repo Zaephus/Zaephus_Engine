@@ -7,7 +7,8 @@
 
 #include <GLFW/glfw3.h>
 
-#include "Action.h"
+template <typename T>
+class Action;
 
 struct Vector2;
 struct Vector2Int;

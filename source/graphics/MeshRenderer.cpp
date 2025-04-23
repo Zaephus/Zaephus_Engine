@@ -4,6 +4,7 @@
 #include <string>
 
 #include <ZMath.h>
+#include <glad/gl.h>
 
 #include <Action.h>
 #include <Camera.h>

@@ -3,6 +3,7 @@
 
 #include <ZMath.h>
 
+#include "Bounds.h"
 #include "Color.h"
 #include "Mesh.h"
 #include "Shader.h"

@@ -2,12 +2,12 @@
 #pragma once
 
 #include <Component.h>
-#include <Transform.h>
 #include <typeinfo>
 
 #include "Action.h"
 #include "Object.h"
 
+class Transform;
 class Component;
 class Bounds;
 struct Vector2;

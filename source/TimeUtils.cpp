@@ -1,7 +1,10 @@
 
 #include "TimeUtils.h"
 
+#include <chrono>
 #include <GLFW/glfw3.h>
+
+typedef std::chrono::high_resolution_clock tClock;
 
 float Time::deltaTime = 0.0f;
 float Time::lastTime = 0.0f;

@@ -7,6 +7,8 @@
 
 #include <ZMath.h>
 
+#include <Action.h>
+
 Action<void(int, int)> Window::sizeChangedCall      = Action<void(int, int)>();
 Action<void(int, int)> Window::keyPressedCall       = Action<void(int, int)>();
 Action<void(int, Vector2)> Window::mousePressedCall = Action<void(int, Vector2)>();
