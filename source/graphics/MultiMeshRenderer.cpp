@@ -17,6 +17,7 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount) {
 
     for(size_t i = 0; i < _instanceCount; i++) {
         instanceTransforms.push_back(new Transform());
+        matrices.push_back(Matrix4x4::identity());
     }
 }
 
@@ -27,6 +28,7 @@ MultiMeshRenderer::MultiMeshRenderer(const Model _model, const int _instanceCoun
 
     for(size_t i = 0; i < _instanceCount; i++) {
         instanceTransforms.push_back(new Transform());
+        matrices.push_back(Matrix4x4::identity());
     }
 }
 
@@ -37,6 +39,7 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
 
     for(size_t i = 0; i < _instanceCount; i++) {
         instanceTransforms.push_back(new Transform());
+        matrices.push_back(Matrix4x4::identity());
     }
 }
 
@@ -85,6 +88,7 @@ void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector
     }
 
     instanceTransforms[_id]->position = _pos;
+    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quaternion& _rot) {
@@ -93,6 +97,7 @@ void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quater
     }
 
     instanceTransforms[_id]->rotation = _rot;
+    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
@@ -101,6 +106,7 @@ void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector
     }
 
     instanceTransforms[_id]->rotation = Quaternion::fromEuler(_eulerAngles);
+    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
 void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& _scale) {
@@ -109,6 +115,7 @@ void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& 
     }
 
     instanceTransforms[_id]->scale = _scale;
+    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
 void MultiMeshRenderer::rotateInstance(unsigned int _id, const Vector3& _eulerAngles) {
@@ -117,6 +124,7 @@ void MultiMeshRenderer::rotateInstance(unsigned int _id, const Vector3& _eulerAn
     }
 
     instanceTransforms[_id]->rotate(_eulerAngles);
+    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
 void MultiMeshRenderer::initializeInstanceBuffer() {
@@ -148,10 +156,10 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() {
-    std::vector<Matrix4x4> matrices;
-    for(size_t i = 0; i < instanceTransforms.size(); i++) {
-        matrices.push_back(instanceTransforms[i]->objectMatrix().transposed());
-    }
+    // std::vector<Matrix4x4> matrices;
+    // for(size_t i = 0; i < instanceTransforms.size(); i++) {
+    //     matrices.push_back(instanceTransforms[i]->objectMatrix().transposed());
+    // }
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
     glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(Matrix4x4), matrices.data(), mesh->drawType);

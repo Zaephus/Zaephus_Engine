@@ -49,6 +49,7 @@ class MultiMeshRenderer : public Component {
         unsigned int instanceBuffer = 0;
 
         std::vector<Transform*> instanceTransforms;
+        std::vector<Matrix4x4> matrices;
 
         void initializeInstanceBuffer();
         void updateInstanceBuffer();
