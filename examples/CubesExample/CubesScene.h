@@ -30,11 +30,16 @@ class CubesScene final : public Scene {
 
     std::vector<GameObject*> cubes;
 
-    int cubeAmount = 10000;
+    int cubeAmount = 100000;
     float size = 25.0f;
 
     public:
         void start() override {
+
+#ifdef ENABLE_PROFILING
+            std::cout << "Sex enabled" << std::endl;
+#endif
+
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
@@ -85,6 +90,7 @@ class CubesScene final : public Scene {
         }
 
         void update() override {
+            ZoneScopedN("scene update");
             MultiMeshRenderer* renderer = multiCube->getComponent<MultiMeshRenderer>();
             renderer->getShader()->setLight("light", light);
             renderer->render();

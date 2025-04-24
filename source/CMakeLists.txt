@@ -17,6 +17,10 @@ add_library(Zaephus_Engine STATIC
     Model.h
 )
 
+if(ENABLE_PROFILING)
+    target_compile_definitions(Zaephus_Engine PUBLIC ENABLE_PROFILING)
+endif()
+
 target_sources(Zaephus_Engine PUBLIC
     Bounds.cpp
     Camera.cpp

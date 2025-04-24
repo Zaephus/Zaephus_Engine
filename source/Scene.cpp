@@ -74,17 +74,24 @@ void Scene::internalStart() {
 }
 
 void Scene::internalUpdate() {
+    ZoneScoped;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     startGameObjectCall.invoke();
     updateGameObjectCall.invoke();
 
+    ZoneNamedN(UpdateZone, "update", true);
     update();
+
+    ZoneNamedN(RenderZone, "render", true);
     render();
+
     Time::tick();
 
     handleDestroyingGameObjects();
 
+    ZoneNamedN(PresentZone, "present frame", true);
     window->presentFrame();
 
     FrameMark;

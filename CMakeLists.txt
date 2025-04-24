@@ -39,8 +39,15 @@ set(ASSIMP_BUILD_FBX_IMPORTER             ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_OBJ_IMPORTER             ON CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_GLTF_IMPORTER            ON CACHE BOOL "" FORCE)
 
-set(TRACY_ENABLE           ON CACHE BOOL "" FORCE)
-set(TRACY_ON_DEMAND        ON CACHE BOOL "" FORCE)
+if(ENABLE_PROFILING)
+    message(profiling enabled)
+    set(TRACY_ENABLE    ON CACHE BOOL "" FORCE)
+    set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
+else()
+    message(profiling disabled)
+    set(TRACY_ENABLE    OFF CACHE BOOL "" FORCE)
+    set(TRACY_ON_DEMAND OFF CACHE BOOL "" FORCE)
+endif()
 
 add_subdirectory(${INCLUDE_DIR}/glfw include/glfw)
 add_subdirectory(${INCLUDE_DIR}/glad include/glad)
@@ -50,8 +57,6 @@ add_subdirectory(${INCLUDE_DIR}/tracy include/tracy)
 
 add_subdirectory(source)
 add_subdirectory(examples)
-
-target_sources(Zaephus_Engine PUBLIC ${INCLUDE_DIR}/tracy/public/TracyClient.cpp)
 
 target_link_libraries(Zaephus_Engine glfw)
 target_link_libraries(Zaephus_Engine glad)
