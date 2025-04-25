@@ -1,5 +1,2 @@
-﻿# CLion project files
-.idea
-
-# Build files
+﻿# Build files
 cmake-build-*

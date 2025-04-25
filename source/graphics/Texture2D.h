@@ -4,32 +4,30 @@
 #include <string>
 #include <vector>
 
-#include "glad/gl.h"
-
 class Texture2D {
 
     public:
 
-        int horizontalWrap = GL_REPEAT;
-        int verticalWrap = GL_REPEAT;
+        int horizontalWrap;
+        int verticalWrap;
 
-        bool generateMipmaps = true;
+        bool generateMipmaps;
 
-        int minFilter = GL_LINEAR_MIPMAP_LINEAR;
-        int magFilter = GL_LINEAR;
+        int minFilter;
+        int magFilter;
 
-        bool flipVerticallyOnLoad = false;
+        bool flipVerticallyOnLoad;
 
         std::string boundUniform;
         std::string path;
 
-        Texture2D() = default;
+        Texture2D();
 
         void use() const;
-        void setUnit(int textureUnit);
-        void destroy();
+        void setUnit(int _textureUnit);
+        void destroy() const;
 
-        static void load(Texture2D* texture, const std::string& texturePath);
+        static void load(Texture2D* _texture, const std::string& _texturePath);
 
     private:
         unsigned int id = -1;
@@ -37,5 +35,5 @@ class Texture2D {
 
         static std::vector<Texture2D> loadedTextures;
 
-        static int checkForMatch(Texture2D* texture);
+        static int checkForMatch(const Texture2D* _texture);
 };

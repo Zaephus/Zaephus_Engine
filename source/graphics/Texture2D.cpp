@@ -1,45 +1,59 @@
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "Texture2D.h"
 
 #include <iostream>
 
-#include "stb_image.h"
+#include <stb_image.h>
+#include <glad/gl.h>
+
+Texture2D::Texture2D() {
+    horizontalWrap = GL_REPEAT;
+    verticalWrap = GL_REPEAT;
+
+    generateMipmaps = true;
+
+    minFilter = GL_LINEAR_MIPMAP_LINEAR;
+    magFilter = GL_LINEAR;
+
+    flipVerticallyOnLoad = false;
+}
 
 void Texture2D::use() const {
     glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, id);
 }
 
-void Texture2D::setUnit(const int textureUnit) {
-    unit = textureUnit;
+void Texture2D::setUnit(const int _textureUnit) {
+    unit = _textureUnit;
 }
 
-void Texture2D::destroy() {
+void Texture2D::destroy() const {
     glDeleteTextures(1, &id);
 }
 
-void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
-    const std::string path = "resources/textures/" + texturePath;
-    texture->path = path;
+void Texture2D::load(Texture2D* _texture, const std::string& _texturePath) {
+    const std::string path = "resources/textures/" + _texturePath;
+    _texture->path = path;
 
-    int loadedTextureIndex = checkForMatch(texture);
+    const int loadedTextureIndex = checkForMatch(_texture);
     if(loadedTextureIndex >= 0) {
-        *texture = loadedTextures[loadedTextureIndex];
+        *_texture = loadedTextures[loadedTextureIndex];
         return;
     }
 
     int width, height, channelAmount;
-    stbi_set_flip_vertically_on_load(texture->flipVerticallyOnLoad);
+    stbi_set_flip_vertically_on_load(_texture->flipVerticallyOnLoad);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelAmount, 0);
 
-    glGenTextures(1, &texture->id);
-    glBindTexture(GL_TEXTURE_2D, texture->id);
+    glGenTextures(1, &_texture->id);
+    glBindTexture(GL_TEXTURE_2D, _texture->id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texture->horizontalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texture->verticalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture->minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture->magFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _texture->horizontalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _texture->verticalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _texture->minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _texture->magFilter);
 
     int format;
     switch(channelAmount) {
@@ -51,9 +65,9 @@ void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
 
     if(data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        if(texture->generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
+        if(_texture->generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
 
-        loadedTextures.emplace_back(*texture);
+        loadedTextures.emplace_back(*_texture);
     }
     else {
         std::cout << "Failed to load texture!" << std::endl;
@@ -65,15 +79,15 @@ void Texture2D::load(Texture2D* texture, const std::string& texturePath) {
 
 std::vector<Texture2D> Texture2D::loadedTextures;
 
-int Texture2D::checkForMatch(Texture2D* texture) {
+int Texture2D::checkForMatch(const Texture2D* _texture) {
     for(int i = 0; i < loadedTextures.size(); i++) {
-        if(texture->path                 != loadedTextures[i].path)                 { continue; }
-        if(texture->horizontalWrap       != loadedTextures[i].horizontalWrap)       { continue; }
-        if(texture->verticalWrap         != loadedTextures[i].verticalWrap)         { continue; }
-        if(texture->generateMipmaps      != loadedTextures[i].generateMipmaps)      { continue; }
-        if(texture->minFilter            != loadedTextures[i].minFilter)            { continue; }
-        if(texture->magFilter            != loadedTextures[i].magFilter)            { continue; }
-        if(texture->flipVerticallyOnLoad != loadedTextures[i].flipVerticallyOnLoad) { continue; }
+        if(_texture->path                 != loadedTextures[i].path)                 { continue; }
+        if(_texture->horizontalWrap       != loadedTextures[i].horizontalWrap)       { continue; }
+        if(_texture->verticalWrap         != loadedTextures[i].verticalWrap)         { continue; }
+        if(_texture->generateMipmaps      != loadedTextures[i].generateMipmaps)      { continue; }
+        if(_texture->minFilter            != loadedTextures[i].minFilter)            { continue; }
+        if(_texture->magFilter            != loadedTextures[i].magFilter)            { continue; }
+        if(_texture->flipVerticallyOnLoad != loadedTextures[i].flipVerticallyOnLoad) { continue; }
 
         return i;
     }

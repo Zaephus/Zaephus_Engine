@@ -4,7 +4,6 @@
 #include <iostream>
 
 #include <glad/gl.h>
-
 #include <assimp/mesh.h>
 
 #include "Shader.h"
