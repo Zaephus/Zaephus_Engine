@@ -1,8 +1,9 @@
 
 #pragma once
 
-#include "Bounds.h"
 #include "MeshRenderer.h"
+
+class Bounds;
 
 class BoundsRenderer : public MeshRenderer {
     public:

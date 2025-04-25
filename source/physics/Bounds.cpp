@@ -1,13 +1,10 @@
 
 #include "Bounds.h"
 
-#include <GameObject.h>
-#include <iostream>
-
 #include <ZMath.h>
 
-#include <Transform.h>
-
+#include "Transform.h"
+#include "GameObject.h"
 #include "BoundsRenderer.h"
 
 bool Bounds::shouldRender = false;

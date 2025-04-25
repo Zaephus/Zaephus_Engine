@@ -5,7 +5,8 @@
 #include <string>
 
 #include <ZMath.h>
-#include "../Color.h"
+
+#include "Color.h"
 
 struct Vertex {
     Vector3 position;

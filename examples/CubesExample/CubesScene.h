@@ -3,21 +3,8 @@
 
 #include <vector>
 
-#include <Bounds.h>
 #include <ZMath.h>
-
-#include <Camera.h>
-#include <Light.h>
-#include <MeshRenderer.h>
-#include <Model.h>
-#include <MultiMeshRenderer.h>
-#include <Scene.h>
-#include <Shader.h>
-#include <TimeUtils.h>
-#include <Transform.h>
-
-#include "ModelLoader.h"
-#include "Random.h"
+#include <ZEngine.h>
 
 #ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>

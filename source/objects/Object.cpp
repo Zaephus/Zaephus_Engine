@@ -1,6 +1,8 @@
 
 #include "Object.h"
-#include <Scene.h>
+
+#include "Action.h"
+#include "Scene.h"
 
 #ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>

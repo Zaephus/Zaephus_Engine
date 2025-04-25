@@ -1,8 +1,10 @@
 
 #pragma once
 
-#include <Action.h>
 #include <vector>
+
+template <typename T>
+class Action;
 
 class Window;
 class GameObject;

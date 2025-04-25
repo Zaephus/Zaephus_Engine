@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <chrono>
-
 class Time {
     public:
         static float deltaTime;
@@ -14,8 +12,6 @@ class Time {
         static long long int nanoseconds();
 
     private:
-        typedef std::chrono::high_resolution_clock tClock;
-
         static float lastTime;
 
 };

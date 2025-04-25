@@ -3,10 +3,8 @@
 
 #include <ZMath.h>
 
-#include <Bounds.h>
-#include <Camera.h>
-#include <RayCast3D.h>
-#include <Window.h>
+#include "Action.h"
+#include "Window.h"
 
 void Input::initialize() {
     Window::mousePressedCall.bind<&Input::onMousePressed>();
@@ -34,9 +32,4 @@ Vector2 Input::getMousePosition() {
 }
 
 void Input::onMousePressed(const int _button, const Vector2 _pos) {
-    // RayCast3D ray = Camera::activeCam->screenToRay(_pos, true);
-    //
-    // if(ray.isColliding()) {
-    //     ray.getCollider()->gameObject->clicked(_button, ray.getCollisionPoint());
-    // }
 }

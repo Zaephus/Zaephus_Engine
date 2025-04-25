@@ -4,15 +4,16 @@
 #include <iostream>
 
 #include <ZMath.h>
+#include <glad/gl.h>
 
-#include <Camera.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Shader.h>
-#include <Transform.h>
+#include "Camera.h"
+#include "Mesh.h"
+#include "Model.h"
+#include "Shader.h"
+#include "Transform.h"
 
 #ifdef ENABLE_PROFILING
-    #include "tracy/Tracy.hpp"
+    #include <tracy/Tracy.hpp>
 #endif
 
 MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount) {

@@ -8,10 +8,10 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <Color.h>
-#include <Mesh.h>
-#include <Model.h>
-#include <Shader.h>
+#include "Color.h"
+#include "Mesh.h"
+#include "Model.h"
+#include "Shader.h"
 
 std::map<std::string, std::vector<Model>> ModelLoader::loadedModels = std::map<std::string, std::vector<Model>>();
 
