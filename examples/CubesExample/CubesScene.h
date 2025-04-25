@@ -19,6 +19,10 @@
 #include "ModelLoader.h"
 #include "Random.h"
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 class CubesScene final : public Scene {
     Light* light = nullptr;
 
@@ -30,11 +34,12 @@ class CubesScene final : public Scene {
 
     std::vector<GameObject*> cubes;
 
-    int cubeAmount = 1000;
+    int cubeAmount = 100000;
     float size = 25.0f;
 
     public:
         void start() override {
+
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
@@ -85,6 +90,10 @@ class CubesScene final : public Scene {
         }
 
         void update() override {
+#ifdef ENABLE_PROFILING
+            ZoneScopedN("scene update");
+#endif
+
             MultiMeshRenderer* renderer = multiCube->getComponent<MultiMeshRenderer>();
             renderer->getShader()->setLight("light", light);
             renderer->render();

@@ -2,9 +2,12 @@
 #pragma once
 
 #include <typeinfo>
+#include <string>
 
 class Object {
     public:
+        std::string name;
+
         Object();
         virtual ~Object();
 

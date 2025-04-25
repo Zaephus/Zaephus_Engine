@@ -17,6 +17,10 @@
 #include "Transform.h"
 #include "Window.h"
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 Scene* Scene::activeScene = nullptr;
 
 Action<void()> Scene::startGameObjectCall = Action<void()>();
@@ -76,18 +80,30 @@ void Scene::internalStart() {
 }
 
 void Scene::internalUpdate() {
+#ifdef ENABLE_PROFILING
+    ZoneScoped;
+#endif
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     startGameObjectCall.invoke();
     updateGameObjectCall.invoke();
-
+#ifdef ENABLE_PROFILING
+    ZoneNamedN(UpdateZone, "update", true);
+#endif
     update();
+
     render();
+
     Time::tick();
 
     handleDestroyingGameObjects();
 
     window->presentFrame();
+
+#ifdef ENABLE_PROFILING
+    FrameMark;
+#endif
 }
 
 void Scene::handleDestroyingGameObjects() {
@@ -150,6 +166,10 @@ void Scene::sortTransparents() {
 }
 
 void Scene::render() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedC(0x0062ff);
+#endif
+
     for(size_t i = 0; i < opaques.size(); i++) {
         if(Camera::activeCam->transform->hasChanged) {
             opaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
