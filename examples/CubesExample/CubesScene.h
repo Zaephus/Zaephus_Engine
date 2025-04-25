@@ -19,6 +19,10 @@
 #include "ModelLoader.h"
 #include "Random.h"
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 class CubesScene final : public Scene {
     Light* light = nullptr;
 
@@ -35,10 +39,6 @@ class CubesScene final : public Scene {
 
     public:
         void start() override {
-
-#ifdef ENABLE_PROFILING
-            std::cout << "Sex enabled" << std::endl;
-#endif
 
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
@@ -90,7 +90,10 @@ class CubesScene final : public Scene {
         }
 
         void update() override {
+#ifdef ENABLE_PROFILING
             ZoneScopedN("scene update");
+#endif
+
             MultiMeshRenderer* renderer = multiCube->getComponent<MultiMeshRenderer>();
             renderer->getShader()->setLight("light", light);
             renderer->render();

@@ -11,7 +11,9 @@
 #include <Shader.h>
 #include <Transform.h>
 
-#include "tracy/Tracy.hpp"
+#ifdef ENABLE_PROFILING
+    #include "tracy/Tracy.hpp"
+#endif
 
 MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount) {
     mesh = _mesh;
@@ -52,7 +54,9 @@ void MultiMeshRenderer::start() {
 }
 
 void MultiMeshRenderer::render() {
+#ifdef ENABLE_PROFILING
     ZoneScopedN("multi-mesh render");
+#endif
 
     updateInstanceBuffer();
 
@@ -152,13 +156,19 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() {
+#ifdef ENABLE_PROFILING
     ZoneScopedN("update buffer");
+#endif
+
     std::vector<Matrix4x4> matrices;
     for(size_t i = 0; i < instanceTransforms.size(); i++) {
         matrices.push_back(instanceTransforms[i]->objectMatrix().transposed());
     }
 
+#ifdef ENABLE_PROFILING
     ZoneNamedN(BindZone, "bind buffer", true);
+#endif
+
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
     glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(Matrix4x4), matrices.data(), mesh->drawType);
 }

@@ -7,6 +7,10 @@
 
 #include <ZMath.h>
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 Action<void(int, int)> Window::sizeChangedCall      = Action<void(int, int)>();
 Action<void(int, int)> Window::keyPressedCall       = Action<void(int, int)>();
 Action<void(int, Vector2)> Window::mousePressedCall = Action<void(int, Vector2)>();
@@ -56,6 +60,9 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
 }
 
 void Window::presentFrame() const {
+#ifdef ENABLE_PROFILING
+    ZoneScopedC(0x0062ff);
+#endif
     glfwSwapBuffers(window);
     glfwPollEvents();
 }
