@@ -6,9 +6,9 @@
 #include <ZMath.h>
 #include <glad/gl.h>
 
-#include <Action.h>
-#include <Camera.h>
-#include <Vertex.h>
+#include "Action.h"
+#include "Camera.h"
+#include "Vertex.h"
 #include "Mesh.h"
 #include "Model.h"
 #include "Shader.h"

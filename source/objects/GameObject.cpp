@@ -4,11 +4,8 @@
 #include <algorithm>
 #include <iostream>
 
-#include <Vectors/Vector2.h>
-
+#include "Action.h"
 #include "Component.h"
-#include "RayCast3D.h"
-#include "Scene.h"
 #include "Transform.h"
 
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();

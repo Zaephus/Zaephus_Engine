@@ -3,9 +3,12 @@
 
 #include <Component.h>
 #include <typeinfo>
+#include <vector>
 
-#include "Action.h"
 #include "Object.h"
+
+template <typename T>
+class Action;
 
 class Transform;
 class Component;

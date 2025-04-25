@@ -12,7 +12,7 @@ function(CopyResources target dir)
     add_custom_command(
         TARGET ${target}
         PRE_BUILD
-        COMMAND ${Python_EXECUTABLE} ${ENGINE_PATH}/CopyResources.py ${CMAKE_BINARY_DIR} ${ENGINE_PATH}/source ${dir}
+        COMMAND ${Python_EXECUTABLE} ${ENGINE_PATH}/CopyResources.py ${CMAKE_BINARY_DIR} ${ENGINE_PATH}/resources ${dir}
     )
 endfunction()
 
@@ -54,6 +54,7 @@ if(ENABLE_PROFILING)
 
     add_subdirectory(${INCLUDE_DIR}/tracy include/tracy)
     target_link_libraries(Zaephus_Engine Tracy::TracyClient)
+    target_include_directories(Zaephus_Engine PUBLIC ${INCLUDE_DIR}/tracy/public)
 else()
     message(profiling disabled)
     set(TRACY_ENABLE    OFF CACHE BOOL "" FORCE)
@@ -68,7 +69,5 @@ target_link_libraries(Zaephus_Engine Zaephus_Math)
 target_include_directories(Zaephus_Engine PUBLIC
     ${INCLUDE_DIR}/stb_image
     ${INCLUDE_DIR}/Zaephus_Math/source
-    ${INCLUDE_DIR}/tracy/public
     source
-    source/graphics
 )

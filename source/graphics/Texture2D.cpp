@@ -1,12 +1,12 @@
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "Texture2D.h"
 
 #include <iostream>
 
-#include "stb_image.h"
-
-#include "glad/gl.h"
+#include <stb_image.h>
+#include <glad/gl.h>
 
 Texture2D::Texture2D() {
     horizontalWrap = GL_REPEAT;
