@@ -20,8 +20,6 @@ class GameObject : public Object {
 
         Transform* transform = nullptr;
 
-        std::string name;
-
         GameObject();
         ~GameObject() override;
 
