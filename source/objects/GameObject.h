@@ -26,28 +26,39 @@ class GameObject : public Object {
         GameObject();
         ~GameObject() override;
 
+        /**
+         * Marks this game object to be destroyed.
+         * @note The game object is not destroyed immediately in order to avoid access violations. It is destroyed before the start of the next frame.
+         */
         void destroy();
 
+        /**
+         * Adds a component to the game object.
+         * @param _component The component you want to add.
+         */
         void addComponent(Component* _component);
-        void addComponents(const std::vector<Component*>& _components);
 
+        /**
+         * Removes a component from the game object.
+         * @param _component The component you want to remove.
+         */
         void removeComponent(const Component* _component);
 
+        /**
+         * Finds and returns a component of type T.
+         * @tparam T Component type.
+         * @return First component of type T, nullptr if no component of that type was found.
+         */
         template<typename T>
         T* getComponent() {
-            T* result = nullptr;
             for(size_t i = 0; i < components.size(); i++) {
                 if(components[i]->getType() == typeid(T)) {
-                    result = static_cast<T*>(components[i]);
+                    return static_cast<T*>(components[i]);
                 }
             }
 
-            return result;
+            return nullptr;
         }
-
-    protected:
-        void start() override {}
-        void update() override {}
 
     private:
         std::vector<Component*> components;

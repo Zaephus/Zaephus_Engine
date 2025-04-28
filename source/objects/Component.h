@@ -12,7 +12,4 @@ class Component : public Object {
         Transform* transform = nullptr;
 
         ~Component() override = default;
-
-        void start() override {}
-        void update() override {}
 };

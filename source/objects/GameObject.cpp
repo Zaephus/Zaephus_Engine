@@ -35,12 +35,6 @@ void GameObject::addComponent(Component* _component) {
     components.push_back(_component);
 }
 
-void GameObject::addComponents(const std::vector<Component*>& _components) {
-    for(size_t i = 0; i < _components.size(); i++) {
-        addComponent(_components[i]);
-    }
-}
-
 void GameObject::removeComponent(const Component* _component) {
     const auto it = std::ranges::find(components.begin(), components.end(), _component);
     if(it == components.end()) {
