@@ -3,21 +3,18 @@
 
 #include <string>
 
-#include "Component.h"
 #include "Quaternion.h"
 #include "Vectors/Vector3.h"
 
 struct Matrix4x4;
 
-class Transform : public Component {
+class Transform {
     public:
         Vector3 position;
         Quaternion rotation;
         Vector3 scale;
 
         Transform* parent = nullptr;
-
-        bool hasChanged = false;
 
         Transform();
         Transform(const Vector3 &_p, const Quaternion &_r, const Vector3 &_s);
@@ -40,9 +37,6 @@ class Transform : public Component {
 
         [[nodiscard]] Matrix4x4 objectMatrix() const;
         [[nodiscard]] Matrix4x4 directionMatrix() const;
-
-    protected:
-        void update() override;
 
     private:
         Vector3 lastPos;

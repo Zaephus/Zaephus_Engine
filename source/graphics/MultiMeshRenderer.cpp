@@ -91,6 +91,13 @@ Mesh* MultiMeshRenderer::getMesh() const { return mesh; }
 void MultiMeshRenderer::setShader(Shader* _shader) { shader = _shader; }
 Shader* MultiMeshRenderer::getShader() const { return shader; }
 
+Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) const {
+    if(_id >= instanceTransforms.size()) {
+        std::cerr << "Index out of bounds." << std::endl;
+    }
+    return instanceTransforms[_id]->position;
+}
+
 void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector3& _pos) {
     if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
@@ -121,7 +128,7 @@ void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& 
     matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
-void MultiMeshRenderer::rotateInstance(unsigned int _id, const Vector3& _eulerAngles) {
+void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Vector3& _eulerAngles) {
     if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
     }

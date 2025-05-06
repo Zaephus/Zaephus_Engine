@@ -29,6 +29,8 @@ class MultiMeshRenderer : public Component {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
+        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id) const;
+
         void setInstancePosition(unsigned int _id, const Vector3& _pos);
         void setInstanceRotation(unsigned int _id, const Vector3& _eulerAngles);
         void setInstanceRotation(unsigned int _id, const Quaternion& _rot);

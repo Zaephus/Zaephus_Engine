@@ -16,19 +16,6 @@ Transform::Transform(const Vector3 &_p, const Quaternion &_r, const Vector3 &_s)
     scale = _s;
 }
 
-void Transform::update() {
-    if(lastPos != position || lastRot != rotation || lastScale != scale) {
-        hasChanged = true;
-    }
-    else {
-        hasChanged = false;
-    }
-
-    lastPos = position;
-    lastRot = rotation;
-    lastScale = scale;
-}
-
 std::string Transform::toString() const {
     return std::format("Position: {}\nRotation: {}\nScale: {}", position.toString(), rotation.toString(), scale.toString());
 }

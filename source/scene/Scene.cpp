@@ -171,24 +171,16 @@ void Scene::render() {
 #endif
 
     for(size_t i = 0; i < opaques.size(); i++) {
-        if(Camera::activeCam->transform->hasChanged) {
-            opaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        }
-        if(!lights.empty() && lights[0]->transform->hasChanged) {
-            opaques[i]->getShader()->setLight("light", lights[0]);
-        }
+        opaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
+        opaques[i]->getShader()->setLight("light", lights[0]);
         opaques[i]->render();
     }
 
     sortTransparents();
 
     for(size_t i = 0; i < transparents.size(); i++) {
-        if(Camera::activeCam->transform->hasChanged) {
-            transparents[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        }
-        if(!lights.empty() && lights[0]->transform->hasChanged) {
-            transparents[i]->getShader()->setLight("light", lights[0]);
-        }
+        transparents[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
+        transparents[i]->getShader()->setLight("light", lights[0]);
         transparents[i]->render();
     }
 }

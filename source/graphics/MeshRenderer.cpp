@@ -56,12 +56,9 @@ void MeshRenderer::render() const {
     const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
     shader->setMatrix4x4("normalMatrix", normalMatrix);
 
-    if(Camera::activeCam->transform->hasChanged) {
-        shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
-    }
-    if(Camera::activeCam->projectionChanged) {
-        shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
-    }
+    shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
+
+    shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
 
     glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
 }

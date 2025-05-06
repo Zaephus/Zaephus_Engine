@@ -19,9 +19,7 @@ class CubesScene final : public Scene {
 
     GameObject* multiCube = nullptr;
 
-    std::vector<GameObject*> cubes;
-
-    int cubeAmount = 100000;
+    int cubeAmount = 1'000'000;
     float size = 25.0f;
 
     public:
@@ -58,22 +56,6 @@ class CubesScene final : public Scene {
                      Random::range(-size, size)
                 });
             }
-
-            // for(int i = 0; i < cubeAmount; i++) {
-            //     GameObject* cube = new GameObject();
-            //
-            //     for(size_t mr = 0; mr < renderers.size(); mr++) {
-            //         renderers[mr]->setShader(cubeShader);
-            //         cube->addComponent(renderers[mr]);
-            //     }
-            //     cube->name = std::format("Cube {0}", i);
-            //     cube->transform->position = {
-            //         Random::range(-size, size),
-            //         Random::range(-size, size),
-            //         Random::range(-size, size)
-            //     };
-            //     cubes.push_back(cube);
-            // }
         }
 
         void update() override {
@@ -86,7 +68,7 @@ class CubesScene final : public Scene {
             renderer->render();
 
             // for(size_t i = 0; i < cubeAmount; i++) {
-            //     renderer->rotateInstance(i, cubes[i]->transform->position.normalized() * 25.0f * Time::deltaTime);
+            //     renderer->rotateInstance(i, renderer->getInstancePosition(i).normalized() * 25.0f * Time::deltaTime);
             // }
             // for(int i = 0; i < cubes.size(); i++) {
             //     cubes[i]->transform->rotate(cubes[i]->transform->position.normalized() * 25.0f * Time::deltaTime);

@@ -13,12 +13,13 @@ Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(Game
 
 GameObject::GameObject() {
     transform = new Transform();
-    addComponent(transform);
 
     gameObjectCreatedCall.invoke(this);
 }
 
 GameObject::~GameObject() {
+    delete transform;
+
     for(size_t i = 0; i < components.size(); i++) {
         delete components[i];
     }
