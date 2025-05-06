@@ -92,7 +92,7 @@ void MultiMeshRenderer::setShader(Shader* _shader) { shader = _shader; }
 Shader* MultiMeshRenderer::getShader() const { return shader; }
 
 void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector3& _pos) {
-    if(_id >= instanceTransforms.size()) {
+    if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
@@ -100,8 +100,11 @@ void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector
     matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
+void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
+    setInstanceRotation(_id, Quaternion::fromEuler(_eulerAngles));
+}
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quaternion& _rot) {
-    if(_id >= instanceTransforms.size()) {
+    if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
@@ -109,17 +112,8 @@ void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quater
     matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
 }
 
-void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
-    if(_id >= instanceTransforms.size()) {
-        std::cerr << "Index out of bounds." << std::endl;
-    }
-
-    instanceTransforms[_id]->rotation = Quaternion::fromEuler(_eulerAngles);
-    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
-}
-
 void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& _scale) {
-    if(_id >= instanceTransforms.size()) {
+    if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
@@ -128,7 +122,7 @@ void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& 
 }
 
 void MultiMeshRenderer::rotateInstance(unsigned int _id, const Vector3& _eulerAngles) {
-    if(_id >= instanceTransforms.size()) {
+    if(_id >= matrices.size()) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
