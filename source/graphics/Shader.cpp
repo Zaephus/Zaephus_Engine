@@ -112,7 +112,7 @@ void Shader::setMatrix4x4(const std::string &_name, const Matrix4x4& _matrix) {
 
     const int location = glGetUniformLocation(id, _name.c_str());
     const float* matrixPtr = &_matrix.m00;
-    glUniformMatrix4fv(location, 1, GL_TRUE, matrixPtr);
+    glUniformMatrix4fv(location, 1, GL_FALSE, matrixPtr);
 }
 
 void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {

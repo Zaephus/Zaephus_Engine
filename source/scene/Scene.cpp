@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <map>
+#include <thread>
 
 #include <glad/gl.h>
 
@@ -12,6 +13,7 @@
 #include "Input.h"
 #include "Light.h"
 #include "MeshRenderer.h"
+#include "MultiMeshRenderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
@@ -68,8 +70,11 @@ void Scene::handleSetup() {
     Light::lightCreatedCall.bind<Scene, &Scene::onLightCreated>(this);
     Light::lightDestroyedCall.bind<Scene, &Scene::onLightDestroyed>(this);
 
-    MeshRenderer::modelCreatedCall.bind<Scene, &Scene::onModelCreated>(this);
-    MeshRenderer::modelDestroyedCall.bind<Scene, &Scene::onModelDestroyed>(this);
+    MeshRenderer::meshRendererCreatedCall.bind<Scene, &Scene::onMeshRendererCreated>(this);
+    MeshRenderer::meshRendererDestroyedCall.bind<Scene, &Scene::onMeshRendererDestroyed>(this);
+
+    MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Scene, &Scene::onMultiMeshRendererCreated>(this);
+    MultiMeshRenderer::multiMeshRendererDestroyedCall.bind<Scene, &Scene::onMultiMeshRendererDestroyed>(this);
 }
 
 void Scene::internalStart() {
@@ -80,18 +85,17 @@ void Scene::internalStart() {
 }
 
 void Scene::internalUpdate() {
-#ifdef ENABLE_PROFILING
-    ZoneScoped;
-#endif
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     startGameObjectCall.invoke();
     updateGameObjectCall.invoke();
+
+    {
 #ifdef ENABLE_PROFILING
-    ZoneNamedN(UpdateZone, "update", true);
+        ZoneNamedN(UpdateZone, "update", true);
 #endif
-    update();
+        update();
+    }
 
     render();
 
@@ -114,34 +118,7 @@ void Scene::handleDestroyingGameObjects() {
     gameObjectsToDestroy.clear();
 }
 
-void Scene::setupAxis() {
-    // xLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    // xLine->setShader(Shader::unlitShader(Color::red()));
-    // xLine->transform->scale = { 100.0f, 0.01f, 0.01f };
-    //
-    // xCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    // xCube->setShader(Shader::unlitShader(Color::red()));
-    // xCube->transform->position = { 1.0f, 0.0f, 0.0f };
-    // xCube->transform->scale = { 0.05f, 0.05f, 0.05f };
-    //
-    // yLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    // yLine->setShader(Shader::unlitShader(Color::green()));
-    // yLine->transform->scale = { 0.01f, 100.0f, 0.01f };
-    //
-    // yCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    // yCube->setShader(Shader::unlitShader(Color::green()));
-    // yCube->transform->position = { 0.0f, 1.0f, 0.0f };
-    // yCube->transform->scale = { 0.05f, 0.05f, 0.05f };
-    //
-    // zLine = MeshRenderer::loadModel(MeshRenderer::cube);
-    // zLine->setShader(Shader::unlitShader(Color::blue()));
-    // zLine->transform->scale = { 0.01f, 0.01f, 100.0f };
-    //
-    // zCube = MeshRenderer::loadModel(MeshRenderer::cube);
-    // zCube->setShader(Shader::unlitShader(Color::blue()));
-    // zCube->transform->position = { 0.0f, 0.0f, 1.0f };
-    // zCube->transform->scale = { 0.05f, 0.05f, 0.05f };
-}
+void Scene::setupAxis() {}
 
 void Scene::setupLights() const {
     for(size_t i = 0; i < lights.size(); i++) {
@@ -183,6 +160,12 @@ void Scene::render() {
         transparents[i]->getShader()->setLight("light", lights[0]);
         transparents[i]->render();
     }
+
+    for(size_t i = 0; i < multiOpaques.size(); i++) {
+        multiOpaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
+        multiOpaques[i]->getShader()->setLight("light", lights[0]);
+        multiOpaques[i]->render();
+    }
 }
 
 void Scene::onGameObjectCreated(GameObject* _gameObject) {
@@ -215,24 +198,37 @@ void Scene::onLightDestroyed(Light* _light) {
 }
 
 
-void Scene::onModelCreated(MeshRenderer* _model) {
-    if(_model->getShader()->isTransparent()) {
-        transparents.push_back(_model);
+void Scene::onMeshRendererCreated(MeshRenderer* _renderer) {
+    if(_renderer->getShader()->isTransparent()) {
+        transparents.push_back(_renderer);
     }
     else {
-        opaques.push_back(_model);
+        opaques.push_back(_renderer);
     }
 }
 
-void Scene::onModelDestroyed(MeshRenderer* _model) {
+void Scene::onMeshRendererDestroyed(MeshRenderer* _renderer) {
     std::vector<MeshRenderer*>* modelList;
-    if(_model->getShader()->isTransparent()) { modelList = &transparents; }
+    if(_renderer->getShader()->isTransparent()) { modelList = &transparents; }
     else { modelList = &opaques; }
 
-    for(size_t i = 0; i < modelList->size(); i++) {
-        if(_model == modelList->at(i)) {
+    for(int i = 0; i < modelList->size(); i++) {
+        if(_renderer == modelList->at(i)) {
             modelList->erase(modelList->begin() + i);
             modelList->shrink_to_fit();
+        }
+    }
+}
+
+void Scene::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
+    multiOpaques.push_back(_renderer);
+}
+
+void Scene::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
+    for(int i = 0; i < multiOpaques.size(); i++) {
+        if(_renderer == multiOpaques.at(i)) {
+            multiOpaques.erase(multiOpaques.begin() + i);
+            multiOpaques.shrink_to_fit();
         }
     }
 }

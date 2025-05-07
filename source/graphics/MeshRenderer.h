@@ -19,8 +19,8 @@ struct Vertex;
 
 class MeshRenderer : public Component {
     public:
-        static Action<void(MeshRenderer*)> modelCreatedCall;
-        static Action<void(MeshRenderer*)> modelDestroyedCall;
+        static Action<void(MeshRenderer*)> meshRendererCreatedCall;
+        static Action<void(MeshRenderer*)> meshRendererDestroyedCall;
 
         MeshRenderer() = default;
         explicit MeshRenderer(Mesh* _mesh);

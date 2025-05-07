@@ -5,6 +5,9 @@
 
 #include "Component.h"
 
+template <typename T>
+class Action;
+
 class Transform;
 class Mesh;
 class Shader;
@@ -16,12 +19,15 @@ struct Matrix4x4;
 
 class MultiMeshRenderer : public Component {
     public:
+        static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
+        static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
+
         MultiMeshRenderer(Mesh* _mesh, int _instanceCount);
         MultiMeshRenderer(Model _model, int _instanceCount);
         MultiMeshRenderer(Mesh* _mesh, Shader* _shader, int _instanceCount);
         ~MultiMeshRenderer() override;
 
-        void render();
+        void render() const;
 
         void setMesh(Mesh* _mesh);
         [[nodiscard]] Mesh* getMesh() const;
@@ -34,7 +40,6 @@ class MultiMeshRenderer : public Component {
         void setInstancePosition(unsigned int _id, const Vector3& _pos);
         void setInstanceRotation(unsigned int _id, const Vector3& _eulerAngles);
         void setInstanceRotation(unsigned int _id, const Quaternion& _rot);
-        void setInstanceScale(unsigned int _id, const Vector3& _scale);
         // void setInstanceMatrix(unsigned int _id, const Matrix4x4& _mat);
 
         void rotateInstance(unsigned int _id, const Vector3& _eulerAngles);
@@ -50,9 +55,8 @@ class MultiMeshRenderer : public Component {
 
         unsigned int instanceBuffer = 0;
 
-        std::vector<Transform*> instanceTransforms;
         std::vector<Matrix4x4> matrices;
 
         void initializeInstanceBuffer();
-        void updateInstanceBuffer();
+        void updateInstanceBuffer() const;
 };

@@ -60,6 +60,8 @@ class ClickExample final : public Scene {
             donut->transform->rotate(90.0f, 0.0f, 0.0f);
 
             std::cout << donut->transform->objectMatrix().toString() << std::endl;
+            std::cout << sizeof(float) << std::endl;
+            std::cout << sizeof(Matrix4x4) << std::endl;
 
             // std::cout << donut->bounds->intersectsLine({ 0.0f, 0.0f, 1.0f }, Vector3::forward()) << std::endl;
         }

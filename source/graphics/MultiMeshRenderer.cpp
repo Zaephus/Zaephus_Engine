@@ -6,6 +6,7 @@
 #include <ZMath.h>
 #include <glad/gl.h>
 
+#include "Action.h"
 #include "Camera.h"
 #include "Mesh.h"
 #include "Model.h"
@@ -16,26 +17,14 @@
     #include <tracy/Tracy.hpp>
 #endif
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount) {
-    mesh = _mesh;
-    instanceCount = _instanceCount;
+Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererCreatedCall = Action<void(MultiMeshRenderer*)>();
+Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererDestroyedCall = Action<void(MultiMeshRenderer*)>();
 
-    for(size_t i = 0; i < _instanceCount; i++) {
-        instanceTransforms.push_back(new Transform());
-        matrices.push_back(Matrix4x4::identity());
-    }
-}
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount)
+    : MultiMeshRenderer(_mesh, nullptr, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(const Model _model, const int _instanceCount) {
-    mesh = _model.mesh;
-    shader = _model.shader;
-    instanceCount = _instanceCount;
-
-    for(size_t i = 0; i < _instanceCount; i++) {
-        instanceTransforms.push_back(new Transform());
-        matrices.push_back(Matrix4x4::identity());
-    }
-}
+MultiMeshRenderer::MultiMeshRenderer(const Model _model, const int _instanceCount)
+    : MultiMeshRenderer(_model.mesh, _model.shader, _instanceCount) {}
 
 MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _instanceCount) {
     mesh = _mesh;
@@ -43,21 +32,24 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
     instanceCount = _instanceCount;
 
     for(size_t i = 0; i < _instanceCount; i++) {
-        instanceTransforms.push_back(new Transform());
         matrices.push_back(Matrix4x4::identity());
     }
 }
 
 MultiMeshRenderer::~MultiMeshRenderer() {
+    multiMeshRendererDestroyedCall.invoke(this);
+
     delete mesh;
     delete shader;
 }
 
 void MultiMeshRenderer::start() {
+    multiMeshRendererCreatedCall.invoke(this);
+
     initializeInstanceBuffer();
 }
 
-void MultiMeshRenderer::render() {
+void MultiMeshRenderer::render() const {
 #ifdef ENABLE_PROFILING
     ZoneScopedN("multi-mesh render");
 #endif
@@ -75,14 +67,11 @@ void MultiMeshRenderer::render() {
     const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
     shader->setMatrix4x4("normalMatrix", normalMatrix);
 
-    // if(Camera::activeCam->transform->hasChanged) {
-        shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
-    // }
-    // if(Camera::activeCam->projectionChanged) {
-        shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
-    // }
+    shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
-    glDrawElementsInstanced(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr, instanceCount);
+    shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
+
+    glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, instanceCount);
 }
 
 void MultiMeshRenderer::setMesh(Mesh* _mesh) { mesh = _mesh; }
@@ -92,49 +81,44 @@ void MultiMeshRenderer::setShader(Shader* _shader) { shader = _shader; }
 Shader* MultiMeshRenderer::getShader() const { return shader; }
 
 Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) const {
-    if(_id >= instanceTransforms.size()) {
+    if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
-    return instanceTransforms[_id]->position;
+    return { matrices[_id].m03, matrices[_id].m13, matrices[_id].m23 };
 }
 
 void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector3& _pos) {
-    if(_id >= matrices.size()) {
+    if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
-    instanceTransforms[_id]->position = _pos;
-    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
+    matrices[_id].m03 = _pos.x;
+    matrices[_id].m13 = _pos.y;
+    matrices[_id].m23 = _pos.z;
 }
 
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
     setInstanceRotation(_id, Quaternion::fromEuler(_eulerAngles));
 }
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quaternion& _rot) {
-    if(_id >= matrices.size()) {
+    if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
-    instanceTransforms[_id]->rotation = _rot;
-    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
-}
+    const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(_rot);
 
-void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& _scale) {
-    if(_id >= matrices.size()) {
-        std::cerr << "Index out of bounds." << std::endl;
-    }
-
-    instanceTransforms[_id]->scale = _scale;
-    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
+    matrices[_id].m00 = rotMatrix.m00; matrices[_id].m01 = rotMatrix.m01; matrices[_id].m02 = rotMatrix.m02;
+    matrices[_id].m10 = rotMatrix.m10; matrices[_id].m11 = rotMatrix.m11; matrices[_id].m12 = rotMatrix.m12;
+    matrices[_id].m20 = rotMatrix.m20; matrices[_id].m21 = rotMatrix.m21; matrices[_id].m22 = rotMatrix.m22;
 }
 
 void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Vector3& _eulerAngles) {
-    if(_id >= matrices.size()) {
+    if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
-    instanceTransforms[_id]->rotate(_eulerAngles);
-    matrices[_id] = instanceTransforms[_id]->objectMatrix().transposed();
+    const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(Quaternion::fromEuler(_eulerAngles));
+    matrices[_id] *= rotMatrix;
 }
 
 void MultiMeshRenderer::initializeInstanceBuffer() {
@@ -146,7 +130,7 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
         Mesh::activeMesh = mesh;
     }
 
-    const int vec4Size = sizeof(Vector4);
+    constexpr int vec4Size = sizeof(Vector4);
 
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * vec4Size, reinterpret_cast<void*>(0));
     glEnableVertexAttribArray(4);
@@ -165,20 +149,15 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
     glVertexAttribDivisor(7, 1);
 }
 
-void MultiMeshRenderer::updateInstanceBuffer() {
+void MultiMeshRenderer::updateInstanceBuffer() const {
 #ifdef ENABLE_PROFILING
     ZoneScopedN("update buffer");
 #endif
-
-    // std::vector<Matrix4x4> matrices;
-    // for(size_t i = 0; i < instanceTransforms.size(); i++) {
-    //     matrices.push_back(instanceTransforms[i]->objectMatrix().transposed());
-    // }
 
 #ifdef ENABLE_PROFILING
     ZoneNamedN(BindZone, "bind buffer", true);
 #endif
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
-    glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(Matrix4x4), matrices.data(), mesh->drawType);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(instanceCount * sizeof(Matrix4x4)), matrices.data(), mesh->drawType);
 }

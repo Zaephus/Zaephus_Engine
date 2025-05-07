@@ -2,6 +2,7 @@
 #pragma once
 
 #include <vector>
+#include <thread>
 
 #include <ZMath.h>
 #include <ZEngine.h>
@@ -18,12 +19,17 @@ class CubesScene final : public Scene {
     Shader* cubeShader = nullptr;
 
     GameObject* multiCube = nullptr;
+    MultiMeshRenderer* multiRenderer = nullptr;
 
     int cubeAmount = 1'000'000;
     float size = 25.0f;
 
+    int numThreads = 1;
+
     public:
         void start() override {
+
+            numThreads = std::thread::hardware_concurrency() - 2;
 
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
@@ -45,12 +51,12 @@ class CubesScene final : public Scene {
             Mesh* cubeMesh = models[0].mesh;
 
             multiCube = new GameObject();
-            MultiMeshRenderer* ren = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);
-            multiCube->addComponent(ren);
-            multiCube->name = "Multicube";
+            multiRenderer = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);
+            multiCube->addComponent(multiRenderer);
+            multiCube->name = "Multi-cube";
 
             for(int i = 0; i < cubeAmount; i++) {
-                ren->setInstancePosition(i, {
+                multiRenderer->setInstancePosition(i, {
                      Random::range(-size, size),
                      Random::range(-size, size),
                      Random::range(-size, size)
@@ -63,15 +69,25 @@ class CubesScene final : public Scene {
             ZoneScopedN("scene update");
 #endif
 
-            MultiMeshRenderer* renderer = multiCube->getComponent<MultiMeshRenderer>();
-            renderer->getShader()->setLight("light", light);
-            renderer->render();
+            // std::vector<std::thread> threads;
+            //
+            // const int chunkSize = cubeAmount / numThreads;
+            //
+            // for(size_t i = 0; i < numThreads; i++) {
+            //     int start = i * chunkSize;
+            //     int length = chunkSize;
+            //
+            //     threads.emplace_back(&CubesScene::rotateCubes, this, start, length);
+            // }
+            //
+            // for(std::thread& thread : threads) {
+            //     thread.join();
+            // }
+        }
 
-            // for(size_t i = 0; i < cubeAmount; i++) {
-            //     renderer->rotateInstance(i, renderer->getInstancePosition(i).normalized() * 25.0f * Time::deltaTime);
-            // }
-            // for(int i = 0; i < cubes.size(); i++) {
-            //     cubes[i]->transform->rotate(cubes[i]->transform->position.normalized() * 25.0f * Time::deltaTime);
-            // }
+        void rotateCubes(const int _start, const int _length) const {
+            for(size_t i = _start; i < _start + _length; i++) {
+                multiRenderer->rotateInstance(i, multiRenderer->getInstancePosition(i).normalized() * 25.0f * Time::deltaTime);
+            }
         }
 };
