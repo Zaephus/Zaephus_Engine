@@ -10,6 +10,8 @@ target_sources(Zaephus_Engine PRIVATE
     MeshRenderer.h
     MultiMeshRenderer.cpp
     MultiMeshRenderer.h
+    RenderItem.cpp
+    RenderItem.h
     Model.cpp
     Model.h
     Shader.cpp

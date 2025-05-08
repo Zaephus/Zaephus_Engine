@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Component.h"
+#include "Matrices/Matrix4x4.h"
 
 template <typename T>
 class Action;

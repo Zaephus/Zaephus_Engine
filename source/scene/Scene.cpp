@@ -2,21 +2,16 @@
 #include "Scene.h"
 
 #include <iterator>
-#include <map>
 #include <thread>
 
-#include <glad/gl.h>
-
 #include "Action.h"
-#include "Camera.h"
-#include "Color.h"
 #include "Input.h"
 #include "Light.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
-#include "Shader.h"
+#include "RenderBuffer.h"
+#include "Renderer.h"
 #include "TimeUtils.h"
-#include "Transform.h"
 #include "Window.h"
 
 #ifdef ENABLE_PROFILING
@@ -25,16 +20,17 @@
 
 Scene* Scene::activeScene = nullptr;
 
-Action<void()> Scene::startGameObjectCall = Action<void()>();
-Action<void()> Scene::updateGameObjectCall = Action<void()>();
+Action<void()> Scene::startObjectCall = Action<void()>();
+Action<void()> Scene::updateObjectCall = Action<void()>();
 
 Scene::Scene() {
     activeScene = this;
+    renderBuffer = new RenderBuffer();
+
+    renderer = new Renderer();
 }
 
 Scene::~Scene() {
-    delete window;
-
     for(int i = gameObjects.size()-1; i >= 0; --i) {
         // std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
         delete gameObjects[i];
@@ -44,24 +40,30 @@ Scene::~Scene() {
 void Scene::initialize() {
     handleSetup();
 
+    renderer->setRenderBuffer(renderBuffer);
+    std::thread renderThread(Renderer::initialize, renderer);
+
+    while(!renderer->hasFinishedSetup) {}
+
     start();
     internalStart();
 
-    while(!window->shouldClose()) {
+    while(!getWindow()->shouldClose()) {
         internalUpdate();
+
+#ifdef ENABLE_PROFILING
+        FrameMark;
+#endif
     }
+
+    renderThread.join();
+}
+
+Window* Scene::getWindow() const {
+    return renderer->window;
 }
 
 void Scene::handleSetup() {
-    window = new Window();
-    window->initialize(1200, 600, "Zaephus Engine");
-
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     Input::initialize();
 
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
@@ -79,16 +81,15 @@ void Scene::handleSetup() {
 
 void Scene::internalStart() {
     if(shouldRenderAxis) { setupAxis(); }
-    setupLights();
-
-    sortTransparents();
 }
 
 void Scene::internalUpdate() {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#ifdef ENABLE_PROFILING
+    tracy::SetThreadName("Update Thread");
+#endif
 
-    startGameObjectCall.invoke();
-    updateGameObjectCall.invoke();
+    startObjectCall.invoke();
+    updateObjectCall.invoke();
 
     {
 #ifdef ENABLE_PROFILING
@@ -97,17 +98,21 @@ void Scene::internalUpdate() {
         update();
     }
 
-    render();
-
     Time::tick();
 
     handleDestroyingGameObjects();
 
-    window->presentFrame();
+    transferRenderData();
+}
 
-#ifdef ENABLE_PROFILING
-    FrameMark;
-#endif
+void Scene::transferRenderData() const {
+    renderBuffer->bind();
+
+    renderBuffer->setMeshRenderers(meshRenderers);
+    renderBuffer->setMultiMeshRenderers(multiMeshRenderers);
+    renderBuffer->setLights(lights);
+
+    renderBuffer->unbind();
 }
 
 void Scene::handleDestroyingGameObjects() {
@@ -119,54 +124,6 @@ void Scene::handleDestroyingGameObjects() {
 }
 
 void Scene::setupAxis() {}
-
-void Scene::setupLights() const {
-    for(size_t i = 0; i < lights.size(); i++) {
-        lights[i]->initialize();
-    }
-}
-
-void Scene::sortTransparents() {
-    std::multimap<float, MeshRenderer*> modelMap;
-    for(size_t i = 0; i < transparents.size(); i++) {
-        float dist = Vector3::distance(Camera::activeCam->transform->position, transparents[i]->transform->position);
-        modelMap.emplace(dist, transparents[i]);
-    }
-
-    std::vector<MeshRenderer*> sortedModels;
-
-    for(std::multimap<float, MeshRenderer*>::reverse_iterator it = modelMap.rbegin(); it != modelMap.rend(); ++it) {
-        sortedModels.push_back(it->second);
-    }
-
-    transparents = sortedModels;
-}
-
-void Scene::render() {
-#ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
-#endif
-
-    for(size_t i = 0; i < opaques.size(); i++) {
-        opaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        opaques[i]->getShader()->setLight("light", lights[0]);
-        opaques[i]->render();
-    }
-
-    sortTransparents();
-
-    for(size_t i = 0; i < transparents.size(); i++) {
-        transparents[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        transparents[i]->getShader()->setLight("light", lights[0]);
-        transparents[i]->render();
-    }
-
-    for(size_t i = 0; i < multiOpaques.size(); i++) {
-        multiOpaques[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        multiOpaques[i]->getShader()->setLight("light", lights[0]);
-        multiOpaques[i]->render();
-    }
-}
 
 void Scene::onGameObjectCreated(GameObject* _gameObject) {
     gameObjects.push_back(_gameObject);
@@ -199,36 +156,27 @@ void Scene::onLightDestroyed(Light* _light) {
 
 
 void Scene::onMeshRendererCreated(MeshRenderer* _renderer) {
-    if(_renderer->getShader()->isTransparent()) {
-        transparents.push_back(_renderer);
-    }
-    else {
-        opaques.push_back(_renderer);
-    }
+    meshRenderers.push_back(_renderer);
 }
 
 void Scene::onMeshRendererDestroyed(MeshRenderer* _renderer) {
-    std::vector<MeshRenderer*>* modelList;
-    if(_renderer->getShader()->isTransparent()) { modelList = &transparents; }
-    else { modelList = &opaques; }
-
-    for(int i = 0; i < modelList->size(); i++) {
-        if(_renderer == modelList->at(i)) {
-            modelList->erase(modelList->begin() + i);
-            modelList->shrink_to_fit();
+    for(int i = 0; i < meshRenderers.size(); i++) {
+        if(_renderer == meshRenderers.at(i)) {
+            meshRenderers.erase(meshRenderers.begin() + i);
+            meshRenderers.shrink_to_fit();
         }
     }
 }
 
 void Scene::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
-    multiOpaques.push_back(_renderer);
+    multiMeshRenderers.push_back(_renderer);
 }
 
 void Scene::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
-    for(int i = 0; i < multiOpaques.size(); i++) {
-        if(_renderer == multiOpaques.at(i)) {
-            multiOpaques.erase(multiOpaques.begin() + i);
-            multiOpaques.shrink_to_fit();
+    for(int i = 0; i < multiMeshRenderers.size(); i++) {
+        if(_renderer == multiMeshRenderers.at(i)) {
+            multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
+            multiMeshRenderers.shrink_to_fit();
         }
     }
 }

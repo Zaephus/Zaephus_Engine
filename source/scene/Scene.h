@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <thread>
 #include <vector>
 
 template <typename T>
@@ -12,21 +11,27 @@ class GameObject;
 class MeshRenderer;
 class MultiMeshRenderer;
 class Light;
+class Renderer;
+
+struct RenderBuffer;
 
 class Scene {
     public:
-        Window* window = nullptr;
+        static Scene* activeScene;
+
+        static Action<void()> startObjectCall;
+        static Action<void()> updateObjectCall;
+
         std::vector<GameObject*> gameObjects;
 
-        static Scene* activeScene;
+        Renderer* renderer = nullptr;
 
         Scene();
         virtual ~Scene() = 0;
 
         void initialize();
 
-        static Action<void()> startGameObjectCall;
-        static Action<void()> updateGameObjectCall;
+        Window* getWindow() const;
 
     protected:
         virtual void start() = 0;
@@ -38,23 +43,20 @@ class Scene {
         std::vector<GameObject*> gameObjectsToDestroy;
 
         std::vector<Light*> lights;
-        std::vector<MeshRenderer*> opaques;
-        std::vector<MeshRenderer*> transparents;
+        std::vector<MeshRenderer*> meshRenderers;
+        std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
-        std::vector<MultiMeshRenderer*> multiOpaques;
+        RenderBuffer* renderBuffer = nullptr;
 
         void handleSetup();
         void internalStart();
         void internalUpdate();
 
+        void transferRenderData() const;
+
         void handleDestroyingGameObjects();
 
         void setupAxis();
-        void setupLights() const;
-
-        void sortTransparents();
-
-        void render();
 
         void onGameObjectCreated(GameObject* _gameObject);
         void onGameObjectDestroyed(GameObject* _gameObject);

@@ -11,7 +11,7 @@ struct Vector4;
 struct Matrix4x4;
 
 struct Vertex;
-class Color;
+struct Color;
 
 class Shader;
 

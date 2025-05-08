@@ -24,7 +24,7 @@ class Light : public GameObject {
 
         ~Light() override;
 
-        void initialize();
+        void start() override;
 
     private:
         float lightSize = 0.1f;

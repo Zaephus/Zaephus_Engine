@@ -9,13 +9,13 @@
 #endif
 
 Object::Object() {
-    Scene::startGameObjectCall.bind<Object, &Object::internalStart>(this);
-    Scene::updateGameObjectCall.bind<Object, &Object::internalUpdate>(this);
+    Scene::startObjectCall.bind<Object, &Object::internalStart>(this);
+    Scene::updateObjectCall.bind<Object, &Object::internalUpdate>(this);
 }
 
 Object::~Object() {
-    Scene::startGameObjectCall.unbind<Object, &Object::internalStart>(this);
-    Scene::updateGameObjectCall.unbind<Object, &Object::internalUpdate>(this);
+    Scene::startObjectCall.unbind<Object, &Object::internalStart>(this);
+    Scene::updateObjectCall.unbind<Object, &Object::internalUpdate>(this);
 }
 
 const std::type_info& Object::getType() {
@@ -27,7 +27,7 @@ void Object::internalStart() {
     ZoneScopedNC("start object", 0xff0000);
 #endif
 
-    Scene::startGameObjectCall.unbind<Object, &Object::internalStart>(this);
+    Scene::startObjectCall.unbind<Object, &Object::internalStart>(this);
 
     start();
 }

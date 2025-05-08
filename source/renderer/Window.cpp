@@ -31,6 +31,8 @@ Window::~Window() {
 }
 
 void Window::initialize(const size_t _w, const size_t _h, const std::string& _title) {
+    std::cout << "Started renderer" << std::endl;
+
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
