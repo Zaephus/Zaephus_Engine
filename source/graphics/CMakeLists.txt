@@ -14,9 +14,13 @@ target_sources(Zaephus_Engine PRIVATE
     RenderItem.h
     Model.cpp
     Model.h
-    Shader.cpp
-    Shader.h
     Texture2D.cpp
     Texture2D.h
     Vertex.h
+)
+
+add_subdirectory(shader)
+
+target_include_directories(Zaephus_Engine PUBLIC
+    shader
 )

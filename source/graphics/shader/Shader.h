@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+class ShaderUniformItem;
 class Color;
 class Texture2D;
 class Light;
@@ -26,6 +27,8 @@ class Shader {
         explicit Shader(const char* _fragmentPath);
         Shader(const char* _vertexPath, const char* _fragmentPath);
         ~Shader();
+
+        void initialize();
 
         void setBool(const std::string& _name, bool _value);
         void setInt(const std::string& _name, int _value);
@@ -63,9 +66,15 @@ class Shader {
         static Shader* textureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
 
     private:
-        unsigned int id;
+        unsigned int id = 0;
+
+        const char* vertexPath = "";
+        const char* fragmentPath = "";
+
         std::map<std::string, Color> assignedColors;
         std::vector<Texture2D*> boundTextures;
+
+        std::map<std::string, ShaderUniformItem> uniformQueue;
 
         static Shader* activeShader;
 
