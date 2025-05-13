@@ -13,12 +13,13 @@ Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(Game
 
 GameObject::GameObject() {
     transform = new Transform();
-    addComponent(transform);
 
     gameObjectCreatedCall.invoke(this);
 }
 
 GameObject::~GameObject() {
+    delete transform;
+
     for(size_t i = 0; i < components.size(); i++) {
         delete components[i];
     }
@@ -33,12 +34,6 @@ void GameObject::addComponent(Component* _component) {
     _component->transform = transform;
 
     components.push_back(_component);
-}
-
-void GameObject::addComponents(const std::vector<Component*>& _components) {
-    for(size_t i = 0; i < _components.size(); i++) {
-        addComponent(_components[i]);
-    }
 }
 
 void GameObject::removeComponent(const Component* _component) {

@@ -14,8 +14,8 @@
 #include "Shader.h"
 #include "Transform.h"
 
-Action<void(MeshRenderer*)> MeshRenderer::modelCreatedCall = Action<void(MeshRenderer*)>();
-Action<void(MeshRenderer*)> MeshRenderer::modelDestroyedCall = Action<void(MeshRenderer*)>();
+Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
+Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
 MeshRenderer::MeshRenderer(Mesh* _mesh) {
     setMesh(_mesh);
@@ -32,14 +32,14 @@ MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
 }
 
 MeshRenderer::~MeshRenderer() {
-    modelDestroyedCall.invoke(this);
+    meshRendererDestroyedCall.invoke(this);
 
     delete mesh;
     delete shader;
 }
 
 void MeshRenderer::start() {
-    modelCreatedCall.invoke(this);
+    meshRendererCreatedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
@@ -56,12 +56,9 @@ void MeshRenderer::render() const {
     const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
     shader->setMatrix4x4("normalMatrix", normalMatrix);
 
-    if(Camera::activeCam->transform->hasChanged) {
-        shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
-    }
-    if(Camera::activeCam->projectionChanged) {
-        shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
-    }
+    shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
+
+    shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
 
     glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
 }

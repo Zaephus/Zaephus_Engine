@@ -1,11 +1,7 @@
 
 #include "ClickableObject.h"
 
-#include <Bounds.h>
-
-#include "MeshRenderer.h"
-#include "Shader.h"
-#include "TimeUtils.h"
+#include <ZEngine.h>
 
 ClickableObject::ClickableObject() {
     addComponent(new Bounds());
@@ -23,7 +19,7 @@ void ClickableObject::update() {
 
             const MeshRenderer* renderer = getComponent<MeshRenderer>();
             if(renderer != nullptr) {
-                renderer->setColor("material.color", oldColor);
+                renderer->getShader()->setColor("material.color", oldColor);
             }
         }
     }
@@ -36,8 +32,8 @@ void ClickableObject::clicked() {
 
         const MeshRenderer* renderer = getComponent<MeshRenderer>();
         if(renderer != nullptr) {
-            oldColor = renderer->shader->getColor("material.color");
-            renderer->setColor("material.color", clickedColor);
+            oldColor = renderer->getShader()->getColor("material.color");
+            renderer->getShader()->setColor("material.color", clickedColor);
         }
     }
 }

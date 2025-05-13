@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <thread>
 #include <vector>
 
 template <typename T>
@@ -9,6 +10,7 @@ class Action;
 class Window;
 class GameObject;
 class MeshRenderer;
+class MultiMeshRenderer;
 class Light;
 
 class Scene {
@@ -39,14 +41,7 @@ class Scene {
         std::vector<MeshRenderer*> opaques;
         std::vector<MeshRenderer*> transparents;
 
-        MeshRenderer* xLine = nullptr;
-        MeshRenderer* xCube = nullptr;
-
-        MeshRenderer* yLine = nullptr;
-        MeshRenderer* yCube = nullptr;
-
-        MeshRenderer* zLine = nullptr;
-        MeshRenderer* zCube = nullptr;
+        std::vector<MultiMeshRenderer*> multiOpaques;
 
         void handleSetup();
         void internalStart();
@@ -67,6 +62,9 @@ class Scene {
         void onLightCreated(Light* _light);
         void onLightDestroyed(Light* _light);
 
-        void onModelCreated(MeshRenderer* _model);
-        void onModelDestroyed(MeshRenderer* _model);
+        void onMeshRendererCreated(MeshRenderer* _renderer);
+        void onMeshRendererDestroyed(MeshRenderer* _renderer);
+
+        void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
+        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

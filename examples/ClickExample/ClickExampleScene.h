@@ -1,19 +1,12 @@
 
 #pragma once
 
+#include <iostream>
+
+#include <ZEngine.h>
 #include <ZMath.h>
 
-#include "Bounds.h"
-#include "Camera.h"
 #include "ClickableObject.h"
-#include "Light.h"
-#include "MeshRenderer.h"
-#include "Scene.h"
-#include "Shader.h"
-#include "TimeUtils.h"
-#include "Transform.h"
-#include "Input.h"
-#include "RayCast3D.h"
 
 class ClickExample final : public Scene {
     Light* light = nullptr;
@@ -40,8 +33,11 @@ class ClickExample final : public Scene {
             cam->transform->position = { 0.0f, 0.0f, 2.0f };
             cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
+            const std::vector<Model> cubeModels = ModelLoader::load(ModelLoader::cube);
+            Mesh* cubeMesh = cubeModels[0].mesh;
+
             box = new ClickableObject();
-            box->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+            box->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 { 0.3f, 0.3f, 0.3f, 1.0f },
                 4.0f)
             ));
@@ -49,8 +45,11 @@ class ClickExample final : public Scene {
             box->transform->position = { -0.8f, 0.0f, 0.0f };
             box->transform->scale = Vector3::one() * 0.5f;
 
+            const std::vector<Model> torusModels = ModelLoader::load(ModelLoader::torus);
+            Mesh* torusMesh = torusModels[0].mesh;
+
             donut = new ClickableObject();
-            donut->addComponent(MeshRenderer::loadModel(MeshRenderer::torus, Shader::diffuseShader(
+            donut->addComponent(new MeshRenderer(torusMesh, Shader::diffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
                 4.0f)
             ));
@@ -59,6 +58,10 @@ class ClickExample final : public Scene {
             donut->getComponent<Bounds>()->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
             donut->transform->rotate(90.0f, 0.0f, 0.0f);
+
+            std::cout << donut->transform->objectMatrix().toString() << std::endl;
+            std::cout << sizeof(float) << std::endl;
+            std::cout << sizeof(Matrix4x4) << std::endl;
 
             // std::cout << donut->bounds->intersectsLine({ 0.0f, 0.0f, 1.0f }, Vector3::forward()) << std::endl;
         }
