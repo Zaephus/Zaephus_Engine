@@ -3,6 +3,8 @@
 
 #include <vector>
 
+#include "RenderItem.h"
+
 struct aiMesh;
 
 struct Vector2;
@@ -15,8 +17,7 @@ struct Color;
 
 class Shader;
 
-class Mesh {
-
+class Mesh : public RenderItem {
     public:
         std::vector<Vector3> positions;
         std::vector<Color> colors;
@@ -37,9 +38,9 @@ class Mesh {
              const std::vector<Vector3>& _normals,
              const std::vector<unsigned int>& _indices);
 
-        ~Mesh();
+        ~Mesh() override;
 
-        void initialize();
+        void initialize() override;
         void bind() const;
 
         void updateVertexData() const;

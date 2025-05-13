@@ -70,9 +70,7 @@ void ModelLoader::processNode(std::vector<Model>* _models, const aiNode* _aiNode
     for(size_t i = 0; i < _aiNode->mNumMeshes; i++) {
         const aiMesh* loadedAiMesh = _aiScene->mMeshes[_aiNode->mMeshes[i]];
         Mesh* mesh = processMesh(loadedAiMesh);
-        std::cout << mesh->positions.size() << std::endl;
 
-        mesh->initialize();
         Shader* shader = nullptr;
 
         if(_aiScene->HasMaterials()) {

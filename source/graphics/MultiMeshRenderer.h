@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Component.h"
+#include "RenderItem.h"
 #include "Matrices/Matrix4x4.h"
 
 template <typename T>
@@ -18,7 +19,7 @@ struct Vector3;
 struct Quaternion;
 struct Matrix4x4;
 
-class MultiMeshRenderer : public Component {
+class MultiMeshRenderer : public Component, RenderItem {
     public:
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
         static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
@@ -47,6 +48,7 @@ class MultiMeshRenderer : public Component {
 
     protected:
         void start() override;
+        void initialize() override;
 
     private:
         Mesh* mesh = nullptr;

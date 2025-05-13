@@ -19,6 +19,7 @@
       <option name="/Default/CodeStyle/CodeFormatting/CppFormatting/SPACE_BEFORE_STATEMENT_PARENTHESES/@EntryValue" value="false" type="bool" />
       <option name="/Default/CodeStyle/CodeFormatting/CppFormatting/KEEP_BLANK_LINES_IN_DECLARATIONS/@EntryValue" value="1" type="long" />
       <option name="/Default/CodeStyle/CodeFormatting/CppFormatting/KEEP_BLANK_LINES_IN_CODE/@EntryValue" value="1" type="long" />
+      <option name="/Default/CodeStyle/CodeFormatting/CppFormatting/INDENT_CASE_FROM_SWITCH/@EntryValue" value="true" type="bool" />
     </RiderCodeStyleSettings>
   </code_scheme>
 </component>

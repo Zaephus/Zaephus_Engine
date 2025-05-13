@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <atomic>
 #include <vector>
 
 #include "Color.h"
@@ -17,7 +18,6 @@ class RenderBuffer;
 class Renderer {
     public:
         static Action<void()> startRenderItemCall;
-        static Action<void()> updateRenderItemCall;
 
         Window* window = nullptr;
 
@@ -26,7 +26,9 @@ class Renderer {
         ~Renderer();
 
         void initialize();
-        void setRenderBuffer(RenderBuffer* _buffer);
+
+        bool isInitialized() const;
+        bool testAndSetReadyForRender();
 
         void setClearColor(float _r, float _g, float _b, float _a);
         void setClearColor(Color _c);
@@ -35,20 +37,29 @@ class Renderer {
         Color clearColor = Color::white();
         bool clearColorChanged = true;
 
-        RenderBuffer* renderBuffer = nullptr;
+        std::atomic<bool> initFlag = false;
+        std::atomic<bool> readyForRenderFlag = false;
 
-        std::vector<MeshRenderer> meshRenderers;
-        std::vector<MultiMeshRenderer> multiMeshRenderers;
-        std::vector<Light> lights;
+        std::vector<Light*> lights;
+        std::vector<MeshRenderer*> meshRenderers;
+        std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
         void handleSetup();
         void render();
 
         void changeClearColor();
 
-        void transferRenderData();
         void clearScreen() const;
         void renderObjects() const;
 
         void sortMeshRenderers();
+
+        void onLightCreated(Light* _light);
+        void onLightDestroyed(Light* _light);
+
+        void onMeshRendererCreated(MeshRenderer* _renderer);
+        void onMeshRendererDestroyed(MeshRenderer* _renderer);
+
+        void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
+        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

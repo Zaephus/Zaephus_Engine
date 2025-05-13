@@ -42,17 +42,9 @@ class Scene {
     private:
         std::vector<GameObject*> gameObjectsToDestroy;
 
-        std::vector<Light*> lights;
-        std::vector<MeshRenderer*> meshRenderers;
-        std::vector<MultiMeshRenderer*> multiMeshRenderers;
-
-        RenderBuffer* renderBuffer = nullptr;
-
         void handleSetup();
         void internalStart();
         void internalUpdate();
-
-        void transferRenderData() const;
 
         void handleDestroyingGameObjects();
 
@@ -60,13 +52,4 @@ class Scene {
 
         void onGameObjectCreated(GameObject* _gameObject);
         void onGameObjectDestroyed(GameObject* _gameObject);
-
-        void onLightCreated(Light* _light);
-        void onLightDestroyed(Light* _light);
-
-        void onMeshRendererCreated(MeshRenderer* _renderer);
-        void onMeshRendererDestroyed(MeshRenderer* _renderer);
-
-        void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
-        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

@@ -41,4 +41,6 @@ void main() {
     vec4 result = ambient + diffuse + specular;
     result.a = material.color.a;
     fragColor = result;
+//    fragColor = light.color;
+//    fragColor = vec4(fragPos, 1.0);
 }

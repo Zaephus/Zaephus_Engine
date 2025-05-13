@@ -45,7 +45,7 @@ void Shader::initialize() {
     id = createProgram(vertexShader, fragmentShader);
 }
 
-void Shader::use() {
+void Shader::bind() {
     if(activeShader == this) { return; }
 
     activeShader = this;
@@ -70,24 +70,31 @@ void Shader::use() {
     }
 }
 
+void Shader::applyUniforms() {
+    for(auto& [_name, _item] : uniformQueue) {
+        _item.apply(id, _name.c_str());
+    }
+    uniformQueue.clear();
+}
+
+bool Shader::isInitialized() const {
+    return id != 0;
+}
+
 void Shader::setBool(const std::string &_name, const bool _value) { setInt(_name, _value); }
 void Shader::setInt(const std::string &_name, const int _value) {
-    const ShaderUniformItem item { .intValue = &_value };
-    uniformQueue[_name] = item;
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 void Shader::setFloat(const std::string &_name, const float _value) {
-    const ShaderUniformItem item { .floatValue = &_value };
-    uniformQueue[_name] = item;
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 void Shader::setColor(const std::string& _name, const float _r, const float _g, const float _b, const float _a) {
     setColor(_name, { _r, _g, _b, _a });
 }
-void Shader::setColor(const std::string& _name, const Color& _color) {
-    assignedColors[_name] = _color;
-
-    const ShaderUniformItem item { .colorValue = &_color };
-    uniformQueue[_name] = item;
+void Shader::setColor(const std::string& _name, const Color& _value) {
+    assignedColors[_name] = _value;
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 Color Shader::getColor(const std::string &_name) const {
@@ -97,14 +104,12 @@ Color Shader::getColor(const std::string &_name) const {
 void Shader::setVector3(const std::string& _name, const float _x, const float _y, const float _z) {
     setVector3(_name, { _x, _y, _z });
 }
-void Shader::setVector3(const std::string& _name, const Vector3& _vector) {
-    const ShaderUniformItem item { .vector3Value = &_vector };
-    uniformQueue[_name] = item;
+void Shader::setVector3(const std::string& _name, const Vector3& _value) {
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
-void Shader::setMatrix4x4(const std::string &_name, const Matrix4x4& _matrix) {
-    const ShaderUniformItem item { .matrixValue = &_matrix };
-    uniformQueue[_name] = item;
+void Shader::setMatrix4x4(const std::string &_name, const Matrix4x4& _value) {
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {

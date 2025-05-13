@@ -1,16 +1,8 @@
 
 #pragma once
 
-#include <Bounds.h>
+#include <ZEngine.h>
 #include <ZMath.h>
-
-#include <Camera.h>
-#include <Light.h>
-#include <MeshRenderer.h>
-#include <Scene.h>
-#include <Shader.h>
-#include <TimeUtils.h>
-#include <Transform.h>
 
 class TransformScene final : public Scene {
     Light* light = nullptr;
@@ -31,11 +23,15 @@ class TransformScene final : public Scene {
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 3.5f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+            cam->transform->position = { 0.0f, 0.0f, 10.5f };
+
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+
+            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0].mesh;
 
             parent = new GameObject();
-            parent->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+            parent->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
                 4.0f)
             ));
@@ -43,7 +39,7 @@ class TransformScene final : public Scene {
             parent->transform->rotate(0.0f, 30.0f, 0.0f);
 
             child = new GameObject();
-            child->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+            child->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 Color::blue(),
                 32.0f)
             ));
@@ -51,6 +47,8 @@ class TransformScene final : public Scene {
             child->transform->parent = parent->transform;
             child->transform->position = { -0.75f, 0.0f, 0.0f };
             child->transform->scale = Vector3::one() * 0.5f;
+
+            // child->getComponent<MeshRenderer>()->getShader()->setColor("material.color", Color::blue());
 
         }
 

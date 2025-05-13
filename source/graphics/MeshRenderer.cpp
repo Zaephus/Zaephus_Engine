@@ -43,6 +43,10 @@ void MeshRenderer::start() {
 }
 
 void MeshRenderer::render() const {
+    if(!shader->isInitialized()) { return; }
+
+    shader->bind();
+
     if(mesh->isDynamic) { mesh->updateVertexData(); }
 
     if(Mesh::activeMesh != mesh) {
@@ -59,6 +63,8 @@ void MeshRenderer::render() const {
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
     shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
+
+    shader->applyUniforms();
 
     glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
 }

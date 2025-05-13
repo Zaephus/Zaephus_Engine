@@ -45,7 +45,9 @@ MultiMeshRenderer::~MultiMeshRenderer() {
 
 void MultiMeshRenderer::start() {
     multiMeshRendererCreatedCall.invoke(this);
+}
 
+void MultiMeshRenderer::initialize() {
     initializeInstanceBuffer();
 }
 
@@ -53,6 +55,10 @@ void MultiMeshRenderer::render() const {
 #ifdef ENABLE_PROFILING
     ZoneScopedN("multi-mesh render");
 #endif
+
+    if(!shader->isInitialized()) { return; }
+
+    shader->bind();
 
     updateInstanceBuffer();
 
@@ -70,6 +76,8 @@ void MultiMeshRenderer::render() const {
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
     shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
+
+    shader->applyUniforms();
 
     glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, instanceCount);
 }
@@ -152,10 +160,6 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 void MultiMeshRenderer::updateInstanceBuffer() const {
 #ifdef ENABLE_PROFILING
     ZoneScopedN("update buffer");
-#endif
-
-#ifdef ENABLE_PROFILING
-    ZoneNamedN(BindZone, "bind buffer", true);
 #endif
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);

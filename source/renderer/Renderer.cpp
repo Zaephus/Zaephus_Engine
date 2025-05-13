@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+
 #include <glad/gl.h>
 
 #include "Action.h"
@@ -20,13 +21,14 @@
 #endif
 
 Action<void()> Renderer::startRenderItemCall = Action<void()>();
-Action<void()> Renderer::updateRenderItemCall = Action<void()>();
 
 Renderer::~Renderer() {
     delete window;
 }
 
 void Renderer::initialize() {
+    initFlag = false;
+
 #ifdef ENABLE_PROFILING
     tracy::SetThreadName("Render Thread");
 #endif
@@ -38,9 +40,18 @@ void Renderer::initialize() {
     }
 }
 
-void Renderer::setRenderBuffer(RenderBuffer* _buffer) {
-    renderBuffer = _buffer;
+bool Renderer::isInitialized() const {
+    return initFlag;
 }
+
+bool Renderer::testAndSetReadyForRender() {
+    const bool val = readyForRenderFlag;
+
+    if(readyForRenderFlag) { readyForRenderFlag = false; }
+
+    return val;
+}
+
 
 void Renderer::setClearColor(float _r, float _g, float _b, float _a) { setClearColor({_r, _g, _b, _a}); }
 void Renderer::setClearColor(const Color _c) {
@@ -49,6 +60,15 @@ void Renderer::setClearColor(const Color _c) {
 }
 
 void Renderer::handleSetup() {
+    Light::lightCreatedCall.bind<Renderer, &Renderer::onLightCreated>(this);
+    Light::lightDestroyedCall.bind<Renderer, &Renderer::onLightDestroyed>(this);
+
+    MeshRenderer::meshRendererCreatedCall.bind<Renderer, &Renderer::onMeshRendererCreated>(this);
+    MeshRenderer::meshRendererDestroyedCall.bind<Renderer, &Renderer::onMeshRendererDestroyed>(this);
+
+    MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
+    MultiMeshRenderer::multiMeshRendererDestroyedCall.bind<Renderer, &Renderer::onMultiMeshRendererDestroyed>(this);
+
     window = new Window();
     window->initialize(1200, 600, "Zaephus Engine");
 
@@ -58,19 +78,22 @@ void Renderer::handleSetup() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    hasFinishedSetup = true;
+    initFlag = true;
 }
 
 void Renderer::render() {
+    while(readyForRenderFlag) {}
+
 #ifdef ENABLE_PROFILING
     ZoneScopedC(0x0062ff);
 #endif
+
+    startRenderItemCall.invoke();
 
     if(clearColorChanged) {
         changeClearColor();
     }
 
-    transferRenderData();
     sortMeshRenderers();
 
     clearScreen();
@@ -78,25 +101,13 @@ void Renderer::render() {
     renderObjects();
 
     window->presentFrame();
+
+    readyForRenderFlag = true;
 }
 
 void Renderer::changeClearColor() {
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     clearColorChanged = false;
-}
-
-void Renderer::transferRenderData() {
-#ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
-#endif
-
-    renderBuffer->bind();
-
-    meshRenderers = renderBuffer->meshRenderers;
-    multiMeshRenderers = renderBuffer->multiMeshRenderers;
-    lights = renderBuffer->lights;
-
-    renderBuffer->unbind();
 }
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
@@ -114,24 +125,24 @@ void Renderer::renderObjects() const {
 #endif
 
     for(size_t i = 0; i < meshRenderers.size(); i++) {
-        meshRenderers[i].getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        meshRenderers[i].getShader()->setLight("light", &lights[0]);
-        meshRenderers[i].render();
+        meshRenderers[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
+        meshRenderers[i]->getShader()->setLight("light", lights[0]);
+        meshRenderers[i]->render();
     }
 
     for(size_t i = 0; i < multiMeshRenderers.size(); i++) {
-        multiMeshRenderers[i].getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        multiMeshRenderers[i].getShader()->setLight("light", &lights[0]);
-        multiMeshRenderers[i].render();
+        multiMeshRenderers[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
+        multiMeshRenderers[i]->getShader()->setLight("light", lights[0]);
+        multiMeshRenderers[i]->render();
     }
 }
 
-bool meshRendererCompare(const MeshRenderer& _a, const MeshRenderer& _b) {
-    if(_a.getShader()->isTransparent() == true && _b.getShader()->isTransparent() == true) {
-        return Vector3::distance(Camera::activeCam->transform->position, _a.transform->position)
-             < Vector3::distance(Camera::activeCam->transform->position, _b.transform->position);
+bool meshRendererCompare(const MeshRenderer* _a, const MeshRenderer* _b) {
+    if(_a->getShader()->isTransparent() == true && _b->getShader()->isTransparent() == true) {
+        return Vector3::distance(Camera::activeCam->transform->position, _a->transform->position)
+             < Vector3::distance(Camera::activeCam->transform->position, _b->transform->position);
     }
-    return !_a.getShader()->isTransparent();
+    return !_a->getShader()->isTransparent();
 }
 
 void Renderer::sortMeshRenderers() {
@@ -140,4 +151,44 @@ void Renderer::sortMeshRenderers() {
 #endif
 
     std::ranges::sort(meshRenderers, meshRendererCompare);
+}
+
+void Renderer::onLightCreated(Light* _light) {
+    lights.push_back(_light);
+}
+
+void Renderer::onLightDestroyed(Light* _light) {
+    for(size_t i = 0; i < lights.size(); i++) {
+        if(_light == lights[i]) {
+            lights.erase(lights.begin() + i);
+            lights.shrink_to_fit();
+        }
+    }
+}
+
+
+void Renderer::onMeshRendererCreated(MeshRenderer* _renderer) {
+    meshRenderers.push_back(_renderer);
+}
+
+void Renderer::onMeshRendererDestroyed(MeshRenderer* _renderer) {
+    for(int i = 0; i < meshRenderers.size(); i++) {
+        if(_renderer == meshRenderers.at(i)) {
+            meshRenderers.erase(meshRenderers.begin() + i);
+            meshRenderers.shrink_to_fit();
+        }
+    }
+}
+
+void Renderer::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
+    multiMeshRenderers.push_back(_renderer);
+}
+
+void Renderer::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
+    for(int i = 0; i < multiMeshRenderers.size(); i++) {
+        if(_renderer == multiMeshRenderers.at(i)) {
+            multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
+            multiMeshRenderers.shrink_to_fit();
+        }
+    }
 }

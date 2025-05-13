@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "RenderItem.h"
+
 class ShaderUniformItem;
 class Color;
 class Texture2D;
@@ -13,7 +15,7 @@ class Light;
 struct Vector3;
 struct Matrix4x4;
 
-class Shader {
+class Shader : public RenderItem {
     public:
         enum renderOrder {
             opaques,
@@ -26,23 +28,28 @@ class Shader {
 
         explicit Shader(const char* _fragmentPath);
         Shader(const char* _vertexPath, const char* _fragmentPath);
-        ~Shader();
+        ~Shader() override;
 
-        void initialize();
+        void initialize() override;
+        void bind();
+
+        void applyUniforms();
+
+        [[nodiscard]] bool isInitialized() const;
 
         void setBool(const std::string& _name, bool _value);
         void setInt(const std::string& _name, int _value);
         void setFloat(const std::string& _name, float _value);
 
         void setColor(const std::string& _name, float _r, float _g, float _b, float _a);
-        void setColor(const std::string& _name, const Color& _color);
+        void setColor(const std::string& _name, const Color& _value);
 
         [[nodiscard]] Color getColor(const std::string& _name) const;
 
         void setVector3(const std::string& _name, float _x, float _y, float _z);
-        void setVector3(const std::string& _name, const Vector3& _vector);
+        void setVector3(const std::string& _name, const Vector3& _value);
 
-        void setMatrix4x4(const std::string& _name, const Matrix4x4& _matrix);
+        void setMatrix4x4(const std::string& _name, const Matrix4x4& _value);
         void setTexture2D(const std::string& _name, Texture2D* _texture);
 
         void setLight(const std::string& _name, const Light* _light);
@@ -77,8 +84,6 @@ class Shader {
         std::map<std::string, ShaderUniformItem> uniformQueue;
 
         static Shader* activeShader;
-
-        void use();
 
         static std::string load(const std::string& _fileName);
 

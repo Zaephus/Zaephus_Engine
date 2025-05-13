@@ -4,12 +4,23 @@
 #include <atomic>
 #include <vector>
 
+#include "Color.h"
+#include "Vectors/Vector3.h"
+
+template <typename T>
+class Action;
+
 class Light;
 class MeshRenderer;
 class MultiMeshRenderer;
 
 class RenderBuffer {
     public:
+        Vector3 lightPosition;
+        Color lightColor;
+        float lightAmbientStrength;
+        float lightSpecularStrength;
+
         std::vector<MeshRenderer> meshRenderers;
         std::vector<MultiMeshRenderer> multiMeshRenderers;
         std::vector<Light> lights;

@@ -1,15 +1,11 @@
 
 #include "Scene.h"
 
-#include <iterator>
 #include <thread>
 
 #include "Action.h"
 #include "Input.h"
 #include "Light.h"
-#include "MeshRenderer.h"
-#include "MultiMeshRenderer.h"
-#include "RenderBuffer.h"
 #include "Renderer.h"
 #include "TimeUtils.h"
 #include "Window.h"
@@ -25,7 +21,6 @@ Action<void()> Scene::updateObjectCall = Action<void()>();
 
 Scene::Scene() {
     activeScene = this;
-    renderBuffer = new RenderBuffer();
 
     renderer = new Renderer();
 }
@@ -40,20 +35,15 @@ Scene::~Scene() {
 void Scene::initialize() {
     handleSetup();
 
-    renderer->setRenderBuffer(renderBuffer);
     std::thread renderThread(Renderer::initialize, renderer);
 
-    while(!renderer->hasFinishedSetup) {}
+    while(!renderer->isInitialized()) {}
 
     start();
     internalStart();
 
     while(!getWindow()->shouldClose()) {
         internalUpdate();
-
-#ifdef ENABLE_PROFILING
-        FrameMark;
-#endif
     }
 
     renderThread.join();
@@ -68,15 +58,6 @@ void Scene::handleSetup() {
 
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.bind<Scene, &Scene::onGameObjectDestroyed>(this);
-
-    Light::lightCreatedCall.bind<Scene, &Scene::onLightCreated>(this);
-    Light::lightDestroyedCall.bind<Scene, &Scene::onLightDestroyed>(this);
-
-    MeshRenderer::meshRendererCreatedCall.bind<Scene, &Scene::onMeshRendererCreated>(this);
-    MeshRenderer::meshRendererDestroyedCall.bind<Scene, &Scene::onMeshRendererDestroyed>(this);
-
-    MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Scene, &Scene::onMultiMeshRendererCreated>(this);
-    MultiMeshRenderer::multiMeshRendererDestroyedCall.bind<Scene, &Scene::onMultiMeshRendererDestroyed>(this);
 }
 
 void Scene::internalStart() {
@@ -102,17 +83,11 @@ void Scene::internalUpdate() {
 
     handleDestroyingGameObjects();
 
-    transferRenderData();
-}
+    while(!renderer->testAndSetReadyForRender()) {}
 
-void Scene::transferRenderData() const {
-    renderBuffer->bind();
-
-    renderBuffer->setMeshRenderers(meshRenderers);
-    renderBuffer->setMultiMeshRenderers(multiMeshRenderers);
-    renderBuffer->setLights(lights);
-
-    renderBuffer->unbind();
+#ifdef ENABLE_PROFILING
+    FrameMark;
+#endif
 }
 
 void Scene::handleDestroyingGameObjects() {
@@ -137,46 +112,6 @@ void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
             gameObjects.erase(gameObjects.begin() + i);
             gameObjects.shrink_to_fit();
             return;
-        }
-    }
-}
-
-void Scene::onLightCreated(Light* _light) {
-    lights.push_back(_light);
-}
-
-void Scene::onLightDestroyed(Light* _light) {
-    for(size_t i = 0; i < lights.size(); i++) {
-        if(_light == lights[i]) {
-            lights.erase(lights.begin() + i);
-            lights.shrink_to_fit();
-        }
-    }
-}
-
-
-void Scene::onMeshRendererCreated(MeshRenderer* _renderer) {
-    meshRenderers.push_back(_renderer);
-}
-
-void Scene::onMeshRendererDestroyed(MeshRenderer* _renderer) {
-    for(int i = 0; i < meshRenderers.size(); i++) {
-        if(_renderer == meshRenderers.at(i)) {
-            meshRenderers.erase(meshRenderers.begin() + i);
-            meshRenderers.shrink_to_fit();
-        }
-    }
-}
-
-void Scene::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
-    multiMeshRenderers.push_back(_renderer);
-}
-
-void Scene::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
-    for(int i = 0; i < multiMeshRenderers.size(); i++) {
-        if(_renderer == multiMeshRenderers.at(i)) {
-            multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
-            multiMeshRenderers.shrink_to_fit();
         }
     }
 }
