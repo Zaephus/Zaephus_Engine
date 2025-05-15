@@ -69,20 +69,20 @@ class CubesScene final : public Scene {
             ZoneScopedN("scene update");
 #endif
 
-            // std::vector<std::thread> threads;
-            //
-            // const int chunkSize = cubeAmount / numThreads;
-            //
-            // for(size_t i = 0; i < numThreads; i++) {
-            //     int start = i * chunkSize;
-            //     int length = chunkSize;
-            //
-            //     threads.emplace_back(&CubesScene::rotateCubes, this, start, length);
-            // }
-            //
-            // for(std::thread& thread : threads) {
-            //     thread.join();
-            // }
+            std::vector<std::thread> threads;
+
+            const int chunkSize = cubeAmount / numThreads;
+
+            for(size_t i = 0; i < numThreads; i++) {
+                int start = i * chunkSize;
+                int length = chunkSize;
+
+                threads.emplace_back(&CubesScene::rotateCubes, this, start, length);
+            }
+
+            for(std::thread& thread : threads) {
+                thread.join();
+            }
         }
 
         void rotateCubes(const int _start, const int _length) const {
