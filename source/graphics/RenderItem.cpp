@@ -5,15 +5,15 @@
 #include "Renderer.h"
 
 RenderItem::RenderItem() {
-    Renderer::startRenderItemCall.bind<RenderItem, &RenderItem::internalInitialize>(this);
+    Renderer::initRenderItemCall.bind<RenderItem, &RenderItem::internalInitialize>(this);
 }
 
 RenderItem::~RenderItem() {
-    Renderer::startRenderItemCall.unbind<RenderItem, &RenderItem::internalInitialize>(this);
+    Renderer::initRenderItemCall.unbind<RenderItem, &RenderItem::internalInitialize>(this);
 }
 
 void RenderItem::internalInitialize() {
-    Renderer::startRenderItemCall.unbind<RenderItem, &RenderItem::internalInitialize>(this);
+    Renderer::initRenderItemCall.unbind<RenderItem, &RenderItem::internalInitialize>(this);
 
     initialize();
 }

@@ -20,7 +20,7 @@
 #include <tracy/Tracy.hpp>
 #endif
 
-Action<void()> Renderer::startRenderItemCall = Action<void()>();
+Action<void()> Renderer::initRenderItemCall = Action<void()>();
 
 Renderer::~Renderer() {
     delete window;
@@ -82,13 +82,13 @@ void Renderer::handleSetup() {
 }
 
 void Renderer::render() {
-    while(readyForRenderFlag) {}
-
 #ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
+    ZoneScopedNC("Renderer::Render", 0x0062ff);
 #endif
 
-    startRenderItemCall.invoke();
+    while(readyForRenderFlag) {}
+
+    initRenderItemCall.invoke();
 
     if(clearColorChanged) {
         changeClearColor();
@@ -113,7 +113,7 @@ void Renderer::changeClearColor() {
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void Renderer::clearScreen() const { // NOLINT(*-convert-member-functions-to-static)
 #ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
+    ZoneScopedNC("Renderer::ClearScreen", 0x0062ff);
 #endif
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -121,7 +121,7 @@ void Renderer::clearScreen() const { // NOLINT(*-convert-member-functions-to-sta
 
 void Renderer::renderObjects() const {
 #ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
+    ZoneScopedNC("Renderer::RenderObjects", 0x0062ff);
 #endif
 
     for(size_t i = 0; i < meshRenderers.size(); i++) {
@@ -147,7 +147,7 @@ bool meshRendererCompare(const MeshRenderer* _a, const MeshRenderer* _b) {
 
 void Renderer::sortMeshRenderers() {
 #ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
+    ZoneScopedNC("Renderer::SortMeshRenderers", 0x0062ff);
 #endif
 
     std::ranges::sort(meshRenderers, meshRendererCompare);
@@ -165,7 +165,6 @@ void Renderer::onLightDestroyed(Light* _light) {
         }
     }
 }
-
 
 void Renderer::onMeshRendererCreated(MeshRenderer* _renderer) {
     meshRenderers.push_back(_renderer);

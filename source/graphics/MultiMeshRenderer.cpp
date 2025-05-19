@@ -20,6 +20,13 @@
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererCreatedCall = Action<void(MultiMeshRenderer*)>();
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererDestroyedCall = Action<void(MultiMeshRenderer*)>();
 
+MultiMeshRenderer::MultiMeshRenderer() {
+    mesh = nullptr;
+    shader = nullptr;
+
+    instanceCount = 0;
+}
+
 MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount)
     : MultiMeshRenderer(_mesh, nullptr, _instanceCount) {}
 
@@ -31,9 +38,8 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
     shader = _shader;
     instanceCount = _instanceCount;
 
-    for(size_t i = 0; i < _instanceCount; i++) {
-        matrices.push_back(Matrix4x4::identity());
-    }
+    matrices.resize(_instanceCount);
+    bufferedMatrices.resize(_instanceCount);
 }
 
 MultiMeshRenderer::~MultiMeshRenderer() {
@@ -48,24 +54,22 @@ void MultiMeshRenderer::start() {
 }
 
 void MultiMeshRenderer::initialize() {
+    mesh->initialize();
+    shader->initialize();
+
     initializeInstanceBuffer();
 }
 
-void MultiMeshRenderer::render() const {
+void MultiMeshRenderer::render() {
 #ifdef ENABLE_PROFILING
-    ZoneScopedN("multi-mesh render");
+    ZoneScopedNC("MultiMeshRenderer::Render",0x33d6ff);
 #endif
 
-    if(!shader->isInitialized()) { return; }
-
+    mesh->bind();
     shader->bind();
 
+    copyInstanceBuffer();
     updateInstanceBuffer();
-
-    if(Mesh::activeMesh != mesh) {
-        mesh->bind();
-        Mesh::activeMesh = mesh;
-    }
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
@@ -88,7 +92,7 @@ Mesh* MultiMeshRenderer::getMesh() const { return mesh; }
 void MultiMeshRenderer::setShader(Shader* _shader) { shader = _shader; }
 Shader* MultiMeshRenderer::getShader() const { return shader; }
 
-Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) const {
+Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) {
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
@@ -96,6 +100,8 @@ Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) const {
 }
 
 void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector3& _pos) {
+    instanceAccessLock.lock();
+
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
@@ -103,12 +109,16 @@ void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector
     matrices[_id].m03 = _pos.x;
     matrices[_id].m13 = _pos.y;
     matrices[_id].m23 = _pos.z;
+
+    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
     setInstanceRotation(_id, Quaternion::fromEuler(_eulerAngles));
 }
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quaternion& _rot) {
+    instanceAccessLock.lock();
+
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
@@ -118,25 +128,36 @@ void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quater
     matrices[_id].m00 = rotMatrix.m00; matrices[_id].m01 = rotMatrix.m01; matrices[_id].m02 = rotMatrix.m02;
     matrices[_id].m10 = rotMatrix.m10; matrices[_id].m11 = rotMatrix.m11; matrices[_id].m12 = rotMatrix.m12;
     matrices[_id].m20 = rotMatrix.m20; matrices[_id].m21 = rotMatrix.m21; matrices[_id].m22 = rotMatrix.m22;
+
+    instanceAccessLock.unlock();
+}
+
+void MultiMeshRenderer::setInstanceMatrix(const unsigned int _id, const Matrix4x4& _mat) {
+    instanceAccessLock.lock();
+
+    matrices[_id] = _mat;
+
+    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Vector3& _eulerAngles) {
+    instanceAccessLock.lock();
+
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
     }
 
     const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(Quaternion::fromEuler(_eulerAngles));
     matrices[_id] *= rotMatrix;
+
+    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::initializeInstanceBuffer() {
     glGenBuffers(1, &instanceBuffer);
     updateInstanceBuffer();
 
-    if(Mesh::activeMesh != mesh) {
-        mesh->bind();
-        Mesh::activeMesh = mesh;
-    }
+    mesh->bind();
 
     constexpr int vec4Size = sizeof(Vector4);
 
@@ -157,11 +178,21 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
     glVertexAttribDivisor(7, 1);
 }
 
+void MultiMeshRenderer::copyInstanceBuffer() {
+    instanceAccessLock.lock();
+
+    for(size_t i = 0; i < matrices.size(); i++) {
+        bufferedMatrices[i] = matrices[i];
+    }
+
+    instanceAccessLock.unlock();
+}
+
 void MultiMeshRenderer::updateInstanceBuffer() const {
 #ifdef ENABLE_PROFILING
-    ZoneScopedN("update buffer");
+    ZoneScopedNC("MultiMeshRenderer::UpdateInstanceBuffer",0x33d6ff);
 #endif
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(instanceCount * sizeof(Matrix4x4)), matrices.data(), mesh->drawType);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(instanceCount * sizeof(Matrix4x4)), bufferedMatrices.data(), mesh->drawType);
 }

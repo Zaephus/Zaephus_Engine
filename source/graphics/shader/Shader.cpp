@@ -16,6 +16,10 @@
 #include "Texture2D.h"
 #include "Transform.h"
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 Shader* Shader::activeShader = nullptr;
 
 Shader::Shader(const char* _fragmentPath) : Shader("BaseVertex.glsl", _fragmentPath) {}
@@ -36,6 +40,12 @@ Shader::~Shader() {
 }
 
 void Shader::initialize() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::Initialize",0x006303);
+#endif
+
+    if(id != 0) { return; }
+
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
 
@@ -46,6 +56,10 @@ void Shader::initialize() {
 }
 
 void Shader::bind() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::Bind",0x006303);
+#endif
+
     if(activeShader == this) { return; }
 
     activeShader = this;
@@ -71,14 +85,14 @@ void Shader::bind() {
 }
 
 void Shader::applyUniforms() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::ApplyUniforms",0x006303);
+#endif
+
     for(auto& [_name, _item] : uniformQueue) {
         _item.apply(id, _name.c_str());
     }
     uniformQueue.clear();
-}
-
-bool Shader::isInitialized() const {
-    return id != 0;
 }
 
 void Shader::setBool(const std::string &_name, const bool _value) { setInt(_name, _value); }

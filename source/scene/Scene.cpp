@@ -65,10 +65,6 @@ void Scene::internalStart() {
 }
 
 void Scene::internalUpdate() {
-#ifdef ENABLE_PROFILING
-    tracy::SetThreadName("Update Thread");
-#endif
-
     startObjectCall.invoke();
     updateObjectCall.invoke();
 

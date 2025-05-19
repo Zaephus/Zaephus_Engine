@@ -15,7 +15,7 @@ void RenderBuffer::unbind() {
 
 void RenderBuffer::setMeshRenderers(const std::vector<MeshRenderer*>& _meshRenderers) {
     meshRenderers.clear();
-    meshRenderers.reserve(_meshRenderers.size());
+    meshRenderers.resize(_meshRenderers.size());
 
     for(size_t i = 0; i < _meshRenderers.size(); i++) {
         meshRenderers[i] = *_meshRenderers[i];
@@ -23,17 +23,17 @@ void RenderBuffer::setMeshRenderers(const std::vector<MeshRenderer*>& _meshRende
 }
 
 void RenderBuffer::setMultiMeshRenderers(const std::vector<MultiMeshRenderer*>& _multiMeshRenderers) {
-    multiMeshRenderers.clear();
-    multiMeshRenderers.reserve(_multiMeshRenderers.size());
+    multiMeshRenderers = std::vector<MultiMeshRenderer>(_multiMeshRenderers.size());
 
     for(size_t i = 0; i < _multiMeshRenderers.size(); i++) {
-        multiMeshRenderers[i] = *_multiMeshRenderers[i];
+        memcpy(&multiMeshRenderers[i], _multiMeshRenderers[i], sizeof(MultiMeshRenderer));
+        // multiMeshRenderers[i] = *_multiMeshRenderers[i];
     }
 }
 
 void RenderBuffer::setLights(const std::vector<Light*>& _lights) {
     lights.clear();
-    lights.reserve(_lights.size());
+    lights.resize(_lights.size());
 
     for(size_t i = 0; i < _lights.size(); i++) {
         lights[i] = *_lights[i];

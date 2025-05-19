@@ -21,7 +21,7 @@ class CubesScene final : public Scene {
     GameObject* multiCube = nullptr;
     MultiMeshRenderer* multiRenderer = nullptr;
 
-    unsigned int cubeAmount = 100'000;
+    unsigned int cubeAmount = 1'000'000;
     float size = 25.0f;
 
     unsigned int numThreads = 1;

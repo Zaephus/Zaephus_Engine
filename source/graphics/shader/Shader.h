@@ -5,8 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "RenderItem.h"
-
 class ShaderUniformItem;
 class Color;
 class Texture2D;
@@ -15,7 +13,7 @@ class Light;
 struct Vector3;
 struct Matrix4x4;
 
-class Shader : public RenderItem {
+class Shader {
     public:
         enum renderOrder {
             opaques,
@@ -28,14 +26,12 @@ class Shader : public RenderItem {
 
         explicit Shader(const char* _fragmentPath);
         Shader(const char* _vertexPath, const char* _fragmentPath);
-        ~Shader() override;
+        ~Shader();
 
-        void initialize() override;
+        void initialize();
         void bind();
 
         void applyUniforms();
-
-        [[nodiscard]] bool isInitialized() const;
 
         void setBool(const std::string& _name, bool _value);
         void setInt(const std::string& _name, int _value);

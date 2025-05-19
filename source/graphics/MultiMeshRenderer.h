@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include <mutex>
 #include <vector>
 
 #include "Component.h"
@@ -24,12 +25,13 @@ class MultiMeshRenderer : public Component, RenderItem {
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
         static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
 
+        MultiMeshRenderer();
         MultiMeshRenderer(Mesh* _mesh, int _instanceCount);
         MultiMeshRenderer(Model _model, int _instanceCount);
         MultiMeshRenderer(Mesh* _mesh, Shader* _shader, int _instanceCount);
         ~MultiMeshRenderer() override;
 
-        void render() const;
+        void render();
 
         void setMesh(Mesh* _mesh);
         [[nodiscard]] Mesh* getMesh() const;
@@ -37,12 +39,12 @@ class MultiMeshRenderer : public Component, RenderItem {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
-        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id) const;
+        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id);
 
         void setInstancePosition(unsigned int _id, const Vector3& _pos);
         void setInstanceRotation(unsigned int _id, const Vector3& _eulerAngles);
         void setInstanceRotation(unsigned int _id, const Quaternion& _rot);
-        // void setInstanceMatrix(unsigned int _id, const Matrix4x4& _mat);
+        void setInstanceMatrix(unsigned int _id, const Matrix4x4& _mat);
 
         void rotateInstance(unsigned int _id, const Vector3& _eulerAngles);
 
@@ -58,8 +60,12 @@ class MultiMeshRenderer : public Component, RenderItem {
 
         unsigned int instanceBuffer = 0;
 
+        std::mutex instanceAccessLock;
+
         std::vector<Matrix4x4> matrices;
+        std::vector<Matrix4x4> bufferedMatrices;
 
         void initializeInstanceBuffer();
+        void copyInstanceBuffer();
         void updateInstanceBuffer() const;
 };

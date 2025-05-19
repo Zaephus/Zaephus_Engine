@@ -17,7 +17,7 @@ class RenderBuffer;
 
 class Renderer {
     public:
-        static Action<void()> startRenderItemCall;
+        static Action<void()> initRenderItemCall;
 
         Window* window = nullptr;
 
