@@ -38,8 +38,11 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
     shader = _shader;
     instanceCount = _instanceCount;
 
-    matrices.resize(_instanceCount);
-    bufferedMatrices.resize(_instanceCount);
+    matrices = new Matrix4x4[_instanceCount];
+    bufferedMatrices = new Matrix4x4[_instanceCount];
+
+    // matrices.resize(_instanceCount);
+    // bufferedMatrices.resize(_instanceCount);
 }
 
 MultiMeshRenderer::~MultiMeshRenderer() {
@@ -100,7 +103,7 @@ Vector3 MultiMeshRenderer::getInstancePosition(const unsigned int _id) {
 }
 
 void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector3& _pos) {
-    instanceAccessLock.lock();
+    while(instancesNotAccessibleFlag == true) {}
 
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
@@ -109,15 +112,13 @@ void MultiMeshRenderer::setInstancePosition(const unsigned int _id, const Vector
     matrices[_id].m03 = _pos.x;
     matrices[_id].m13 = _pos.y;
     matrices[_id].m23 = _pos.z;
-
-    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Vector3& _eulerAngles) {
     setInstanceRotation(_id, Quaternion::fromEuler(_eulerAngles));
 }
 void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quaternion& _rot) {
-    instanceAccessLock.lock();
+    while(instancesNotAccessibleFlag == true) {}
 
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
@@ -128,20 +129,16 @@ void MultiMeshRenderer::setInstanceRotation(const unsigned int _id, const Quater
     matrices[_id].m00 = rotMatrix.m00; matrices[_id].m01 = rotMatrix.m01; matrices[_id].m02 = rotMatrix.m02;
     matrices[_id].m10 = rotMatrix.m10; matrices[_id].m11 = rotMatrix.m11; matrices[_id].m12 = rotMatrix.m12;
     matrices[_id].m20 = rotMatrix.m20; matrices[_id].m21 = rotMatrix.m21; matrices[_id].m22 = rotMatrix.m22;
-
-    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::setInstanceMatrix(const unsigned int _id, const Matrix4x4& _mat) {
-    instanceAccessLock.lock();
+    while(instancesNotAccessibleFlag == true) {}
 
     matrices[_id] = _mat;
-
-    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Vector3& _eulerAngles) {
-    instanceAccessLock.lock();
+    while(instancesNotAccessibleFlag == true) {}
 
     if(_id >= instanceCount) {
         std::cerr << "Index out of bounds." << std::endl;
@@ -149,8 +146,6 @@ void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Vector3& _e
 
     const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(Quaternion::fromEuler(_eulerAngles));
     matrices[_id] *= rotMatrix;
-
-    instanceAccessLock.unlock();
 }
 
 void MultiMeshRenderer::initializeInstanceBuffer() {
@@ -179,20 +174,29 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 }
 
 void MultiMeshRenderer::copyInstanceBuffer() {
-    instanceAccessLock.lock();
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("MultiMeshRenderer::CopyInstanceBuffer", 0x33d6ff);
+#endif
 
-    for(size_t i = 0; i < matrices.size(); i++) {
-        bufferedMatrices[i] = matrices[i];
-    }
+    instancesNotAccessibleFlag = true;
 
-    instanceAccessLock.unlock();
+    memcpy(bufferedMatrices, matrices, sizeof(Matrix4x4) * instanceCount);
+
+    // std::swap(matrices, bufferedMatrices);
+    
+    // for(size_t i = 0; i < matrices.size(); i++) {
+    //     // bufferedMatrices[i] = matrices[i];
+    //     memcpy(&bufferedMatrices[i], &matrices[i], sizeof(Matrix4x4));
+    // }
+
+    instancesNotAccessibleFlag = false;
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() const {
 #ifdef ENABLE_PROFILING
-    ZoneScopedNC("MultiMeshRenderer::UpdateInstanceBuffer",0x33d6ff);
+    ZoneScopedNC("MultiMeshRenderer::UpdateInstanceBuffer", 0x33d6ff);
 #endif
 
     glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer);
-    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(instanceCount * sizeof(Matrix4x4)), bufferedMatrices.data(), mesh->drawType);
+    glBufferData(GL_ARRAY_BUFFER, static_cast<int>(instanceCount * sizeof(Matrix4x4)), bufferedMatrices, mesh->drawType);
 }

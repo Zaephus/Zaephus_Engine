@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <mutex>
+#include <atomic>
 #include <vector>
 
 #include "Component.h"
@@ -60,10 +60,13 @@ class MultiMeshRenderer : public Component, RenderItem {
 
         unsigned int instanceBuffer = 0;
 
-        std::mutex instanceAccessLock;
+        std::atomic<bool> instancesNotAccessibleFlag = false;
 
-        std::vector<Matrix4x4> matrices;
-        std::vector<Matrix4x4> bufferedMatrices;
+        // std::vector<Matrix4x4> matrices;
+        // std::vector<Matrix4x4> bufferedMatrices;
+
+        Matrix4x4* matrices = nullptr;
+        Matrix4x4* bufferedMatrices = nullptr;
 
         void initializeInstanceBuffer();
         void copyInstanceBuffer();
