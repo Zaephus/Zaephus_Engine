@@ -81,6 +81,8 @@ void Scene::internalUpdate() {
 
     while(!renderer->testAndSetReadyForRender()) {}
 
+    notifyEndOfFrame.invoke();
+
 #ifdef ENABLE_PROFILING
     FrameMark;
 #endif

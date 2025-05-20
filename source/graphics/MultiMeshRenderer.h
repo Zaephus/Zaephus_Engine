@@ -65,10 +65,17 @@ class MultiMeshRenderer : public Component, RenderItem {
         // std::vector<Matrix4x4> matrices;
         // std::vector<Matrix4x4> bufferedMatrices;
 
-        Matrix4x4* matrices = nullptr;
-        Matrix4x4* bufferedMatrices = nullptr;
+        Matrix4x4* prevMatrixBuffer = nullptr;
+        Matrix4x4* currentMatrixBuffer = nullptr;
+        Matrix4x4* nextMatrixBuffer = nullptr;
 
         void initializeInstanceBuffer();
+
+        void swapPrevNext();
+        void swapCurrentPrev();
+
+        void copyBuffers(const Matrix4x4* _from, Matrix4x4* _to) const;
+
         void copyInstanceBuffer();
         void updateInstanceBuffer() const;
 };

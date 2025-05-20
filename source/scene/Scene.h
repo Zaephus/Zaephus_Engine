@@ -3,8 +3,7 @@
 
 #include <vector>
 
-template <typename T>
-class Action;
+#include "Action.h"
 
 class Window;
 class GameObject;
@@ -22,6 +21,8 @@ class Scene {
         static Action<void()> startObjectCall;
         static Action<void()> updateObjectCall;
 
+        Action<void()> notifyEndOfFrame = Action<void()>();
+
         std::vector<GameObject*> gameObjects;
 
         Renderer* renderer = nullptr;
@@ -31,7 +32,7 @@ class Scene {
 
         void initialize();
 
-        Window* getWindow() const;
+        [[nodiscard]] Window* getWindow() const;
 
     protected:
         virtual void start() = 0;
