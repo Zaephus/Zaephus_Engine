@@ -1,3 +1,4 @@
 ﻿# Build files
 cmake-build-*
 *.iml
+.idea/editor.xml

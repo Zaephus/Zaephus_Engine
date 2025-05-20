@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 class TransformScene final : public Scene {
     Light* light = nullptr;
@@ -23,8 +23,9 @@ class TransformScene final : public Scene {
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 3.5f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+            cam->transform->position = { 0.0f, 0.0f, 10.5f };
+
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
             Mesh* cubeMesh = models[0].mesh;
@@ -46,6 +47,8 @@ class TransformScene final : public Scene {
             child->transform->parent = parent->transform;
             child->transform->position = { -0.75f, 0.0f, 0.0f };
             child->transform->scale = Vector3::one() * 0.5f;
+
+            // child->getComponent<MeshRenderer>()->getShader()->setColor("material.color", Color::blue());
 
         }
 

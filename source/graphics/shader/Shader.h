@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+class ShaderUniformItem;
 class Color;
 class Texture2D;
 class Light;
@@ -27,19 +28,24 @@ class Shader {
         Shader(const char* _vertexPath, const char* _fragmentPath);
         ~Shader();
 
+        void initialize();
+        void bind();
+
+        void applyUniforms();
+
         void setBool(const std::string& _name, bool _value);
         void setInt(const std::string& _name, int _value);
         void setFloat(const std::string& _name, float _value);
 
         void setColor(const std::string& _name, float _r, float _g, float _b, float _a);
-        void setColor(const std::string& _name, const Color& _color);
+        void setColor(const std::string& _name, const Color& _value);
 
         [[nodiscard]] Color getColor(const std::string& _name) const;
 
         void setVector3(const std::string& _name, float _x, float _y, float _z);
-        void setVector3(const std::string& _name, const Vector3& _vector);
+        void setVector3(const std::string& _name, const Vector3& _value);
 
-        void setMatrix4x4(const std::string& _name, const Matrix4x4& _matrix);
+        void setMatrix4x4(const std::string& _name, const Matrix4x4& _value);
         void setTexture2D(const std::string& _name, Texture2D* _texture);
 
         void setLight(const std::string& _name, const Light* _light);
@@ -63,13 +69,17 @@ class Shader {
         static Shader* textureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
 
     private:
-        unsigned int id;
+        unsigned int id = 0;
+
+        const char* vertexPath = "";
+        const char* fragmentPath = "";
+
         std::map<std::string, Color> assignedColors;
         std::vector<Texture2D*> boundTextures;
 
-        static Shader* activeShader;
+        std::map<std::string, ShaderUniformItem> uniformQueue;
 
-        void use();
+        static Shader* activeShader;
 
         static std::string load(const std::string& _fileName);
 

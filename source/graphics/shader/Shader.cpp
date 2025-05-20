@@ -12,21 +12,21 @@
 
 #include "Color.h"
 #include "Light.h"
+#include "ShaderUniformItem.h"
 #include "Texture2D.h"
 #include "Transform.h"
+
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
 
 Shader* Shader::activeShader = nullptr;
 
 Shader::Shader(const char* _fragmentPath) : Shader("BaseVertex.glsl", _fragmentPath) {}
 
 Shader::Shader(const char* _vertexPath, const char* _fragmentPath) {
-    const std::string vertexCode = load(_vertexPath);
-    const std::string fragmentCode = load(_fragmentPath);
-
-    const unsigned int vertexShader = compile(vertexCode, GL_VERTEX_SHADER);
-    const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
-
-    id = createProgram(vertexShader, fragmentShader);
+    vertexPath = _vertexPath;
+    fragmentPath = _fragmentPath;
 }
 
 Shader::~Shader() {
@@ -39,7 +39,27 @@ Shader::~Shader() {
     glDeleteProgram(id);
 }
 
-void Shader::use() {
+void Shader::initialize() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::Initialize",0x006303);
+#endif
+
+    if(id != 0) { return; }
+
+    const std::string vertexCode = load(vertexPath);
+    const std::string fragmentCode = load(fragmentPath);
+
+    const unsigned int vertexShader = compile(vertexCode, GL_VERTEX_SHADER);
+    const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
+
+    id = createProgram(vertexShader, fragmentShader);
+}
+
+void Shader::bind() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::Bind",0x006303);
+#endif
+
     if(activeShader == this) { return; }
 
     activeShader = this;
@@ -64,32 +84,31 @@ void Shader::use() {
     }
 }
 
-void Shader::setBool(const std::string &_name, const bool _value) {
-    use();
+void Shader::applyUniforms() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Shader::ApplyUniforms",0x006303);
+#endif
 
-    glUniform1i(glGetUniformLocation(id, _name.c_str()), static_cast<int>(_value));
+    for(auto& [_name, _item] : uniformQueue) {
+        _item.apply(id, _name.c_str());
+    }
+    uniformQueue.clear();
 }
-void Shader::setInt(const std::string &_name, const int _value) {
-    use();
 
-    glUniform1i(glGetUniformLocation(id, _name.c_str()), _value);
+void Shader::setBool(const std::string &_name, const bool _value) { setInt(_name, _value); }
+void Shader::setInt(const std::string &_name, const int _value) {
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 void Shader::setFloat(const std::string &_name, const float _value) {
-    use();
-
-    glUniform1f(glGetUniformLocation(id, _name.c_str()), _value);
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 void Shader::setColor(const std::string& _name, const float _r, const float _g, const float _b, const float _a) {
-    const Color c = { _r, _g, _b, _a };
-    setColor(_name, c);
+    setColor(_name, { _r, _g, _b, _a });
 }
-void Shader::setColor(const std::string& _name, const Color& _color) {
-    use();
-
-    assignedColors[_name] = _color;
-    const float* colorPtr = &_color.r;
-    glUniform4fv(glGetUniformLocation(id, _name.c_str()), 1, colorPtr);
+void Shader::setColor(const std::string& _name, const Color& _value) {
+    assignedColors[_name] = _value;
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 Color Shader::getColor(const std::string &_name) const {
@@ -97,29 +116,19 @@ Color Shader::getColor(const std::string &_name) const {
 }
 
 void Shader::setVector3(const std::string& _name, const float _x, const float _y, const float _z) {
-    const Vector3 v = { _x, _y, _z };
-    setVector3(_name, v);
+    setVector3(_name, { _x, _y, _z });
 }
-void Shader::setVector3(const std::string& _name, const Vector3& _vector) {
-    use();
-
-    const float* vectorPtr = &_vector.x;
-    glUniform3fv(glGetUniformLocation(id, _name.c_str()), 1, vectorPtr);
+void Shader::setVector3(const std::string& _name, const Vector3& _value) {
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
-void Shader::setMatrix4x4(const std::string &_name, const Matrix4x4& _matrix) {
-    use();
-
-    const int location = glGetUniformLocation(id, _name.c_str());
-    const float* matrixPtr = &_matrix.m00;
-    glUniformMatrix4fv(location, 1, GL_FALSE, matrixPtr);
+void Shader::setMatrix4x4(const std::string &_name, const Matrix4x4& _value) {
+    uniformQueue.emplace(std::make_pair<std::string, ShaderUniformItem>(_name.data(), {_value}));
 }
 
 void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {
-    use();
-
     const int textureIndex = static_cast<int>(boundTextures.size());
-    glUniform1i(glGetUniformLocation(id, _name.c_str()), static_cast<int>(textureIndex));
+    setInt(_name, textureIndex);
 
     for(int i = 0; i < boundTextures.size(); i++) {
         if(boundTextures[i]->boundUniform == _name) {
@@ -136,13 +145,17 @@ void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {
 }
 
 void Shader::setLight(const std::string& _name, const Light* _light) {
-    use();
+    setVector3(_name + ".position", _light->transform->position);
 
-    glUniform3fv(glGetUniformLocation(id, (_name + ".position").c_str()), 1, &_light->transform->position.x);
+    setColor(_name + ".color", _light->color);
+    setFloat(_name + ".ambientStrength", _light->ambientStrength);
+    setFloat(_name + ".specularStrength", _light->specularStrength);
 
-    glUniform4fv(glGetUniformLocation(id, (_name + ".color").c_str()), 1, &_light->color.r);
-    glUniform1f(glGetUniformLocation(id, (_name + ".ambientStrength").c_str()), _light->ambientStrength);
-    glUniform1f(glGetUniformLocation(id, (_name + ".specularStrength").c_str()), _light->specularStrength);
+    // glUniform3fv(glGetUniformLocation(id, (_name + ".position").c_str()), 1, &_light->transform->position.x);
+
+    // glUniform4fv(glGetUniformLocation(id, (_name + ".color").c_str()), 1, &_light->color.r);
+    // glUniform1f(glGetUniformLocation(id, (_name + ".ambientStrength").c_str()), _light->ambientStrength);
+    // glUniform1f(glGetUniformLocation(id, (_name + ".specularStrength").c_str()), _light->specularStrength);
 }
 
 bool Shader::isTransparent() const {
@@ -156,7 +169,6 @@ Shader *Shader::unlitShader(const float _r, const float _g, const float _b, cons
 
 Shader* Shader::unlitShader(const Color& _c) {
     Shader* shader = new Shader("BaseVertex.glsl", "UnlitFragment.glsl");
-    shader->use();
 
     shader->setColor("objectColor", _c);
 
@@ -174,7 +186,6 @@ Shader* Shader::diffuseShader(const Color& _c) {
 }
 Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
     Shader* shader = new Shader("BaseVertex.glsl", "DiffuseFragment.glsl");
-    shader->use();
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -196,7 +207,6 @@ Shader* Shader::instancedDiffuseShader(const Color& _c) {
 }
 Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) {
     Shader* shader = new Shader("InstancedVertex.glsl", "DiffuseFragment.glsl");
-    shader->use();
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -219,7 +229,6 @@ Shader* Shader::textureShader(const std::string& _diffusePath, const std::string
 
 Shader* Shader::textureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
     Shader* shader = new Shader("BaseVertex.glsl", "TextureFrag_ment.glsl");
-    shader->use();
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);

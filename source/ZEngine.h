@@ -25,6 +25,7 @@
 #include "Bounds.h"
 #include "RayCast3D.h"
 
+#include "Renderer.h"
 #include "Window.h"
 
 #include "Camera.h"

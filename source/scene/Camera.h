@@ -37,9 +37,6 @@ class Camera : public GameObject {
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
         [[nodiscard]] Matrix4x4 viewMatrix() const;
 
-        void setClearColor(float _r, float _g, float _b, float _a);
-        void setClearColor(Color _c);
-
         void setAsActive();
         void onWindowResized(int _w, int _h);
 

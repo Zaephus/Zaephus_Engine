@@ -11,12 +11,11 @@ struct Vector4;
 struct Matrix4x4;
 
 struct Vertex;
-class Color;
+struct Color;
 
 class Shader;
 
 class Mesh {
-
     public:
         std::vector<Vector3> positions;
         std::vector<Color> colors;

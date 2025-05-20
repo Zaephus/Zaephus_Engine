@@ -34,6 +34,8 @@ Mesh::~Mesh() {
 }
 
 void Mesh::initialize() {
+    if(vertexArrayObject != 0 && vertexBufferObject != 0 && elementBufferObject != 0) { return; }
+
     if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
     else { drawType = GL_STATIC_DRAW; }
 
@@ -45,6 +47,8 @@ void Mesh::initialize() {
 }
 
 void Mesh::bind() const {
+    if(activeMesh == this) { return; }
+
     glBindVertexArray(vertexArrayObject);
 }
 

@@ -14,6 +14,10 @@
 #include "Shader.h"
 #include "Transform.h"
 
+#ifdef ENABLE_PROFILING
+#include <tracy/Tracy.hpp>
+#endif
+
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
@@ -42,13 +46,20 @@ void MeshRenderer::start() {
     meshRendererCreatedCall.invoke(this);
 }
 
+void MeshRenderer::initialize() {
+    mesh->initialize();
+    shader->initialize();
+}
+
 void MeshRenderer::render() const {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("MeshRenderer::Render", 0xbe33ff);
+#endif
+
+    mesh->bind();
     if(mesh->isDynamic) { mesh->updateVertexData(); }
 
-    if(Mesh::activeMesh != mesh) {
-        mesh->bind();
-        Mesh::activeMesh = mesh;
-    }
+    shader->bind();
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
@@ -59,6 +70,8 @@ void MeshRenderer::render() const {
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
     shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
+
+    shader->applyUniforms();
 
     glDrawElements(GL_TRIANGLES, mesh->indices.size(), GL_UNSIGNED_INT, nullptr);
 }

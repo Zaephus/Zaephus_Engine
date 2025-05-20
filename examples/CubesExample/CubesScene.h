@@ -21,10 +21,10 @@ class CubesScene final : public Scene {
     GameObject* multiCube = nullptr;
     MultiMeshRenderer* multiRenderer = nullptr;
 
-    int cubeAmount = 1'000'000;
+    unsigned int cubeAmount = 1'000'000;
     float size = 25.0f;
 
-    int numThreads = 1;
+    unsigned int numThreads = 1;
 
     public:
         void start() override {
@@ -40,7 +40,8 @@ class CubesScene final : public Scene {
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 75.0f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             cubeShader = Shader::instancedDiffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
@@ -71,11 +72,11 @@ class CubesScene final : public Scene {
 
             std::vector<std::thread> threads;
 
-            const int chunkSize = cubeAmount / numThreads;
+            const unsigned int chunkSize = cubeAmount / numThreads;
 
             for(size_t i = 0; i < numThreads; i++) {
-                int start = i * chunkSize;
-                int length = chunkSize;
+                unsigned int start = i * chunkSize;
+                unsigned int length = chunkSize;
 
                 threads.emplace_back(&CubesScene::rotateCubes, this, start, length);
             }

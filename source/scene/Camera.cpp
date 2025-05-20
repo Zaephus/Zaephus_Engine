@@ -3,7 +3,6 @@
 
 #include <iostream>
 
-#include <glad/gl.h>
 #include <ZMath.h>
 
 #include "Action.h"
@@ -37,11 +36,6 @@ Matrix4x4 Camera::viewMatrix() const {
     const Matrix4x4 view = r * t;
 
     return view;
-}
-
-void Camera::setClearColor(float _r, float _g, float _b, float _a) { setClearColor({_r, _g, _b, _a}); }
-void Camera::setClearColor(Color _c) {
-    glClearColor(_c.r, _c.g, _c.b, _c.a);
 }
 
 void Camera::setAsActive() {

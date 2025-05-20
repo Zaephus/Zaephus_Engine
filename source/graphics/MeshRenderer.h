@@ -2,6 +2,7 @@
 #pragma once
 
 #include "Component.h"
+#include "RenderItem.h"
 
 template <typename T>
 class Action;
@@ -17,7 +18,7 @@ struct Matrix4x4;
 struct Vector3;
 struct Vertex;
 
-class MeshRenderer : public Component {
+class MeshRenderer : public Component, RenderItem {
     public:
         static Action<void(MeshRenderer*)> meshRendererCreatedCall;
         static Action<void(MeshRenderer*)> meshRendererDestroyedCall;
@@ -28,6 +29,7 @@ class MeshRenderer : public Component {
         MeshRenderer(Mesh* _mesh, Shader* _shader);
         ~MeshRenderer() override;
 
+        void initialize() override;
         void render() const;
 
         void setMesh(Mesh* _mesh);

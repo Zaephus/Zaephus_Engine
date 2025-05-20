@@ -31,7 +31,7 @@ Light::~Light() {
     lightDestroyedCall.invoke(this);
 }
 
-void Light::initialize() {
+void Light::start() {
     Model model = ModelLoader::load(ModelLoader::cube)[0];
     model.shader = Shader::unlitShader(color);
     addComponent(new MeshRenderer(model));

@@ -26,6 +26,7 @@ class Transform;
 class Bounds;
 class RayCast3D;
 
+class Renderer;
 class Window;
 
 class Camera;
