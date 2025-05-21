@@ -22,9 +22,8 @@ uniform mat4 projectionMatrix;
 uniform float speed;
 
 void main() {
-    float posX = 0.2 * mix(0.0, sin(speed * 0.5f * PI * TIME), aPos.y + 1.0);
-    float posY = 0.1 * mix(0.0, cos(speed * 0.5f * PI * 2*(TIME + 0.5*PI)), aPos.y + 1.0);
-    vec3 pos = vec3(aPos.x + posX, aPos.y + posY, aPos.z);
+    float posZ = 0.2 * mix(0.0, sin(speed * 0.5f * PI * TIME), aPos.y);
+    vec3 pos = vec3(aPos.x, aPos.y, aPos.z + posZ);
 
     gl_Position = vec4(pos, 1.0) * modelMatrix * viewMatrix * projectionMatrix;
 
