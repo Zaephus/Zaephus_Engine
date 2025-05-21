@@ -29,16 +29,15 @@ class ShaderAnimScene final : public Scene {
             const std::vector<Model> models = ModelLoader::load(ModelLoader::capsule);
             Mesh* capsuleMesh = models[0].mesh;
 
-            Shader* capsuleShader = new Shader("CapsuleVertex.glsl", "DiffuseFragment.glsl");
+            Shader* capsuleShader = new Shader("CapsuleVertex.glsl", "ZE_DiffuseFragment.glsl");
             capsuleShader->setColor("material.color", Color::green());
             capsuleShader->setFloat("material.shininess", 32.0f);
+            capsuleShader->setFloat("speed", 3.5f);
 
             capsule = new GameObject();
             capsule->addComponent(new MeshRenderer(capsuleMesh, capsuleShader));
             capsule->name = "capsule";
         }
 
-        void update() override {
-
-        }
+        void update() override {}
 };
