@@ -22,7 +22,7 @@
 
 Shader* Shader::activeShader = nullptr;
 
-Shader::Shader(const char* _fragmentPath) : Shader("BaseVertex.glsl", _fragmentPath) {}
+Shader::Shader(const char* _fragmentPath) : Shader("ZE_BaseVertex.glsl", _fragmentPath) {}
 
 Shader::Shader(const char* _vertexPath, const char* _fragmentPath) {
     vertexPath = _vertexPath;
@@ -34,8 +34,8 @@ void Shader::initialize() {
     ZoneScopedNC("Shader::Initialize",0x006303);
 #endif
 
-
     if(id != 0) { return; }
+
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
 
@@ -168,7 +168,7 @@ Shader *Shader::unlitShader(const float _r, const float _g, const float _b, cons
 
 
 Shader* Shader::unlitShader(const Color& _c) {
-    Shader* shader = new Shader("BaseVertex.glsl", "UnlitFragment.glsl");
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitFragment.glsl");
 
     shader->setColor("objectColor", _c);
 
@@ -185,7 +185,7 @@ Shader* Shader::diffuseShader(const Color& _c) {
     return diffuseShader(_c, 32.0f);
 }
 Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
-    Shader* shader = new Shader("BaseVertex.glsl", "DiffuseFragment.glsl");
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_DiffuseFragment.glsl");
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -206,7 +206,7 @@ Shader* Shader::instancedDiffuseShader(const Color& _c) {
     return diffuseShader(_c, 32.0f);
 }
 Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) {
-    Shader* shader = new Shader("InstancedVertex.glsl", "DiffuseFragment.glsl");
+    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_DiffuseFragment.glsl");
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -228,7 +228,7 @@ Shader* Shader::textureShader(const std::string& _diffusePath, const std::string
 }
 
 Shader* Shader::textureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
-    Shader* shader = new Shader("BaseVertex.glsl", "TextureFrag_ment.glsl");
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "TextureFrag_ment.glsl");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);

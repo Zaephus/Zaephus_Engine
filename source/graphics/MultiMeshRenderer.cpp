@@ -13,6 +13,7 @@
 #include "Model.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "TimeUtils.h"
 #include "Transform.h"
 
 #ifdef ENABLE_PROFILING
@@ -47,7 +48,7 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
 void MultiMeshRenderer::start() {
     multiMeshRendererCreatedCall.invoke(this);
 
-     copyBuffers(nextMatrixBuffer, prevMatrixBuffer);
+    copyBuffers(nextMatrixBuffer, prevMatrixBuffer);
     copyBuffers(nextMatrixBuffer, currentMatrixBuffer);
 
     Scene::activeScene->notifyEndOfFrame.bind<MultiMeshRenderer, &MultiMeshRenderer::swapPrevNext>(this);
@@ -78,6 +79,8 @@ void MultiMeshRenderer::render() {
     // copyInstanceBuffer();
     swapCurrentPrev();
     updateInstanceBuffer();
+
+    shader->setFloat("TIME", Time::currentTime());
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);

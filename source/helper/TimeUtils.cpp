@@ -10,8 +10,12 @@ float Time::deltaTime = 0.0f;
 float Time::lastTime = 0.0f;
 
 void Time::tick() {
-    deltaTime = static_cast<float>(glfwGetTime()) - lastTime;
-    lastTime = static_cast<float>(glfwGetTime());
+    deltaTime = currentTime() - lastTime;
+    lastTime = currentTime();
+}
+
+float Time::currentTime() {
+    return static_cast<float>(glfwGetTime());
 }
 
 long long int Time::milliseconds() {

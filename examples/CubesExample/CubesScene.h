@@ -35,7 +35,7 @@ class CubesScene final : public Scene {
             shouldRenderAxis = false;
 
             light = new Light();
-            light-> name = "main_light";
+            light->name = "main_light";
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
