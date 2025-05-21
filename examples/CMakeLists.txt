@@ -31,3 +31,9 @@ add_executable(cubesExample
     CubesExample/main.cpp
 )
 add_dependencies(cubesExample examples)
+
+add_executable(shaderAnimationExample
+        ShaderAnimationExample/ShaderAnimScene.h
+        ShaderAnimationExample/main.cpp
+)
+add_dependencies(shaderAnimationExample examples)

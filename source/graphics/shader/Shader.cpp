@@ -34,8 +34,8 @@ void Shader::initialize() {
     ZoneScopedNC("Shader::Initialize",0x006303);
 #endif
 
-
     if(id != 0) { return; }
+
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
 

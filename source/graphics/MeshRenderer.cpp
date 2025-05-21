@@ -12,6 +12,7 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Shader.h"
+#include "TimeUtils.h"
 #include "Transform.h"
 
 #ifdef ENABLE_PROFILING
@@ -57,6 +58,8 @@ void MeshRenderer::render() const {
     if(mesh->isDynamic) { mesh->updateVertexData(); }
 
     shader->bind();
+
+    shader->setFloat("TIME", Time::currentTime());
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
