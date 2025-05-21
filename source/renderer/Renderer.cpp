@@ -12,7 +12,6 @@
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
 #include "Window.h"
-#include "RenderBuffer.h"
 #include "Shader.h"
 #include "Transform.h"
 
@@ -21,10 +20,7 @@
 #endif
 
 Action<void()> Renderer::initRenderItemCall = Action<void()>();
-
-Renderer::~Renderer() {
-    delete window;
-}
+Action<void()> Renderer::destroyRenderItemCall = Action<void()>();
 
 void Renderer::initialize() {
     initFlag = false;
@@ -38,6 +34,8 @@ void Renderer::initialize() {
     while(!window->shouldClose()) {
         render();
     }
+
+    handleExit();
 }
 
 bool Renderer::isInitialized() const {
@@ -52,7 +50,6 @@ bool Renderer::testAndSetReadyForRender() {
     return val;
 }
 
-
 void Renderer::setClearColor(float _r, float _g, float _b, float _a) { setClearColor({_r, _g, _b, _a}); }
 void Renderer::setClearColor(const Color _c) {
     clearColor = _c;
@@ -64,10 +61,7 @@ void Renderer::handleSetup() {
     Light::lightDestroyedCall.bind<Renderer, &Renderer::onLightDestroyed>(this);
 
     MeshRenderer::meshRendererCreatedCall.bind<Renderer, &Renderer::onMeshRendererCreated>(this);
-    MeshRenderer::meshRendererDestroyedCall.bind<Renderer, &Renderer::onMeshRendererDestroyed>(this);
-
     MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
-    MultiMeshRenderer::multiMeshRendererDestroyedCall.bind<Renderer, &Renderer::onMultiMeshRendererDestroyed>(this);
 
     window = new Window();
     window->initialize(1200, 600, "Zaephus Engine");
@@ -79,6 +73,22 @@ void Renderer::handleSetup() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     initFlag = true;
+}
+
+void Renderer::handleExit() {
+    destroyRenderItemCall.invoke();
+
+    lights.clear();
+    meshRenderers.clear();
+    multiMeshRenderers.clear();
+
+    Light::lightCreatedCall.unbind<Renderer, &Renderer::onLightCreated>(this);
+    Light::lightDestroyedCall.unbind<Renderer, &Renderer::onLightDestroyed>(this);
+
+    MeshRenderer::meshRendererCreatedCall.unbind<Renderer, &Renderer::onMeshRendererCreated>(this);
+    MultiMeshRenderer::multiMeshRendererCreatedCall.unbind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
+
+    delete window;
 }
 
 void Renderer::render() {
@@ -170,24 +180,6 @@ void Renderer::onMeshRendererCreated(MeshRenderer* _renderer) {
     meshRenderers.push_back(_renderer);
 }
 
-void Renderer::onMeshRendererDestroyed(MeshRenderer* _renderer) {
-    for(int i = 0; i < meshRenderers.size(); i++) {
-        if(_renderer == meshRenderers.at(i)) {
-            meshRenderers.erase(meshRenderers.begin() + i);
-            meshRenderers.shrink_to_fit();
-        }
-    }
-}
-
 void Renderer::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
     multiMeshRenderers.push_back(_renderer);
-}
-
-void Renderer::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
-    for(int i = 0; i < multiMeshRenderers.size(); i++) {
-        if(_renderer == multiMeshRenderers.at(i)) {
-            multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
-            multiMeshRenderers.shrink_to_fit();
-        }
-    }
 }

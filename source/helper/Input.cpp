@@ -10,6 +10,10 @@ void Input::initialize() {
     Window::mousePressedCall.bind<&Input::onMousePressed>();
 }
 
+void Input::dispose() {
+    Window::mousePressedCall.unbind<&Input::onMousePressed>();
+}
+
 bool Input::isKeyDown(const int _key) {
     return glfwGetKey(Window::activeWindow->window, _key) == GLFW_PRESS;
 }

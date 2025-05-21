@@ -28,7 +28,7 @@ class Scene {
         Renderer* renderer = nullptr;
 
         Scene();
-        virtual ~Scene() = 0;
+        virtual ~Scene() {}
 
         void initialize();
 
@@ -44,6 +44,8 @@ class Scene {
         std::vector<GameObject*> gameObjectsToDestroy;
 
         void handleSetup();
+        void handleExit();
+
         void internalStart();
         void internalUpdate();
 

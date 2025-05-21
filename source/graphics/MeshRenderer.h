@@ -21,15 +21,12 @@ struct Vertex;
 class MeshRenderer : public Component, RenderItem {
     public:
         static Action<void(MeshRenderer*)> meshRendererCreatedCall;
-        static Action<void(MeshRenderer*)> meshRendererDestroyedCall;
 
         MeshRenderer() = default;
         explicit MeshRenderer(Mesh* _mesh);
         explicit MeshRenderer(Model _model);
         MeshRenderer(Mesh* _mesh, Shader* _shader);
-        ~MeshRenderer() override;
 
-        void initialize() override;
         void render() const;
 
         void setMesh(Mesh* _mesh);
@@ -43,4 +40,6 @@ class MeshRenderer : public Component, RenderItem {
         Shader* shader = nullptr;
 
         void start() override;
+        void initialize() override;
+        void destroy() override;
 };

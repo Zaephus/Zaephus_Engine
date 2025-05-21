@@ -27,12 +27,6 @@ Mesh::Mesh(const std::vector<Vector3>& _positions,
     indices = _indices;
 }
 
-Mesh::~Mesh() {
-    glDeleteVertexArrays(1, &vertexArrayObject);
-    glDeleteBuffers(1, &vertexBufferObject);
-    glDeleteBuffers(1, &elementBufferObject);
-}
-
 void Mesh::initialize() {
     if(vertexArrayObject != 0 && vertexBufferObject != 0 && elementBufferObject != 0) { return; }
 
@@ -44,6 +38,12 @@ void Mesh::initialize() {
     initializeElementBuffer();
 
     setVertexAttributes();
+}
+
+void Mesh::destroy() const {
+    glDeleteVertexArrays(1, &vertexArrayObject);
+    glDeleteBuffers(1, &vertexBufferObject);
+    glDeleteBuffers(1, &elementBufferObject);
 }
 
 void Mesh::bind() const {

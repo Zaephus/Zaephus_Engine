@@ -18,12 +18,11 @@ class RenderBuffer;
 class Renderer {
     public:
         static Action<void()> initRenderItemCall;
+        static Action<void()> destroyRenderItemCall;
 
         Window* window = nullptr;
 
         bool hasFinishedSetup = false;
-
-        ~Renderer();
 
         void initialize();
 
@@ -45,6 +44,7 @@ class Renderer {
         std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
         void handleSetup();
+        void handleExit();
         void render();
 
         void changeClearColor();
@@ -58,8 +58,5 @@ class Renderer {
         void onLightDestroyed(Light* _light);
 
         void onMeshRendererCreated(MeshRenderer* _renderer);
-        void onMeshRendererDestroyed(MeshRenderer* _renderer);
-
         void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
-        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

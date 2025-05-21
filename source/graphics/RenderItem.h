@@ -8,8 +8,10 @@ class RenderItem {
 
     protected:
         virtual void initialize() {}
+        virtual void destroy() {}
 
     private:
         void internalInitialize();
+        void internalDestroy();
 
 };

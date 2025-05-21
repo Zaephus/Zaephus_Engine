@@ -25,13 +25,6 @@ Scene::Scene() {
     renderer = new Renderer();
 }
 
-Scene::~Scene() {
-    for(int i = gameObjects.size()-1; i >= 0; --i) {
-        // std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
-        delete gameObjects[i];
-    }
-}
-
 void Scene::initialize() {
     handleSetup();
 
@@ -47,6 +40,19 @@ void Scene::initialize() {
     }
 
     renderThread.join();
+    handleExit();
+}
+
+void Scene::handleExit() {
+    for(int i = gameObjects.size()-1; i >= 0; --i) {
+        // std::cout << "Deleting GameObject: " << gameObjects[i]->name << std::endl;
+        delete gameObjects[i];
+    }
+
+    Input::dispose();
+
+    GameObject::gameObjectCreatedCall.unbind<Scene, &Scene::onGameObjectCreated>(this);
+    GameObject::gameObjectDestroyedCall.unbind<Scene, &Scene::onGameObjectDestroyed>(this);
 }
 
 Window* Scene::getWindow() const {

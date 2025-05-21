@@ -8,6 +8,7 @@
 
 #include "Action.h"
 #include "Camera.h"
+#include "Color.h"
 #include "Mesh.h"
 #include "Model.h"
 #include "Scene.h"
@@ -19,7 +20,6 @@
 #endif
 
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererCreatedCall = Action<void(MultiMeshRenderer*)>();
-Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererDestroyedCall = Action<void(MultiMeshRenderer*)>();
 
 MultiMeshRenderer::MultiMeshRenderer() {
     mesh = nullptr;
@@ -42,16 +42,6 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
     prevMatrixBuffer = new Matrix4x4[_instanceCount];
     currentMatrixBuffer = new Matrix4x4[_instanceCount];
     nextMatrixBuffer = new Matrix4x4[_instanceCount];
-
-    // matrices.resize(_instanceCount);
-    // bufferedMatrices.resize(_instanceCount);
-}
-
-MultiMeshRenderer::~MultiMeshRenderer() {
-    multiMeshRendererDestroyedCall.invoke(this);
-
-    delete mesh;
-    delete shader;
 }
 
 void MultiMeshRenderer::start() {
@@ -68,6 +58,13 @@ void MultiMeshRenderer::initialize() {
     shader->initialize();
 
     initializeInstanceBuffer();
+}
+
+void MultiMeshRenderer::destroy() {
+    mesh->destroy();
+    shader->destroy();
+
+    Scene::activeScene->notifyEndOfFrame.unbind<MultiMeshRenderer, &MultiMeshRenderer::swapPrevNext>(this);
 }
 
 void MultiMeshRenderer::render() {

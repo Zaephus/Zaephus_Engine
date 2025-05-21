@@ -29,23 +29,13 @@ Shader::Shader(const char* _vertexPath, const char* _fragmentPath) {
     fragmentPath = _fragmentPath;
 }
 
-Shader::~Shader() {
-    for(const Texture2D* boundTexture : boundTextures) {
-        boundTexture->destroy();
-        delete boundTexture;
-    }
-
-    glUseProgram(id);
-    glDeleteProgram(id);
-}
-
 void Shader::initialize() {
 #ifdef ENABLE_PROFILING
     ZoneScopedNC("Shader::Initialize",0x006303);
 #endif
 
-    if(id != 0) { return; }
 
+    if(id != 0) { return; }
     const std::string vertexCode = load(vertexPath);
     const std::string fragmentCode = load(fragmentPath);
 
@@ -53,6 +43,16 @@ void Shader::initialize() {
     const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
 
     id = createProgram(vertexShader, fragmentShader);
+}
+
+void Shader::destroy() const {
+    for(const Texture2D* boundTexture : boundTextures) {
+        boundTexture->destroy();
+        delete boundTexture;
+    }
+
+    glUseProgram(id);
+    glDeleteProgram(id);
 }
 
 void Shader::bind() {

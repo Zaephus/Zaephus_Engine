@@ -23,6 +23,12 @@ Camera::Camera() {
     }
 }
 
+Camera::~Camera() {
+    Window::sizeChangedCall.unbind<Camera, &Camera::onWindowResized>(this);
+    Window::keyPressedCall.unbind<Camera, &Camera::onKeyPressed>(this);
+    Window::cursorMovedCall.unbind<Camera, &Camera::onCursorMovement>(this);
+}
+
 void Camera::update() {
     if(lastProjMatrix != projectionMatrix) { projectionChanged = true; }
     else { projectionChanged = false; }

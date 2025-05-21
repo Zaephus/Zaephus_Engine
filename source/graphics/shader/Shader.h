@@ -5,11 +5,12 @@
 #include <string>
 #include <vector>
 
-class ShaderUniformItem;
-class Color;
+#include "ShaderUniformItem.h"
+
 class Texture2D;
 class Light;
 
+struct Color;
 struct Vector3;
 struct Matrix4x4;
 
@@ -26,9 +27,10 @@ class Shader {
 
         explicit Shader(const char* _fragmentPath);
         Shader(const char* _vertexPath, const char* _fragmentPath);
-        ~Shader();
 
         void initialize();
+        void destroy() const;
+
         void bind();
 
         void applyUniforms();

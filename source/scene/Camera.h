@@ -11,9 +11,7 @@ class Color;
 struct Vector3;
 
 class Camera : public GameObject {
-
     public:
-
         enum ProjectionType {
             none,
             perspective,
@@ -33,6 +31,7 @@ class Camera : public GameObject {
         bool projectionChanged = false;
 
         Camera();
+        ~Camera();
 
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
         [[nodiscard]] Matrix4x4 viewMatrix() const;

@@ -10,6 +10,7 @@ struct Vector2;
 class Input {
     public:
         static void initialize();
+        static void dispose();
 
         static bool isKeyDown(int _key);
         static bool isMouseDown(int _button);

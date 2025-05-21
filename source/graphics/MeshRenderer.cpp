@@ -19,7 +19,6 @@
 #endif
 
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
-Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
 MeshRenderer::MeshRenderer(Mesh* _mesh) {
     setMesh(_mesh);
@@ -35,13 +34,6 @@ MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
     setShader(_shader);
 }
 
-MeshRenderer::~MeshRenderer() {
-    meshRendererDestroyedCall.invoke(this);
-
-    delete mesh;
-    delete shader;
-}
-
 void MeshRenderer::start() {
     meshRendererCreatedCall.invoke(this);
 }
@@ -49,6 +41,11 @@ void MeshRenderer::start() {
 void MeshRenderer::initialize() {
     mesh->initialize();
     shader->initialize();
+}
+
+void MeshRenderer::destroy() {
+    mesh->destroy();
+    shader->destroy();
 }
 
 void MeshRenderer::render() const {

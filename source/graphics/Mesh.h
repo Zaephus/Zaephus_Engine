@@ -36,9 +36,9 @@ class Mesh {
              const std::vector<Vector3>& _normals,
              const std::vector<unsigned int>& _indices);
 
-        ~Mesh();
-
         void initialize();
+        void destroy() const;
+
         void bind() const;
 
         void updateVertexData() const;

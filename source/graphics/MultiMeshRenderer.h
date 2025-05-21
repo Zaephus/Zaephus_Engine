@@ -2,7 +2,6 @@
 #pragma once
 
 #include <atomic>
-#include <vector>
 
 #include "Component.h"
 #include "RenderItem.h"
@@ -23,13 +22,11 @@ struct Matrix4x4;
 class MultiMeshRenderer : public Component, RenderItem {
     public:
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
-        static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
 
         MultiMeshRenderer();
         MultiMeshRenderer(Mesh* _mesh, int _instanceCount);
         MultiMeshRenderer(Model _model, int _instanceCount);
         MultiMeshRenderer(Mesh* _mesh, Shader* _shader, int _instanceCount);
-        ~MultiMeshRenderer() override;
 
         void render();
 
@@ -51,6 +48,7 @@ class MultiMeshRenderer : public Component, RenderItem {
     protected:
         void start() override;
         void initialize() override;
+        void destroy() override;
 
     private:
         Mesh* mesh = nullptr;
@@ -61,9 +59,6 @@ class MultiMeshRenderer : public Component, RenderItem {
         unsigned int instanceBuffer = 0;
 
         std::atomic<bool> instancesNotAccessibleFlag = false;
-
-        // std::vector<Matrix4x4> matrices;
-        // std::vector<Matrix4x4> bufferedMatrices;
 
         Matrix4x4* prevMatrixBuffer = nullptr;
         Matrix4x4* currentMatrixBuffer = nullptr;
