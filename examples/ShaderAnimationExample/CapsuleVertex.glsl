@@ -28,7 +28,7 @@ void main() {
 
     gl_Position = vec4(pos, 1.0) * modelMatrix * viewMatrix * projectionMatrix;
 
-    fragPos = aPos;
+    fragPos = vec3(vec4(pos, 1.0) * modelMatrix);
     normal = vec3(vec4(aNormal, 0.0) * normalMatrix);
 
     vertexColor = aColor;

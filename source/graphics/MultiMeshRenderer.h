@@ -36,14 +36,33 @@ class MultiMeshRenderer : public Component, RenderItem {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
-        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id);
+        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id) const;
+        [[nodiscard]] Vector3 getInstanceScale(unsigned int _id) const;
+        [[nodiscard]] Quaternion getInstanceRotation(unsigned int _id) const;
+        [[nodiscard]] Matrix4x4 getInstanceRotationMatrix(unsigned int _id) const;
+        [[nodiscard]] Matrix4x4 getInstanceMatrix(unsigned int _id) const;
 
+        void setInstancePosition(unsigned int _id, float _x, float _y, float _z);
         void setInstancePosition(unsigned int _id, const Vector3& _pos);
+
+        void setInstanceScale(unsigned int _id, float _x, float _y, float _z);
+        void setInstanceScale(unsigned int _id, const Vector3& _scale);
+
+        void setInstanceRotation(unsigned int _id, float _xDeg, float _yDeg, float _zDeg);
         void setInstanceRotation(unsigned int _id, const Vector3& _eulerAngles);
         void setInstanceRotation(unsigned int _id, const Quaternion& _rot);
+
         void setInstanceMatrix(unsigned int _id, const Matrix4x4& _mat);
 
+        void translateInstance(unsigned int _id, float _x, float _y, float _z);
+        void translateInstance(unsigned int _id, const Vector3& _translate);
+
+        void scaleInstance(unsigned int _id, float _x, float _y, float _z);
+        void scaleInstance(unsigned int _id, const Vector3& _scale);
+
+        void rotateInstance(unsigned int _id, float _xDeg, float _yDeg, float _zDeg);
         void rotateInstance(unsigned int _id, const Vector3& _eulerAngles);
+        void rotateInstance(unsigned int _id, const Quaternion& _rot);
 
     protected:
         void start() override;
@@ -71,6 +90,5 @@ class MultiMeshRenderer : public Component, RenderItem {
 
         void copyBuffers(const Matrix4x4* _from, Matrix4x4* _to) const;
 
-        void copyInstanceBuffer();
         void updateInstanceBuffer() const;
 };
