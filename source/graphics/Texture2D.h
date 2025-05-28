@@ -21,16 +21,16 @@ class Texture2D {
         std::string boundUniform;
         std::string path;
 
-        Texture2D();
+        explicit Texture2D(const std::string& _name);
+
+        void initialize();
 
         void use() const;
         void setUnit(int _textureUnit);
         void destroy() const;
 
-        static void load(Texture2D* _texture, const std::string& _texturePath);
-
     private:
-        unsigned int id = -1;
+        unsigned int id = 0;
         int unit = -1;
 
         static std::vector<Texture2D> loadedTextures;

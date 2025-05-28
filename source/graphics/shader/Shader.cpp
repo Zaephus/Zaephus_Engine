@@ -43,6 +43,10 @@ void Shader::initialize() {
     const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
 
     id = createProgram(vertexShader, fragmentShader);
+
+    for(Texture2D* boundTexture : boundTextures) {
+        boundTexture->initialize();
+    }
 }
 
 void Shader::destroy() const {
@@ -86,7 +90,7 @@ void Shader::bind() {
 
 void Shader::applyUniforms() {
 #ifdef ENABLE_PROFILING
-    ZoneScopedNC("Shader::ApplyUniforms",0x006303);
+    ZoneScopedNC("Shader::ApplyUniforms", 0x006303);
 #endif
 
     for(auto& [_name, _item] : uniformQueue) {
@@ -133,7 +137,6 @@ void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {
     for(int i = 0; i < boundTextures.size(); i++) {
         if(boundTextures[i]->boundUniform == _name) {
             boundTextures[i]->destroy();
-            std::cout << "Old texture was destroyed" << std::endl;
             boundTextures.erase(boundTextures.begin() + i);
             break;
         }
@@ -150,12 +153,6 @@ void Shader::setLight(const std::string& _name, const Light* _light) {
     setColor(_name + ".color", _light->color);
     setFloat(_name + ".ambientStrength", _light->ambientStrength);
     setFloat(_name + ".specularStrength", _light->specularStrength);
-
-    // glUniform3fv(glGetUniformLocation(id, (_name + ".position").c_str()), 1, &_light->transform->position.x);
-
-    // glUniform4fv(glGetUniformLocation(id, (_name + ".color").c_str()), 1, &_light->color.r);
-    // glUniform1f(glGetUniformLocation(id, (_name + ".ambientStrength").c_str()), _light->ambientStrength);
-    // glUniform1f(glGetUniformLocation(id, (_name + ".specularStrength").c_str()), _light->specularStrength);
 }
 
 bool Shader::isTransparent() const {
@@ -165,7 +162,6 @@ bool Shader::isTransparent() const {
 Shader *Shader::unlitShader(const float _r, const float _g, const float _b, const float _a) {
     return unlitShader({ _r, _g, _b, _a } );
 }
-
 
 Shader* Shader::unlitShader(const Color& _c) {
     Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitFragment.glsl");
@@ -218,17 +214,14 @@ Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) 
 }
 
 Shader* Shader::textureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
-    Texture2D* diffuse = new Texture2D();
-    Texture2D::load(diffuse, _diffusePath);
-
-    Texture2D* specular = new Texture2D();
-    Texture2D::load(specular, _specularPath);
+    Texture2D* diffuse = new Texture2D(_diffusePath);
+    Texture2D* specular = new Texture2D(_specularPath);
 
     return textureShader(diffuse, specular, _shininess);
 }
 
 Shader* Shader::textureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "TextureFrag_ment.glsl");
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_TextureFragment.glsl");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);

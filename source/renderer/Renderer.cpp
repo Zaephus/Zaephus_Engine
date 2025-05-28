@@ -66,6 +66,8 @@ void Renderer::handleSetup() {
     window = new Window();
     window->initialize(1200, 600, "Zaephus Engine");
 
+    glEnable(GL_TEXTURE_2D);
+
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
 
@@ -150,7 +152,7 @@ void Renderer::renderObjects() const {
 bool meshRendererCompare(const MeshRenderer* _a, const MeshRenderer* _b) {
     if(_a->getShader()->isTransparent() == true && _b->getShader()->isTransparent() == true) {
         return Vector3::distance(Camera::activeCam->transform->position, _a->transform->position)
-             < Vector3::distance(Camera::activeCam->transform->position, _b->transform->position);
+             > Vector3::distance(Camera::activeCam->transform->position, _b->transform->position);
     }
     return !_a->getShader()->isTransparent();
 }

@@ -8,7 +8,7 @@
 #include <stb_image.h>
 #include <glad/gl.h>
 
-Texture2D::Texture2D() {
+Texture2D::Texture2D(const std::string& _name) {
     horizontalWrap = GL_REPEAT;
     verticalWrap = GL_REPEAT;
 
@@ -18,6 +18,9 @@ Texture2D::Texture2D() {
     magFilter = GL_LINEAR;
 
     flipVerticallyOnLoad = false;
+
+    boundUniform = "";
+    path = "resources/textures/" + _name;
 }
 
 void Texture2D::use() const {
@@ -33,27 +36,24 @@ void Texture2D::destroy() const {
     glDeleteTextures(1, &id);
 }
 
-void Texture2D::load(Texture2D* _texture, const std::string& _texturePath) {
-    const std::string path = "resources/textures/" + _texturePath;
-    _texture->path = path;
-
-    const int loadedTextureIndex = checkForMatch(_texture);
+void Texture2D::initialize() {
+    const int loadedTextureIndex = checkForMatch(this);
     if(loadedTextureIndex >= 0) {
-        *_texture = loadedTextures[loadedTextureIndex];
+        *this = loadedTextures[loadedTextureIndex];
         return;
     }
 
     int width, height, channelAmount;
-    stbi_set_flip_vertically_on_load(_texture->flipVerticallyOnLoad);
+    stbi_set_flip_vertically_on_load(flipVerticallyOnLoad);
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channelAmount, 0);
 
-    glGenTextures(1, &_texture->id);
-    glBindTexture(GL_TEXTURE_2D, _texture->id);
+    glGenTextures(1, &id);
+    glBindTexture(GL_TEXTURE_2D, id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, _texture->horizontalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, _texture->verticalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, _texture->minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, _texture->magFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, horizontalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, verticalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
     int format;
     switch(channelAmount) {
@@ -65,9 +65,9 @@ void Texture2D::load(Texture2D* _texture, const std::string& _texturePath) {
 
     if(data) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        if(_texture->generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
+        if(generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
 
-        loadedTextures.emplace_back(*_texture);
+        loadedTextures.emplace_back(*this);
     }
     else {
         std::cout << "Failed to load texture!" << std::endl;

@@ -3,17 +3,8 @@
 
 #include <iostream>
 
+#include <ZEngine.h>
 #include <ZMath.h>
-
-#include "Bounds.h"
-#include "Camera.h"
-#include "Light.h"
-#include "MeshRenderer.h"
-#include "Scene.h"
-#include "Shader.h"
-#include "Texture2D.h"
-#include "TimeUtils.h"
-#include "Transform.h"
 
 class LightingScene final : public Scene {
 
@@ -41,10 +32,12 @@ class LightingScene final : public Scene {
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.5f, 3.0f };
 
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+
+            Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0].mesh;
 
             floor = new GameObject();
-            floor->addComponent(MeshRenderer::loadModel(MeshRenderer::quad, Shader::diffuseShader(
+            floor->addComponent(new MeshRenderer(quadMesh, Shader::diffuseShader(
                 { 0.3f, 0.3f, 0.3f, 1.0f },
                 4.0f)
             ));
@@ -52,15 +45,19 @@ class LightingScene final : public Scene {
             floor->transform->position = { 0.0f, -0.5f, 0.0f };
             floor->transform->scale = { 10.0f, 1.0f, 10.0f };
 
+            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0].mesh;
+
             donut = new GameObject();
-            donut->addComponent(MeshRenderer::loadModel(MeshRenderer::torus, Shader::diffuseShader(
+            donut->addComponent(new MeshRenderer(torusMesh, Shader::diffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
                 4.0f)
             ));
             donut->name = "donut";
 
+            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
+
             crate = new GameObject();
-            crate->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::textureShader(
+            crate->addComponent(new MeshRenderer(cubeMesh, Shader::textureShader(
                 "container2.png",
                 "container2_specular.png",
                 32.0f
@@ -71,7 +68,7 @@ class LightingScene final : public Scene {
             crate->transform->rotate(20.0f, 35.0f, 0.0f);
 
             redGlassBox = new GameObject();
-            redGlassBox->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+            redGlassBox->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 {1.0f, 0.0f, 0.0f, 0.4f},
                 1.0f
             )));
@@ -80,7 +77,7 @@ class LightingScene final : public Scene {
             redGlassBox->transform->scale = Vector3::one() * 0.5f;
 
             blueGlassBox = new GameObject();
-            blueGlassBox->addComponent(MeshRenderer::loadModel(MeshRenderer::cube, Shader::diffuseShader(
+            blueGlassBox->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 {0.0f, 0.0f, 1.0f, 0.4f},
                 1.0f
             )));
