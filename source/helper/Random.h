@@ -29,7 +29,7 @@ class Random {
 
     private:
         inline static int counter = 1;
-        inline static std::ranlux24_base rng = std::ranlux24_base();
+        inline static std::mt19937 rng = std::mt19937();
 
         static void setSeed() {
             rng.seed(counter * Time::microseconds());

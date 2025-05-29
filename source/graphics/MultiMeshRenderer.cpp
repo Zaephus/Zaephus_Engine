@@ -11,7 +11,6 @@
 #include "Color.h"
 #include "Mesh.h"
 #include "Model.h"
-#include "Scene.h"
 #include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
@@ -42,19 +41,13 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _in
 
     nextMatrixBuffer = new Matrix4x4[_instanceCount];
     currentMatrixBuffer = nextMatrixBuffer;
-    prevMatrixBuffer = nextMatrixBuffer;
 }
 
 void MultiMeshRenderer::start() {
     multiMeshRendererCreatedCall.invoke(this);
 
     currentMatrixBuffer = new Matrix4x4[instanceCount];
-    prevMatrixBuffer = new Matrix4x4[instanceCount];
-
-    copyBuffers(nextMatrixBuffer, prevMatrixBuffer);
-    copyBuffers(nextMatrixBuffer, currentMatrixBuffer);
-
-    Scene::activeScene->notifyEndOfFrame.bind<MultiMeshRenderer, &MultiMeshRenderer::swapPrevNext>(this);
+    swapBuffers();
 }
 
 void MultiMeshRenderer::initialize() {
@@ -67,8 +60,6 @@ void MultiMeshRenderer::initialize() {
 void MultiMeshRenderer::destroy() {
     mesh->destroy();
     shader->destroy();
-
-    Scene::activeScene->notifyEndOfFrame.unbind<MultiMeshRenderer, &MultiMeshRenderer::swapPrevNext>(this);
 }
 
 void MultiMeshRenderer::render() {
@@ -78,8 +69,6 @@ void MultiMeshRenderer::render() {
 
     mesh->bind();
     shader->bind();
-
-    swapCurrentPrev();
     updateInstanceBuffer();
 
     shader->setFloat("TIME", Time::currentTime());
@@ -97,6 +86,8 @@ void MultiMeshRenderer::render() {
     shader->applyUniforms();
 
     glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, instanceCount);
+
+    swapBuffers();
 }
 
 void MultiMeshRenderer::setMesh(Mesh* _mesh) { mesh = _mesh; }
@@ -186,9 +177,9 @@ void MultiMeshRenderer::setInstanceScale(const unsigned int _id, const Vector3& 
 
     const Matrix4x4 rotMatrix = getInstanceRotationMatrix(_id);
     const Matrix4x4 scaleMatrix = {
-        _scale.x, 0.0f, 0.0f, prevMatrixBuffer[_id].m03,
-        0.0f, _scale.y, 0.0f, prevMatrixBuffer[_id].m13,
-        0.0f, 0.0f, _scale.z, prevMatrixBuffer[_id].m23,
+        _scale.x, 0.0f, 0.0f, currentMatrixBuffer[_id].m03,
+        0.0f, _scale.y, 0.0f, currentMatrixBuffer[_id].m13,
+        0.0f, 0.0f, _scale.z, currentMatrixBuffer[_id].m23,
         0.0f, 0.0f, 0.0f,     1.0f
     };
 
@@ -243,7 +234,7 @@ void MultiMeshRenderer::translateInstance(const unsigned int _id, const Vector3&
     }
 
     const Matrix4x4 translateMatrix = Matrix4x4::translateMatrix(_translate);
-    const Matrix4x4 result = prevMatrixBuffer[_id] * translateMatrix;
+    const Matrix4x4 result = currentMatrixBuffer[_id] * translateMatrix;
     nextMatrixBuffer[_id] = result;
 }
 
@@ -259,7 +250,7 @@ void MultiMeshRenderer::scaleInstance(const unsigned int _id, const Vector3& _sc
     }
 
     const Matrix4x4 scaleMatrix = Matrix4x4::scaleMatrix(_scale);
-    const Matrix4x4 result = prevMatrixBuffer[_id] * scaleMatrix;
+    const Matrix4x4 result = currentMatrixBuffer[_id] * scaleMatrix;
     nextMatrixBuffer[_id] = result;
 }
 
@@ -278,7 +269,7 @@ void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Quaternion&
     }
 
     const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(_rot);
-    const Matrix4x4 result = prevMatrixBuffer[_id] * rotMatrix;
+    const Matrix4x4 result = currentMatrixBuffer[_id] * rotMatrix;
     nextMatrixBuffer[_id] = result;
 }
 
@@ -307,16 +298,8 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
     glVertexAttribDivisor(7, 1);
 }
 
-void MultiMeshRenderer::swapPrevNext() {
-    std::swap(prevMatrixBuffer, nextMatrixBuffer);
-}
-
-void MultiMeshRenderer::swapCurrentPrev() {
-    std::swap(currentMatrixBuffer, prevMatrixBuffer);
-}
-
-void MultiMeshRenderer::copyBuffers(const Matrix4x4* _from, Matrix4x4* _to) const {
-    memcpy(_to, _from, sizeof(Matrix4x4) * instanceCount);
+void MultiMeshRenderer::swapBuffers() {
+    std::swap(currentMatrixBuffer, nextMatrixBuffer);
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() const {

@@ -31,6 +31,7 @@ class LightingScene final : public Scene {
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.5f, 3.0f };
+            cam->addComponent(new DebugCameraController());
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
@@ -105,5 +106,7 @@ class LightingScene final : public Scene {
                 Time::deltaTime * 5.0f,
                 Time::deltaTime * 15.0f
             );
+
+            // std::cout << Input::getMouseDelta().toString() << std::endl;
         }
 };

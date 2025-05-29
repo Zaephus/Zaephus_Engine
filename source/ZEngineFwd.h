@@ -19,6 +19,7 @@ class Random;
 class TimeUtils;
 
 class Component;
+class DebugCameraController
 class GameObject;
 class Object;
 class Transform;
