@@ -15,8 +15,6 @@ Camera* Camera::activeCam = nullptr;
 
 Camera::Camera() {
     Window::sizeChangedCall.bind<Camera, &Camera::onWindowResized>(this);
-    Window::keyPressedCall.bind<Camera, &Camera::onKeyPressed>(this);
-    Window::cursorMovedCall.bind<Camera, &Camera::onCursorMovement>(this);
 
     if(activeCam == nullptr) {
         activeCam = this;
@@ -25,8 +23,6 @@ Camera::Camera() {
 
 Camera::~Camera() {
     Window::sizeChangedCall.unbind<Camera, &Camera::onWindowResized>(this);
-    Window::keyPressedCall.unbind<Camera, &Camera::onKeyPressed>(this);
-    Window::cursorMovedCall.unbind<Camera, &Camera::onCursorMovement>(this);
 }
 
 void Camera::update() {
@@ -73,55 +69,6 @@ RayCast3D Camera::screenToRay(const Vector2& _screenPos, const bool _oneShot) co
     const Vector3 dir = pos - transform->position;
 
     return { pos, dir, _oneShot };
-}
-
-void Camera::onKeyPressed(int _key, int _action) {
-    // if(_action == GLFW_PRESS) {
-    //     switch(_key) {
-    //         case GLFW_KEY_W:
-    //             transform->position -= Time::deltaTime * speed * transform->forward();
-    //             break;
-    //         case GLFW_KEY_S:
-    //             transform->position += Time::deltaTime * speed * transform->forward();
-    //             break;
-    //         case GLFW_KEY_D:
-    //             transform->position += Time::deltaTime * speed * transform->right();
-    //             break;
-    //         case GLFW_KEY_A:
-    //             transform->position -= Time::deltaTime * speed * transform->right();
-    //             break;
-    //         case GLFW_KEY_SPACE:
-    //             transform->position += Time::deltaTime * speed * Vector3::up();
-    //             break;
-    //         case GLFW_KEY_LEFT_SHIFT:
-    //             transform->position -= Time::deltaTime * speed * Vector3::up();
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
-}
-
-void Camera::onCursorMovement(const Vector2 _mouseDelta) { // NOLINT(*-unnecessary-value-param)
-//     Vector2 camRot = {
-//         _mouseDelta.x * mouseSensitivity * Time::deltaTime,
-//         _mouseDelta.y * mouseSensitivity * Time::deltaTime
-//     };
-//
-// //    if(abs(Vector3::dot(transform->forward(), Vector3::up())) >= 0.9f ) {
-// //        camRot.x = 0;
-// //    }
-//
-//     Vector3 oldRot = transform->rotation.toEuler();
-//     transform->rotation = Quaternion::identity();
-//     transform->rotate(0.0f, oldRot.y - camRot.x, 0.0f);
-//     transform->rotate(oldRot.x - camRot.y, 0.0f, 0.0f);
-//
-// //    transform->rotate(-camRot.y, -camRot.x, 0.0f);
-// //    transform->rotate(Quaternion::fromAxisAngle(Vector3::up(), camRot.y * Math::deg2rad));
-// //    transform->rotate(Quaternion::fromAxisAngle(transform->right(), camRot.x * Math::deg2rad));
-// //    transform->rotation *= Quaternion::fromEuler(camRot.x, camRot.y, 0.0f);
-// //    std::cout << "Current camera rotation: " << transform->rotation.toEuler().toString() << std::endl;
 }
 
 Camera* Camera::createPerspectiveCamera(const float _fovY, const float _near, const float _far) {

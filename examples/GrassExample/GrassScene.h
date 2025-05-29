@@ -30,6 +30,7 @@ class GrassScene final : public Scene {
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 2.5f, 0.0f };
+            cam->addComponent(new DebugCameraController());
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 

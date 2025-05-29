@@ -25,9 +25,6 @@ class Camera : public GameObject {
         float near = 0.1f;
         float far = 100.0f;
 
-        float speed = 3.0f;
-        float mouseSensitivity = 75.0f;
-
         bool projectionChanged = false;
 
         Camera();
@@ -42,9 +39,6 @@ class Camera : public GameObject {
         [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos, bool _oneShot) const;
-
-        void onKeyPressed(int _key, int _action);
-        void onCursorMovement(Vector2 _mouseDelta);
 
         static Camera* activeCam;
 

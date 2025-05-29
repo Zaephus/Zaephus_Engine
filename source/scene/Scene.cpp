@@ -32,6 +32,8 @@ void Scene::initialize() {
 
     while(!renderer->isInitialized()) {}
 
+    Input::initialize();
+
     start();
     internalStart();
 
@@ -60,8 +62,6 @@ Window* Scene::getWindow() const {
 }
 
 void Scene::handleSetup() {
-    Input::initialize();
-
     GameObject::gameObjectCreatedCall.bind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.bind<Scene, &Scene::onGameObjectDestroyed>(this);
 }

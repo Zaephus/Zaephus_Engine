@@ -112,6 +112,7 @@ void Renderer::render() {
 
     renderObjects();
 
+    window->processCallStack();
     window->presentFrame();
 
     readyForRenderFlag = true;

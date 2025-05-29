@@ -44,12 +44,23 @@ void Transform::rotateAround(const Vector3 &_point, const Vector3& _axis, float 
 }
 
 void Transform::lookAt(const Vector3& _point) {
-    Vector3 directional = (position - _point).normalized();
-    Vector3 perpendicular = Vector3::cross(directional, Vector3::up());
-    Vector3 up = Vector3::cross(directional, perpendicular);
+    const Vector3 dir = (position - _point).normalized();
+    const Vector3 fwd = forward();
 
-    lookAt(_point, up);
+    const float dot = Vector3::dot(dir, fwd);
+    if(dot >= 0.9999) { return; }
+
+    Vector3 up = Vector3::up();
+    if(dot > -0.9999) {
+        up = Vector3::cross(dir, fwd);
+    }
+
+    const float angle = Vector3::angle(fwd, dir);
+
+    const Quaternion rot = Quaternion::fromAxisAngle(-up, ZMath::deg2rad * angle);
+    rotate(rot);
 }
+
 void Transform::lookAt(const Vector3& _point, const Vector3& _up) {
     std::cerr << "Not yet implemented." << std::endl;
 }

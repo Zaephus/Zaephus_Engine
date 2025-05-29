@@ -18,6 +18,7 @@
 #include "TimeUtils.h"
 
 #include "Component.h"
+#include "DebugCameraController.h"
 #include "GameObject.h"
 #include "Object.h"
 #include "Transform.h"
