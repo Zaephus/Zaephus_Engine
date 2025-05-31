@@ -5,7 +5,7 @@
 #include <ZMath.h>
 
 class TransformScene final : public Scene {
-    Light* light = nullptr;
+    PointLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -17,7 +17,7 @@ class TransformScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new PointLight();
             light-> name = "main_light";
             light->transform->position = {1.0f, 2.0f, 3.0f };
 

@@ -1,7 +1,7 @@
 
 #include "RenderBuffer.h"
 
-#include "Light.h"
+#include "PointLight.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
 
@@ -31,7 +31,7 @@ void RenderBuffer::setMultiMeshRenderers(const std::vector<MultiMeshRenderer*>& 
     }
 }
 
-void RenderBuffer::setLights(const std::vector<Light*>& _lights) {
+void RenderBuffer::setLights(const std::vector<PointLight*>& _lights) {
     lights.clear();
     lights.resize(_lights.size());
 

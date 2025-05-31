@@ -8,7 +8,7 @@ template <typename T>
 class Action;
 
 class Color;
-class Light;
+class PointLight;
 class Mesh;
 class Shader;
 class Texture2D;

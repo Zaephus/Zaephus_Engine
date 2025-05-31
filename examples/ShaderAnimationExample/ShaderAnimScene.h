@@ -5,7 +5,7 @@
 #include <ZEngine.h>
 
 class ShaderAnimScene final : public Scene {
-    Light* light = nullptr;
+    PointLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -16,7 +16,7 @@ class ShaderAnimScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new PointLight();
             light->name = "main_light";
             light->transform->position = { 1.0f, 2.0f, 1.5f };
 

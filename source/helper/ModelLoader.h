@@ -21,6 +21,7 @@ struct Model;
 class ModelLoader {
     public:
         enum primitiveType {
+            arrow,
             cube,
             quad,
             cylinder,

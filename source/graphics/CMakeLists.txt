@@ -2,8 +2,6 @@
 target_sources(Zaephus_Engine PRIVATE
     Color.cpp
     Color.h
-    Light.cpp
-    Light.h
     Mesh.cpp
     Mesh.h
     MeshRenderer.cpp
@@ -20,7 +18,9 @@ target_sources(Zaephus_Engine PRIVATE
 )
 
 add_subdirectory(shader)
+add_subdirectory(Lighting)
 
 target_include_directories(Zaephus_Engine PUBLIC
     shader
+    Lighting
 )

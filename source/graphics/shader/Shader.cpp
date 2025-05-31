@@ -11,7 +11,8 @@
 #include <glad/gl.h>
 
 #include "Color.h"
-#include "Light.h"
+#include "DirectionalLight.h"
+#include "PointLight.h"
 #include "ShaderUniformItem.h"
 #include "Texture2D.h"
 #include "Transform.h"
@@ -147,12 +148,24 @@ void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {
     _texture->boundUniform = _name;
 }
 
-void Shader::setLight(const std::string& _name, const Light* _light) {
+void Shader::setDirLight(const std::string& _name, const DirectionalLight* _light) {
+    setVector3(_name + ".direction", _light->transform->forward());
+
+    setColor(_name + ".color", _light->color);
+    setFloat(_name + ".ambientStrength", _light->ambientStrength);
+    setFloat(_name + ".specularStrength", _light->specularStrength);
+}
+
+void Shader::setPointLight(const std::string& _name, const PointLight* _light) {
     setVector3(_name + ".position", _light->transform->position);
 
     setColor(_name + ".color", _light->color);
     setFloat(_name + ".ambientStrength", _light->ambientStrength);
     setFloat(_name + ".specularStrength", _light->specularStrength);
+
+    setFloat(_name + ".constant", _light->constantAtt);
+    setFloat(_name + ".linear", _light->linearAtt);
+    setFloat(_name + ".quadratic", _light->quadraticAtt);
 }
 
 bool Shader::isTransparent() const {

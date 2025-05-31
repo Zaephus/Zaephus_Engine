@@ -47,7 +47,7 @@ void MultiMeshRenderer::start() {
     multiMeshRendererCreatedCall.invoke(this);
 
     currentMatrixBuffer = new Matrix4x4[instanceCount];
-    swapBuffers();
+    copyBuffer(nextMatrixBuffer, currentMatrixBuffer);
 }
 
 void MultiMeshRenderer::initialize() {
@@ -75,9 +75,6 @@ void MultiMeshRenderer::render() {
 
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
-
-    const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
-    shader->setMatrix4x4("normalMatrix", normalMatrix);
 
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
@@ -300,6 +297,10 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 
 void MultiMeshRenderer::swapBuffers() {
     std::swap(currentMatrixBuffer, nextMatrixBuffer);
+}
+
+void MultiMeshRenderer::copyBuffer(const Matrix4x4* _source, Matrix4x4* _dest) {
+    memcpy(_dest, _source, instanceCount * sizeof(Matrix4x4));
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() const {

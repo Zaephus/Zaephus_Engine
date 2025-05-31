@@ -8,7 +8,8 @@
 
 #include "Action.h"
 #include "Camera.h"
-#include "Light.h"
+#include "DirectionalLight.h"
+#include "PointLight.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
 #include "Window.h"
@@ -57,8 +58,11 @@ void Renderer::setClearColor(const Color _c) {
 }
 
 void Renderer::handleSetup() {
-    Light::lightCreatedCall.bind<Renderer, &Renderer::onLightCreated>(this);
-    Light::lightDestroyedCall.bind<Renderer, &Renderer::onLightDestroyed>(this);
+    DirectionalLight::dirLightCreatedCall.bind<Renderer, &Renderer::onDirLightCreated>(this);
+    DirectionalLight::dirLightDestroyedCall.bind<Renderer, &Renderer::onDirLightDestroyed>(this);
+
+    PointLight::pointLightCreatedCall.bind<Renderer, &Renderer::onPointLightCreated>(this);
+    PointLight::pointLightDestroyedCall.bind<Renderer, &Renderer::onPointLightDestroyed>(this);
 
     MeshRenderer::meshRendererCreatedCall.bind<Renderer, &Renderer::onMeshRendererCreated>(this);
     MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
@@ -80,12 +84,15 @@ void Renderer::handleSetup() {
 void Renderer::handleExit() {
     destroyRenderItemCall.invoke();
 
-    lights.clear();
+    pointLights.clear();
     meshRenderers.clear();
     multiMeshRenderers.clear();
 
-    Light::lightCreatedCall.unbind<Renderer, &Renderer::onLightCreated>(this);
-    Light::lightDestroyedCall.unbind<Renderer, &Renderer::onLightDestroyed>(this);
+    DirectionalLight::dirLightCreatedCall.unbind<Renderer, &Renderer::onDirLightCreated>(this);
+    DirectionalLight::dirLightDestroyedCall.unbind<Renderer, &Renderer::onDirLightDestroyed>(this);
+
+    PointLight::pointLightCreatedCall.unbind<Renderer, &Renderer::onPointLightCreated>(this);
+    PointLight::pointLightDestroyedCall.unbind<Renderer, &Renderer::onPointLightDestroyed>(this);
 
     MeshRenderer::meshRendererCreatedCall.unbind<Renderer, &Renderer::onMeshRendererCreated>(this);
     MultiMeshRenderer::multiMeshRendererCreatedCall.unbind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
@@ -137,16 +144,28 @@ void Renderer::renderObjects() const {
     ZoneScopedNC("Renderer::RenderObjects", 0x0062ff);
 #endif
 
+    for(size_t i = 0; i < pointLights.size(); i++) {
+        pointLights[i]->calculateAttenuation();
+    }
+
     for(size_t i = 0; i < meshRenderers.size(); i++) {
-        meshRenderers[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        meshRenderers[i]->getShader()->setLight("light", lights[0]);
+        setShaderData(meshRenderers[i]->getShader());
         meshRenderers[i]->render();
     }
 
     for(size_t i = 0; i < multiMeshRenderers.size(); i++) {
-        multiMeshRenderers[i]->getShader()->setVector3("viewPos", Camera::activeCam->transform->position);
-        multiMeshRenderers[i]->getShader()->setLight("light", lights[0]);
+        setShaderData(multiMeshRenderers[i]->getShader());
         multiMeshRenderers[i]->render();
+    }
+}
+
+void Renderer::setShaderData(Shader* _shader) const {
+    _shader->setVector3("viewPos", Camera::activeCam->transform->position);
+    if(dirLights.size() > 0) {
+        _shader->setDirLight("dirLight", dirLights[0]);
+    }
+    if(pointLights.size() > 0) {
+        _shader->setPointLight("pointLight", pointLights[0]);
     }
 }
 
@@ -166,15 +185,28 @@ void Renderer::sortMeshRenderers() {
     std::ranges::sort(meshRenderers, meshRendererCompare);
 }
 
-void Renderer::onLightCreated(Light* _light) {
-    lights.push_back(_light);
+void Renderer::onPointLightCreated(PointLight* _light) {
+    pointLights.push_back(_light);
 }
 
-void Renderer::onLightDestroyed(Light* _light) {
-    for(size_t i = 0; i < lights.size(); i++) {
-        if(_light == lights[i]) {
-            lights.erase(lights.begin() + i);
-            lights.shrink_to_fit();
+void Renderer::onPointLightDestroyed(PointLight* _light) {
+    for(size_t i = 0; i < pointLights.size(); i++) {
+        if(_light == pointLights[i]) {
+            pointLights.erase(pointLights.begin() + i);
+            pointLights.shrink_to_fit();
+        }
+    }
+}
+
+void Renderer::onDirLightCreated(DirectionalLight* _light) {
+    dirLights.push_back(_light);
+}
+
+void Renderer::onDirLightDestroyed(DirectionalLight* _light) {
+    for(size_t i = 0; i < dirLights.size(); i++) {
+        if(_light == dirLights[i]) {
+            dirLights.erase(dirLights.begin() + i);
+            dirLights.shrink_to_fit();
         }
     }
 }

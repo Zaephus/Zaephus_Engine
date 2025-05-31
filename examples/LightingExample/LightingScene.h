@@ -7,8 +7,8 @@
 #include <ZMath.h>
 
 class LightingScene final : public Scene {
-
-    Light* light = nullptr;
+    DirectionalLight* dirLight = nullptr;
+    PointLight* pointLight = nullptr;
 
     Camera* cam = nullptr;
 
@@ -24,9 +24,14 @@ class LightingScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
-            light->name = "light";
-            light->transform->position = Vector3(1.0f, 0.5f, 0.0f);
+            dirLight = new DirectionalLight();
+            dirLight->name = "dir_light";
+            dirLight->transform->rotate(-55.0f, 30.0f, 0.0f);
+
+            pointLight = new PointLight();
+            pointLight->range = 12.0f;
+            pointLight->name = "point_light";
+            pointLight->transform->position = Vector3(1.0f, 0.5f, 0.0f);
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
@@ -88,7 +93,7 @@ class LightingScene final : public Scene {
         }
 
         void update() override {
-            light->transform->rotateAround(
+            pointLight->transform->rotateAround(
                 Vector3::zero(),
                 Vector3::up(),
                 Time::deltaTime * 25.0f,

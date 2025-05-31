@@ -18,15 +18,16 @@ std::map<std::string, std::vector<Model>> ModelLoader::loadedModels = std::map<s
 std::vector<Model> ModelLoader::load(const primitiveType _type) { return load(_type, false); }
 std::vector<Model> ModelLoader::load(primitiveType _type, const bool _loadUnique) {
     switch(_type) {
-    case cube:     return load("ZE_cube.obj", _loadUnique);
-    case quad:     return load("ZE_quad.obj", _loadUnique);
-    case cylinder: return load("ZE_cylinder.obj", _loadUnique);
-    case capsule:  return load("ZE_capsule.obj", _loadUnique);
-    case sphere:   return load("ZE_sphere.obj", _loadUnique);
-    case torus:    return load("ZE_torus.obj", _loadUnique);
-    default:
-        std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
-        return {};
+        case arrow:    return load("ZE_arrow.obj", _loadUnique);
+        case cube:     return load("ZE_cube.obj", _loadUnique);
+        case quad:     return load("ZE_quad.obj", _loadUnique);
+        case cylinder: return load("ZE_cylinder.obj", _loadUnique);
+        case capsule:  return load("ZE_capsule.obj", _loadUnique);
+        case sphere:   return load("ZE_sphere.obj", _loadUnique);
+        case torus:    return load("ZE_torus.obj", _loadUnique);
+        default:
+            std::cerr << "Primitive type " << _type << " does not exist" << std::endl;
+            return {};
     }
 }
 

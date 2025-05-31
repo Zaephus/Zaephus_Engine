@@ -85,6 +85,7 @@ class MultiMeshRenderer : public Component, RenderItem {
         void initializeInstanceBuffer();
 
         void swapBuffers();
+        void copyBuffer(const Matrix4x4* _source, Matrix4x4* _dest);
 
         void updateInstanceBuffer() const;
 };

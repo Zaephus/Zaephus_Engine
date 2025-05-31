@@ -9,7 +9,7 @@
 #include "ClickableObject.h"
 
 class ClickExample final : public Scene {
-    Light* light = nullptr;
+    PointLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -23,7 +23,7 @@ class ClickExample final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new PointLight();
             light->name = "light";
             light->transform->position = { 2.0f, 3.0f, 3.0f };
 

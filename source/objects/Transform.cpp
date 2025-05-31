@@ -22,15 +22,10 @@ std::string Transform::toString() const {
 
 void Transform::rotate(const Vector3& _eulerAngles) { rotate(_eulerAngles.x, _eulerAngles.y, _eulerAngles.z); }
 void Transform::rotate(const float _xDeg, const float _yDeg, const float _zDeg) {
-    rotate(Quaternion::fromEuler(0.0f, 0.0f, _zDeg));
-    rotate(Quaternion::fromEuler(0.0f, _yDeg, 0.0f));
-    rotate(Quaternion::fromEuler(_xDeg, 0.0f, 0.0f));
-//    rotate(Quaternion::fromAxisAngle(forward(), _zDeg * Math::deg2rad));
-//    rotate(Quaternion::fromAxisAngle(up(), _yDeg * Math::deg2rad));
-//    rotate(Quaternion::fromAxisAngle(right(), _xDeg * Math::deg2rad));
+    rotate(Quaternion::fromEuler(_xDeg, _yDeg, _zDeg));
 }
 void Transform::rotate(const Quaternion& _q) {
-    rotation = rotation * _q;
+    rotation = _q * rotation;
 }
 
 void Transform::rotateAround(const Vector3& _point, const Vector3 &_axis, float _deg) {

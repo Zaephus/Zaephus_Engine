@@ -1,13 +1,16 @@
 
 #pragma once
 
+#include "DirectionalLight.h"
+#include "PointLight.h"
+
+#include "Shader.h"
+
 #include "Color.h"
-#include "Light.h"
 #include "Mesh.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
 #include "Model.h"
-#include "Shader.h"
 #include "Texture2D.h"
 #include "Vertex.h"
 

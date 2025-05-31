@@ -5,7 +5,7 @@
 #include <ZEngine.h>
 
 class GrassScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -16,16 +16,19 @@ class GrassScene final : public Scene {
 
     int grassAmount = 100'000;
 
-    float groundSize = 100.0f;
+    float groundSize = 50.0f;
 
     public:
         void start() override {
+            DirectionalLight::renderDebugArrow = true;
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new DirectionalLight();
             light->name = "main_light";
-            light->transform->position = { 1.0f, 4.0f, -10.0f };
+            light->transform->rotate(-55.0f, 30.0f, 0.0f);
+            light->transform->position = { 0.0f, 4.0f, 0.0f };
+            light->specularStrength = 0.0f;
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
@@ -57,6 +60,7 @@ class GrassScene final : public Scene {
 
             grassRenderer = new MultiMeshRenderer(grassMesh, grassShader, grassAmount);
             grass->addComponent(grassRenderer);
+            // grass->addComponent(new MeshRenderer(grassMesh, grassShader));
             grass->name = "grass";
             // grass->transform->rotate(0.0f, -90.0f, 0.0f);
 
@@ -67,15 +71,17 @@ class GrassScene final : public Scene {
                     Random::range(-groundSize*0.5f, groundSize*0.5f)
                 });
                 grassRenderer->scaleInstance(i, {
-                    Random::range(0.8f, 3.2f),
-                    Random::range(0.8f, 3.2f),
-                    Random::range(0.8f, 3.2f)
+                    1.0f,
+                    Random::range(0.8f, 1.2f),
+                    1.0f
                 });
-                grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
+                // grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
             }
 
             std::cout << grassRenderer->getInstanceScale(1).toString() << std::endl;
         }
 
-        void update() override {}
+        void update() override {
+            light->transform->rotate(0.0f, 15.0f * Time::deltaTime, 0.0f);
+        }
 };

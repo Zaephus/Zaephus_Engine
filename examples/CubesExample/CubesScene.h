@@ -12,7 +12,7 @@
 #endif
 
 class CubesScene final : public Scene {
-    Light* light = nullptr;
+    PointLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -34,7 +34,7 @@ class CubesScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new PointLight();
             light->name = "main_light";
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
