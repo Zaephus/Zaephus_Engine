@@ -28,13 +28,13 @@ MultiMeshRenderer::MultiMeshRenderer() {
     instanceCount = 0;
 }
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount)
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const unsigned int _instanceCount)
     : MultiMeshRenderer(_mesh, nullptr, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(const Model _model, const int _instanceCount)
+MultiMeshRenderer::MultiMeshRenderer(const Model _model, const unsigned int _instanceCount)
     : MultiMeshRenderer(_model.mesh, _model.shader, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _instanceCount) {
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount) {
     mesh = _mesh;
     shader = _shader;
     instanceCount = _instanceCount;
@@ -82,7 +82,7 @@ void MultiMeshRenderer::render() {
 
     shader->applyUniforms();
 
-    glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, instanceCount);
+    glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, static_cast<int>(instanceCount));
 
     swapBuffers();
 }

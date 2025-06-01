@@ -17,6 +17,8 @@ class DirectionalLight : public GameObject {
 
         Color color = Color::white();
 
+        float intensity = 1.0f;
+
         float ambientStrength = 0.2f;
         float specularStrength = 1.0f;
 

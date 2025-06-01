@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 class ShaderAnimScene final : public Scene {
-    PointLight* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -16,9 +16,9 @@ class ShaderAnimScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new PointLight();
+            light = new DirectionalLight();
             light->name = "main_light";
-            light->transform->position = { 1.0f, 2.0f, 1.5f };
+            light->transform->rotation = Quaternion::fromEuler({ -45.0f, 30.0f, 0.0f });
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";

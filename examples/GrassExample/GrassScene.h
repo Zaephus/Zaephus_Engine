@@ -61,9 +61,7 @@ class GrassScene final : public Scene {
 
             grassRenderer = new MultiMeshRenderer(grassMesh, grassShader, grassAmount);
             grass->addComponent(grassRenderer);
-            // grass->addComponent(new MeshRenderer(grassMesh, grassShader));
             grass->name = "grass";
-            // grass->transform->rotate(0.0f, -90.0f, 0.0f);
 
             for(int i = 0; i < grassAmount; i++) {
                 grassRenderer->setInstancePosition(i, {
@@ -76,7 +74,7 @@ class GrassScene final : public Scene {
                     Random::range(0.8f, 1.2f),
                     1.0f
                 });
-                // grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
+                grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
             }
         }
 

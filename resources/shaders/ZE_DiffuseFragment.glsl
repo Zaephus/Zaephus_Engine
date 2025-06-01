@@ -1,3 +1,4 @@
+
 #version 330 core
 
 struct Material {
@@ -10,6 +11,8 @@ struct DirectionalLight {
     vec3 direction;
 
     vec4 color;
+
+    float intensity;
     float ambientStrength;
     float specularStrength;
 };
@@ -21,6 +24,8 @@ struct PointLight {
     vec3 position;
 
     vec4 color;
+
+    float intensity;
     float ambientStrength;
     float specularStrength;
 
@@ -73,7 +78,7 @@ vec4 calcDirLight(DirectionalLight _dirLight, vec3 _normal, vec3 _fragPos, vec3 
     float spec = pow(max(dot(_viewDir, reflectDir), 0.0), material.shininess);
     vec4 specular = _dirLight.color * _dirLight.specularStrength * spec * material.color;
 
-    return ambient + diffuse + specular;
+    return _dirLight.intensity * (ambient + diffuse + specular);
 }
 
 vec4 calcPointLight(PointLight _pointLight, vec3 _normal, vec3 _fragPos, vec3 _viewDir) {
@@ -96,5 +101,5 @@ vec4 calcPointLight(PointLight _pointLight, vec3 _normal, vec3 _fragPos, vec3 _v
     diffuse *= attenuation;
     specular *= attenuation;
 
-    return ambient + diffuse + specular;
+    return _pointLight.intensity * (ambient + diffuse + specular);
 }

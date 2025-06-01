@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <ZEngineFwd.h>
+
 #include "Color.h"
 #include "GameObject.h"
 
@@ -11,6 +13,8 @@ class ClickableObject : public GameObject {
         void clicked();
 
     private:
+        Shader* shader = nullptr;
+
         Color oldColor;
         Color clickedColor = Color::magenta();
 
@@ -19,5 +23,6 @@ class ClickableObject : public GameObject {
 
         bool isClicked = false;
 
+        void start() override;
         void update() override;
 };
