@@ -25,6 +25,7 @@ class Renderer {
         Window* window = nullptr;
 
         bool hasFinishedSetup = false;
+        bool shouldExit = false;
 
         void initialize();
 
@@ -35,7 +36,7 @@ class Renderer {
         void setClearColor(Color _c);
 
     private:
-        Color clearColor = Color::white();
+        Color clearColor = Color::black();
         bool clearColorChanged = true;
 
         std::atomic<bool> initFlag = false;

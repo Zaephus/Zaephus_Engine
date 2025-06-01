@@ -109,8 +109,8 @@ bool Window::shouldClose() const {
 Vector2 Window::screenToClip(const Vector2& _pos) const {
     const Vector2Int screenSize = getSize();
     Vector2 pos;
-    pos.x = _pos.x / screenSize.x;
-    pos.y = _pos.y / screenSize.y;
+    pos.x = _pos.x / static_cast<float>(screenSize.x);
+    pos.y = _pos.y / static_cast<float>(screenSize.y);
 
     pos.x = 2 * pos.x - 1;
     pos.y = 1 - 2 * pos.y;

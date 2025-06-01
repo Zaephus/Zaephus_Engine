@@ -28,7 +28,7 @@ class Scene {
         Renderer* renderer = nullptr;
 
         Scene();
-        virtual ~Scene() {}
+        virtual ~Scene() = default;
 
         void initialize();
 

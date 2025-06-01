@@ -33,7 +33,7 @@ void Renderer::initialize() {
 
     handleSetup();
 
-    while(!window->shouldClose()) {
+    while(!shouldExit) {
         render();
     }
 
@@ -45,6 +45,8 @@ bool Renderer::isInitialized() const {
 }
 
 bool Renderer::testAndSetReadyForRender() {
+    if(shouldExit) { return true; }
+
     const bool val = readyForRenderFlag;
 
     if(readyForRenderFlag) { readyForRenderFlag = false; }
@@ -83,6 +85,8 @@ void Renderer::handleSetup() {
 }
 
 void Renderer::handleExit() {
+    readyForRenderFlag = true;
+
     destroyRenderItemCall.invoke();
 
     pointLights.clear();
@@ -122,6 +126,8 @@ void Renderer::render() {
 
     window->processCallStack();
     window->presentFrame();
+
+    shouldExit = window->shouldClose();
 
     readyForRenderFlag = true;
 }
