@@ -27,4 +27,7 @@ class DirectionalLight : public GameObject {
         ~DirectionalLight() override;
 
         void start() override;
+
+    private:
+        float debugSize = 0.4f;
 };

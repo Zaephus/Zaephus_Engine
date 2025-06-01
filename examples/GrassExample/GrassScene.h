@@ -24,11 +24,12 @@ class GrassScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new DirectionalLight();
+            light = new DirectionalLight({ 1.0f, 0.96f, 0.49f, 1.0f });
             light->name = "main_light";
             light->transform->rotate(-55.0f, 30.0f, 0.0f);
             light->transform->position = { 0.0f, 4.0f, 0.0f };
-            light->specularStrength = 0.0f;
+            light->ambientStrength = 0.5f;
+            light->specularStrength = 0.6f;
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
@@ -50,8 +51,8 @@ class GrassScene final : public Scene {
 
             Mesh* grassMesh = ModelLoader::load("grass_blade.obj")[0].mesh;
 
-            Shader* grassShader = new Shader("GrassVertex.glsl", "GrassFragment.glsl");
-            grassShader->setColor("material.color", Color::green());
+            Shader* grassShader = new Shader("GrassVertex.glsl", "ZE_DiffuseFragment.glsl");
+            grassShader->setColor("material.color", { 0.0f, 0.6f, 0.0f, 1.0f });
             grassShader->setFloat("material.shininess", 1.0f);
             grassShader->setFloat("speed", 0.8f);
             grassShader->setFloat("range", 0.08f);
@@ -77,8 +78,6 @@ class GrassScene final : public Scene {
                 });
                 // grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
             }
-
-            std::cout << grassRenderer->getInstanceScale(1).toString() << std::endl;
         }
 
         void update() override {

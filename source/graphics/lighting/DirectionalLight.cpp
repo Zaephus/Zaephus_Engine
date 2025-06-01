@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "ModelLoader.h"
 #include "Shader.h"
+#include "Transform.h"
 
 Action<void(DirectionalLight*)> DirectionalLight::dirLightCreatedCall = Action<void(DirectionalLight*)>();
 Action<void(DirectionalLight*)> DirectionalLight::dirLightDestroyedCall = Action<void(DirectionalLight*)>();
@@ -34,5 +35,6 @@ void DirectionalLight::start() {
     if(renderDebugArrow) {
         Mesh* mesh = ModelLoader::load(ModelLoader::arrow)[0].mesh;
         addComponent(new MeshRenderer(mesh, Shader::unlitShader(color)));
+        transform->scale *= debugSize;
     }
 }

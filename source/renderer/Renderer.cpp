@@ -2,6 +2,7 @@
 #include "Renderer.h"
 
 #include <algorithm>
+#include <format>
 #include <iostream>
 
 #include <glad/gl.h>
@@ -161,11 +162,17 @@ void Renderer::renderObjects() const {
 
 void Renderer::setShaderData(Shader* _shader) const {
     _shader->setVector3("viewPos", Camera::activeCam->transform->position);
-    if(dirLights.size() > 0) {
-        _shader->setDirLight("dirLight", dirLights[0]);
+
+    _shader->setInt("dirLightAmount", static_cast<int>(dirLights.size()));
+    for(size_t i = 0; i < dirLights.size(); i++) {
+        std::string name = std::format("dirLights[{}]", i);
+        _shader->setDirLight(name, dirLights[i]);
     }
-    if(pointLights.size() > 0) {
-        _shader->setPointLight("pointLight", pointLights[0]);
+
+    _shader->setInt("pointLightAmount", static_cast<int>(pointLights.size()));
+    for(size_t i = 0; i < pointLights.size(); i++) {
+        std::string name = std::format("pointLights[{}]", i);
+        _shader->setPointLight(name, pointLights[i]);
     }
 }
 
