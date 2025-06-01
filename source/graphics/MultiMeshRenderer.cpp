@@ -28,13 +28,13 @@ MultiMeshRenderer::MultiMeshRenderer() {
     instanceCount = 0;
 }
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const int _instanceCount)
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const unsigned int _instanceCount)
     : MultiMeshRenderer(_mesh, nullptr, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(const Model _model, const int _instanceCount)
+MultiMeshRenderer::MultiMeshRenderer(const Model _model, const unsigned int _instanceCount)
     : MultiMeshRenderer(_model.mesh, _model.shader, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const int _instanceCount) {
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount) {
     mesh = _mesh;
     shader = _shader;
     instanceCount = _instanceCount;
@@ -47,7 +47,7 @@ void MultiMeshRenderer::start() {
     multiMeshRendererCreatedCall.invoke(this);
 
     currentMatrixBuffer = new Matrix4x4[instanceCount];
-    swapBuffers();
+    copyBuffer(nextMatrixBuffer, currentMatrixBuffer);
 }
 
 void MultiMeshRenderer::initialize() {
@@ -76,16 +76,13 @@ void MultiMeshRenderer::render() {
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
 
-    const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
-    shader->setMatrix4x4("normalMatrix", normalMatrix);
-
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
 
     shader->setMatrix4x4("projectionMatrix", Camera::activeCam->projectionMatrix);
 
     shader->applyUniforms();
 
-    glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, instanceCount);
+    glDrawElementsInstanced(GL_TRIANGLES, static_cast<int>(mesh->indices.size()), GL_UNSIGNED_INT, nullptr, static_cast<int>(instanceCount));
 
     swapBuffers();
 }
@@ -300,6 +297,10 @@ void MultiMeshRenderer::initializeInstanceBuffer() {
 
 void MultiMeshRenderer::swapBuffers() {
     std::swap(currentMatrixBuffer, nextMatrixBuffer);
+}
+
+void MultiMeshRenderer::copyBuffer(const Matrix4x4* _source, Matrix4x4* _dest) {
+    memcpy(_dest, _source, instanceCount * sizeof(Matrix4x4));
 }
 
 void MultiMeshRenderer::updateInstanceBuffer() const {

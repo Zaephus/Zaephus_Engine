@@ -24,9 +24,9 @@ class MultiMeshRenderer : public Component, RenderItem {
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
 
         MultiMeshRenderer();
-        MultiMeshRenderer(Mesh* _mesh, int _instanceCount);
-        MultiMeshRenderer(Model _model, int _instanceCount);
-        MultiMeshRenderer(Mesh* _mesh, Shader* _shader, int _instanceCount);
+        MultiMeshRenderer(Mesh* _mesh, unsigned int _instanceCount);
+        MultiMeshRenderer(Model _model, unsigned int _instanceCount);
+        MultiMeshRenderer(Mesh* _mesh, Shader* _shader, unsigned int _instanceCount);
 
         void render();
 
@@ -73,7 +73,7 @@ class MultiMeshRenderer : public Component, RenderItem {
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 
-        int instanceCount;
+        unsigned int instanceCount;
 
         unsigned int instanceBuffer = 0;
 
@@ -85,6 +85,7 @@ class MultiMeshRenderer : public Component, RenderItem {
         void initializeInstanceBuffer();
 
         void swapBuffers();
+        void copyBuffer(const Matrix4x4* _source, Matrix4x4* _dest);
 
         void updateInstanceBuffer() const;
 };

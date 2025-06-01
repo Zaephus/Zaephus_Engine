@@ -7,8 +7,8 @@
 #include <ZMath.h>
 
 class LightingScene final : public Scene {
-
-    Light* light = nullptr;
+    DirectionalLight* dirLight = nullptr;
+    std::vector<PointLight*> pointLights = std::vector<PointLight*>(4);
 
     Camera* cam = nullptr;
 
@@ -24,9 +24,32 @@ class LightingScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
-            light->name = "light";
-            light->transform->position = Vector3(1.0f, 0.5f, 0.0f);
+            dirLight = new DirectionalLight();
+            dirLight->name = "dir_light";
+            dirLight->transform->rotate(-55.0f, 30.0f, 0.0f);
+
+            pointLights[0] = new PointLight();
+            pointLights[0]->range = 12.0f;
+            pointLights[0]->name = "point_light_0";
+            pointLights[0]->transform->position = Vector3(1.0f, 0.5f, 0.0f);
+
+            pointLights[1] = new PointLight({ 0.8f, 0.1f, 0.0f, 1.0f });
+            pointLights[1]->range = 5.0f;
+            pointLights[1]->intensity = 2.0f;
+            pointLights[1]->name = "point_light_1";
+            pointLights[1]->transform->position = Vector3(0.0f, -0.4f, 0.4f);
+
+            pointLights[2] = new PointLight({ 0.1f, 0.0f, 0.8f, 1.0f });
+            pointLights[2]->range = 15.0f;
+            pointLights[2]->intensity = 2.5f;
+            pointLights[2]->name = "point_light_2";
+            pointLights[2]->transform->position = Vector3(0.5f, 0.6f, -0.5f);
+
+            pointLights[3] = new PointLight({ 0.8f, 0.8f, 0.0f, 1.0f });
+            pointLights[3]->range = 8.0f;
+            pointLights[3]->intensity = 2.5f;
+            pointLights[3]->name = "point_light_3";
+            pointLights[3]->transform->position = Vector3(-1.0f, 0.2f, 0.2f);
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
@@ -71,7 +94,7 @@ class LightingScene final : public Scene {
             redGlassBox = new GameObject();
             redGlassBox->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 {1.0f, 0.0f, 0.0f, 0.4f},
-                1.0f
+                32.0f
             )));
             redGlassBox->name = "redGlassBox";
             redGlassBox->transform->position = { 1.0f, 0.5f, 0.1f };
@@ -80,7 +103,7 @@ class LightingScene final : public Scene {
             blueGlassBox = new GameObject();
             blueGlassBox->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
                 {0.0f, 0.0f, 1.0f, 0.4f},
-                1.0f
+                32.0f
             )));
             blueGlassBox->name = "blueGlassBox";
             blueGlassBox->transform->position = { 0.6f, 0.5f, 1.2f };
@@ -88,7 +111,7 @@ class LightingScene final : public Scene {
         }
 
         void update() override {
-            light->transform->rotateAround(
+            pointLights[0]->transform->rotateAround(
                 Vector3::zero(),
                 Vector3::up(),
                 Time::deltaTime * 25.0f,

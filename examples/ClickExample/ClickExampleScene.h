@@ -1,15 +1,13 @@
 
 #pragma once
 
-#include <iostream>
-
 #include <ZEngine.h>
 #include <ZMath.h>
 
 #include "ClickableObject.h"
 
 class ClickExample final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -23,18 +21,17 @@ class ClickExample final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new DirectionalLight();
             light->name = "light";
-            light->transform->position = { 2.0f, 3.0f, 3.0f };
+            light->transform->rotation = Quaternion::fromEuler({ -45.0f, 30.0f, 0.0f });
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
-            // cam = Camera::createOrthographicCamera(3.0f, 12.0f / 6.0f, 0.1f, 100.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 2.0f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            const std::vector<Model> cubeModels = ModelLoader::load(ModelLoader::cube);
-            Mesh* cubeMesh = cubeModels[0].mesh;
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+
+            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
 
             box = new ClickableObject();
             box->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
@@ -45,8 +42,7 @@ class ClickExample final : public Scene {
             box->transform->position = { -0.8f, 0.0f, 0.0f };
             box->transform->scale = Vector3::one() * 0.5f;
 
-            const std::vector<Model> torusModels = ModelLoader::load(ModelLoader::torus);
-            Mesh* torusMesh = torusModels[0].mesh;
+            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0].mesh;
 
             donut = new ClickableObject();
             donut->addComponent(new MeshRenderer(torusMesh, Shader::diffuseShader(
@@ -58,12 +54,6 @@ class ClickExample final : public Scene {
             donut->getComponent<Bounds>()->bottom = -0.15f;
             donut->transform->position = { 0.8f, 0.0f, 0.0f };
             donut->transform->rotate(90.0f, 0.0f, 0.0f);
-
-            std::cout << donut->transform->objectMatrix().toString() << std::endl;
-            std::cout << sizeof(float) << std::endl;
-            std::cout << sizeof(Matrix4x4) << std::endl;
-
-            // std::cout << donut->bounds->intersectsLine({ 0.0f, 0.0f, 1.0f }, Vector3::forward()) << std::endl;
         }
 
         void update() override {

@@ -15,6 +15,7 @@ out vec2 uv;
 
 uniform float TIME;
 
+uniform mat4 modelMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
@@ -25,11 +26,13 @@ void main() {
     float posZ = range * mix(0.0, sin(speed * 0.5f * PI * TIME), aPos.y);
     vec3 pos = vec3(aPos.x, aPos.y, aPos.z + posZ);
 
-    gl_Position = vec4(pos, 1.0) * instanceMatrix * viewMatrix * projectionMatrix;
+    mat4 localMatrix = instanceMatrix * modelMatrix;
 
-    fragPos = vec3(vec4(pos, 1.0) * instanceMatrix);
+    gl_Position = vec4(pos, 1.0) * localMatrix * viewMatrix * projectionMatrix;
 
-    mat3 normalMatrix = mat3(instanceMatrix);
+    fragPos = vec3(vec4(pos, 1.0) * localMatrix);
+
+    mat3 normalMatrix = mat3(localMatrix);
     normal = aNormal * normalMatrix;
 
     vertexColor = aColor;

@@ -27,15 +27,6 @@ void Bounds::start() {
     }
 }
 
-void Bounds::update() {
-    if(shouldRender) {
-        const BoundsRenderer* renderer = gameObject->getComponent<BoundsRenderer>();
-        if(renderer != nullptr) {
-            renderer->render();
-        }
-    }
-}
-
 Vector3 Bounds::getTopRightFront() const {
     return {right, top, front};
 }

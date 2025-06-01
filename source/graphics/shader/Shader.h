@@ -7,8 +7,9 @@
 
 #include "ShaderUniformItem.h"
 
+class DirectionalLight;
 class Texture2D;
-class Light;
+class PointLight;
 
 struct Color;
 struct Vector3;
@@ -50,7 +51,8 @@ class Shader {
         void setMatrix4x4(const std::string& _name, const Matrix4x4& _value);
         void setTexture2D(const std::string& _name, Texture2D* _texture);
 
-        void setLight(const std::string& _name, const Light* _light);
+        void setDirLight(const std::string& _name, const DirectionalLight* _light);
+        void setPointLight(const std::string& _name, const PointLight* _light);
 
         [[nodiscard]] bool isTransparent() const;
 

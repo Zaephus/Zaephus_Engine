@@ -5,7 +5,7 @@
 
 #include "Action.h"
 #include "Input.h"
-#include "Light.h"
+#include "GameObject.h"
 #include "Renderer.h"
 #include "TimeUtils.h"
 #include "Window.h"

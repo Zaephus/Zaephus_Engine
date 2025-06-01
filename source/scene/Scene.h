@@ -9,7 +9,7 @@ class Window;
 class GameObject;
 class MeshRenderer;
 class MultiMeshRenderer;
-class Light;
+class PointLight;
 class Renderer;
 
 struct RenderBuffer;

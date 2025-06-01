@@ -1,13 +1,16 @@
 
 #pragma once
 
+class DirectionalLight;
+class PointLight;
+
+class Shader;
+
 struct Color;
-class Light;
 class Mesh;
 class MeshRenderer;
 class MultiMeshRenderer;
 struct Model;
-class Shader;
 class Texture2D;
 struct Vertex;
 
@@ -19,7 +22,7 @@ class Random;
 class TimeUtils;
 
 class Component;
-class DebugCameraController
+class DebugCameraController;
 class GameObject;
 class Object;
 class Transform;

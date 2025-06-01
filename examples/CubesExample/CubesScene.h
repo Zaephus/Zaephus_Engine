@@ -4,15 +4,15 @@
 #include <vector>
 #include <thread>
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 #ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
 #endif
 
 class CubesScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -34,8 +34,9 @@ class CubesScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new DirectionalLight();
             light->name = "main_light";
+            light->transform->rotate(-55.0f, 30.0f, 0.0f);
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";

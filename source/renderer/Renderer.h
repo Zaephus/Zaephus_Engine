@@ -6,12 +6,14 @@
 
 #include "Color.h"
 
+class DirectionalLight;
 template <typename T>
 class Action;
 
-class Light;
+class PointLight;
 class MeshRenderer;
 class MultiMeshRenderer;
+class Shader;
 class Window;
 class RenderBuffer;
 
@@ -26,7 +28,7 @@ class Renderer {
 
         void initialize();
 
-        bool isInitialized() const;
+        [[nodiscard]] bool isInitialized() const;
         bool testAndSetReadyForRender();
 
         void setClearColor(float _r, float _g, float _b, float _a);
@@ -39,7 +41,9 @@ class Renderer {
         std::atomic<bool> initFlag = false;
         std::atomic<bool> readyForRenderFlag = false;
 
-        std::vector<Light*> lights;
+        std::vector<DirectionalLight*> dirLights;
+        std::vector<PointLight*> pointLights;
+
         std::vector<MeshRenderer*> meshRenderers;
         std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
@@ -52,10 +56,15 @@ class Renderer {
         void clearScreen() const;
         void renderObjects() const;
 
+        void setShaderData(Shader* _shader) const;
+
         void sortMeshRenderers();
 
-        void onLightCreated(Light* _light);
-        void onLightDestroyed(Light* _light);
+        void onPointLightCreated(PointLight* _light);
+        void onPointLightDestroyed(PointLight* _light);
+
+        void onDirLightCreated(DirectionalLight* _light);
+        void onDirLightDestroyed(DirectionalLight* _light);
 
         void onMeshRendererCreated(MeshRenderer* _renderer);
         void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);

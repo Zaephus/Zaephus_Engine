@@ -5,7 +5,7 @@
 #include <ZEngine.h>
 
 class GrassScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -16,16 +16,20 @@ class GrassScene final : public Scene {
 
     int grassAmount = 100'000;
 
-    float groundSize = 100.0f;
+    float groundSize = 50.0f;
 
     public:
         void start() override {
+            DirectionalLight::renderDebugArrow = true;
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new DirectionalLight({ 1.0f, 0.96f, 0.49f, 1.0f });
             light->name = "main_light";
-            light->transform->position = { 1.0f, 4.0f, -10.0f };
+            light->transform->rotate(-55.0f, 30.0f, 0.0f);
+            light->transform->position = { 0.0f, 4.0f, 0.0f };
+            light->ambientStrength = 0.5f;
+            light->specularStrength = 0.6f;
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
@@ -47,8 +51,8 @@ class GrassScene final : public Scene {
 
             Mesh* grassMesh = ModelLoader::load("grass_blade.obj")[0].mesh;
 
-            Shader* grassShader = new Shader("GrassVertex.glsl", "GrassFragment.glsl");
-            grassShader->setColor("material.color", Color::green());
+            Shader* grassShader = new Shader("GrassVertex.glsl", "ZE_DiffuseFragment.glsl");
+            grassShader->setColor("material.color", { 0.0f, 0.6f, 0.0f, 1.0f });
             grassShader->setFloat("material.shininess", 1.0f);
             grassShader->setFloat("speed", 0.8f);
             grassShader->setFloat("range", 0.08f);
@@ -58,7 +62,6 @@ class GrassScene final : public Scene {
             grassRenderer = new MultiMeshRenderer(grassMesh, grassShader, grassAmount);
             grass->addComponent(grassRenderer);
             grass->name = "grass";
-            // grass->transform->rotate(0.0f, -90.0f, 0.0f);
 
             for(int i = 0; i < grassAmount; i++) {
                 grassRenderer->setInstancePosition(i, {
@@ -67,15 +70,15 @@ class GrassScene final : public Scene {
                     Random::range(-groundSize*0.5f, groundSize*0.5f)
                 });
                 grassRenderer->scaleInstance(i, {
-                    Random::range(0.8f, 3.2f),
-                    Random::range(0.8f, 3.2f),
-                    Random::range(0.8f, 3.2f)
+                    1.0f,
+                    Random::range(0.8f, 1.2f),
+                    1.0f
                 });
                 grassRenderer->setInstanceRotation(i, { 0.0f, -90.0f, 0.0f });
             }
-
-            std::cout << grassRenderer->getInstanceScale(1).toString() << std::endl;
         }
 
-        void update() override {}
+        void update() override {
+            light->transform->rotate(0.0f, 15.0f * Time::deltaTime, 0.0f);
+        }
 };

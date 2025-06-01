@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "MeshRenderer.h"
 
 class Bounds;
@@ -13,4 +15,7 @@ class BoundsRenderer : public MeshRenderer {
 
     private:
         Bounds* bounds;
+
+        [[nodiscard]] std::vector<Vector3> calculateVertices() const;
+        [[nodiscard]] std::vector<unsigned int> calculateIndices() const;
 };

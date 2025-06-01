@@ -19,7 +19,6 @@ class Bounds : public Component {
         explicit Bounds(const Vector3& _scale);
 
         void start() override;
-        void update() override;
 
         [[nodiscard]] Vector3 getTopRightFront() const;
         [[nodiscard]] Vector3 getTopRightBack() const;
