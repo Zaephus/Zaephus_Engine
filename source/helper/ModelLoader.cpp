@@ -2,6 +2,7 @@
 #include "ModelLoader.h"
 
 #include <iostream>
+#include <sstream>
 
 #include <ZMath.h>
 #include <assimp/Importer.hpp>
@@ -12,6 +13,7 @@
 #include "Mesh.h"
 #include "Model.h"
 #include "Shader.h"
+#include "Texture2D.h"
 
 std::map<std::string, std::vector<Model>> ModelLoader::loadedModels = std::map<std::string, std::vector<Model>>();
 
@@ -132,11 +134,46 @@ Mesh* ModelLoader::processMesh(const aiMesh* _aiMesh) {
     return mesh;
 }
 
-Shader* ModelLoader::processMaterial(const aiMaterial* _aiMaterial) {
-    aiColor3D color;
-    _aiMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+Shader* ModelLoader::processMaterial(const aiMaterial* _mat) {
+    float shininess;
+    _mat->Get(AI_MATKEY_SHININESS, shininess);
 
-    return Shader::diffuseShader({color.r, color.g, color.b, 1.0f});
+    if(shininess <= 0) {
+        shininess = 1.0f;
+    }
+
+    if(_mat->GetTextureCount(aiTextureType_DIFFUSE) >= 1) {
+        Texture2D* diffuseTex = loadTexture(_mat, aiTextureType_DIFFUSE);
+        Texture2D* specularTex = nullptr;
+
+        if(_mat->GetTextureCount(aiTextureType_SPECULAR) >= 1) {
+            specularTex = loadTexture(_mat, aiTextureType_SPECULAR);
+        }
+        else {
+            specularTex = new Texture2D(Color::white());
+        }
+
+        return Shader::textureShader(diffuseTex, specularTex, shininess);
+    }
+
+    aiColor3D color;
+    _mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
+
+    return Shader::diffuseShader({color.r, color.g, color.b, 1.0f}, shininess);
 }
 
-// Texture2D* ModelLoader::loadTexture(const Mesh* _model, const aiMaterial* _material, unsigned int _type) {}
+Texture2D* ModelLoader::loadTexture(const aiMaterial* _mat, unsigned int _type) {
+    aiString aiPath;
+    _mat->GetTexture(static_cast<aiTextureType>(_type), 0, &aiPath);
+
+    std::stringstream stream(std::string(aiPath.C_Str()));
+    std::string fileName;
+
+    while(!stream.eof()) {
+        std::getline(stream, fileName, '/');
+    }
+
+    std::cout << fileName << std::endl;
+
+    return new Texture2D(fileName);
+}

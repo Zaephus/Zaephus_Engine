@@ -21,7 +21,7 @@ def copy_from_source(_root_dir):
             name, ext = os.path.splitext(file)
 
             match ext:
-                case ".obj":
+                case ".obj" | ".mtl":
                     output_dir = modelDir
                 case ".glsl":
                     output_dir = shaderDir

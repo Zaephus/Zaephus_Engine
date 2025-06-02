@@ -16,9 +16,9 @@ Action<void(DirectionalLight*)> DirectionalLight::dirLightDestroyedCall = Action
 bool DirectionalLight::renderDebugArrow = false;
 
 DirectionalLight::DirectionalLight()
-    : DirectionalLight(Color::white(), 0.2f, 1.0f) {}
+    : DirectionalLight(Color::white(), 0.2f, 0.2f) {}
 DirectionalLight::DirectionalLight(const Color& _c)
-    : DirectionalLight(_c, 0.2f, 1.0f) {}
+    : DirectionalLight(_c, 0.2f, 0.2f) {}
 DirectionalLight::DirectionalLight(const Color& _c, const float _ambientStrength, const float _specularStrength) {
     color = _c;
     ambientStrength = _ambientStrength;

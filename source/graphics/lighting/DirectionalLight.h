@@ -19,8 +19,8 @@ class DirectionalLight : public GameObject {
 
         float intensity = 1.0f;
 
-        float ambientStrength = 0.2f;
-        float specularStrength = 1.0f;
+        float ambientStrength;
+        float specularStrength;
 
         DirectionalLight();
         explicit DirectionalLight(const Color& _c);

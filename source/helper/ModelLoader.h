@@ -42,8 +42,8 @@ class ModelLoader {
 
         static void processNode(std::vector<Model>* _models, const aiNode* _aiNode, const aiScene* _aiScene);
         static Mesh* processMesh(const aiMesh* _aiMesh);
-        static Shader* processMaterial(const aiMaterial* _aiMaterial);
+        static Shader* processMaterial(const aiMaterial* _mat);
 
         // TODO: Add texture support for loading materials.
-        // static Texture2D* loadTexture(const Mesh* _model, const aiMaterial* _material, unsigned int _type);
+        static Texture2D* loadTexture(const aiMaterial* _mat, unsigned int _type);
 };
