@@ -37,6 +37,7 @@ class Camera : public GameObject {
         void onWindowResized(int _w, int _h);
 
         [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos) const;
+        [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos, float _depth) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos, bool _oneShot) const;
 

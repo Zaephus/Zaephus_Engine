@@ -60,6 +60,13 @@ void Transform::lookAt(const Vector3& _point, const Vector3& _up) {
     std::cerr << "Not yet implemented." << std::endl;
 }
 
+Vector3 Transform::globalPosition() const {
+    if(parent != nullptr) {
+        return parent->objectMatrix() * position;
+    }
+    return position;
+}
+
 Vector3 Transform::right() const {
     return (rotation * Vector3::right()).normalized();
 }

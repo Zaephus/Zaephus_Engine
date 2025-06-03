@@ -57,7 +57,21 @@ void Camera::onWindowResized(const int _w, const int _h) {
 Vector3 Camera::screenToWorldPos(const Vector2& _screenPos) const {
     const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
     const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
-    return viewMatrix().inverse() * viewPos;
+    const Vector3 nearPlanePos = viewMatrix().inverse() * viewPos;
+    const Vector3 direction = (transform->position - nearPlanePos).normalized();
+
+    const float angle = Vector3::angle(Vector3::up(), direction);
+    const float depth = transform->position.y / std::cos(angle);
+
+    return transform->position - direction * depth;
+}
+
+Vector3 Camera::screenToWorldPos(const Vector2& _screenPos, const float _depth) const {
+    const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
+    const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
+    const Vector3 nearPlanePos = viewMatrix().inverse() * viewPos;
+    const Vector3 direction = (transform->position - nearPlanePos).normalized();
+    return transform->position - direction * _depth;
 }
 
 RayCast3D Camera::screenToRay(const Vector2& _screenPos) const {
