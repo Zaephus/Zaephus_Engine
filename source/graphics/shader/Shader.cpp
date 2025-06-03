@@ -45,16 +45,11 @@ void Shader::initialize() {
     id = createProgram(vertexShader, fragmentShader);
 
     for(Texture2D* boundTexture : boundTextures) {
-        boundTexture->initialize();
+        boundTexture->bind();
     }
 }
 
 void Shader::destroy() const {
-    for(const Texture2D* boundTexture : boundTextures) {
-        boundTexture->destroy();
-        delete boundTexture;
-    }
-
     glUseProgram(id);
     glDeleteProgram(id);
 }
@@ -136,7 +131,6 @@ void Shader::setTexture2D(const std::string &_name, Texture2D* _texture) {
 
     for(int i = 0; i < boundTextures.size(); i++) {
         if(boundTextures[i]->boundUniform == _name) {
-            boundTextures[i]->destroy();
             boundTextures.erase(boundTextures.begin() + i);
             break;
         }

@@ -7,16 +7,10 @@
 template <typename T>
 class Action;
 
-class Color;
-class PointLight;
 class Mesh;
 class Shader;
-class Texture2D;
 
 struct Model;
-struct Matrix4x4;
-struct Vector3;
-struct Vertex;
 
 class MeshRenderer : public Component, RenderItem {
     public:
@@ -39,7 +33,6 @@ class MeshRenderer : public Component, RenderItem {
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 
-        void start() override;
         void initialize() override;
         void destroy() override;
 };

@@ -5,11 +5,10 @@
 #include <vector>
 
 #include "Color.h"
+#include "RenderItem.h"
 
-class Texture2D {
-
+class Texture2D : public RenderItem {
     public:
-
         int horizontalWrap;
         int verticalWrap;
 
@@ -27,11 +26,13 @@ class Texture2D {
         explicit Texture2D(const std::string& _name);
         explicit Texture2D(const Color& _color);
 
-        void initialize();
+        void bind();
 
         void use() const;
         void setUnit(int _textureUnit);
-        void destroy() const;
+
+    protected:
+        void destroy() override;
 
     private:
         unsigned int id = 0;

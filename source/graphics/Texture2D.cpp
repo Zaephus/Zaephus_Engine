@@ -51,11 +51,11 @@ void Texture2D::setUnit(const int _textureUnit) {
     unit = _textureUnit;
 }
 
-void Texture2D::destroy() const {
+void Texture2D::destroy() {
     glDeleteTextures(1, &id);
 }
 
-void Texture2D::initialize() {
+void Texture2D::bind() {
     const int loadedTextureIndex = checkForMatch(this);
     if(loadedTextureIndex >= 0) {
         *this = loadedTextures[loadedTextureIndex];

@@ -35,13 +35,11 @@ MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
     setShader(_shader);
 }
 
-void MeshRenderer::start() {
-    meshRendererCreatedCall.invoke(this);
-}
-
 void MeshRenderer::initialize() {
     mesh->initialize();
     shader->initialize();
+
+    meshRendererCreatedCall.invoke(this);
 }
 
 void MeshRenderer::destroy() {

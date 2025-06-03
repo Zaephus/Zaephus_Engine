@@ -183,11 +183,8 @@ void Renderer::setShaderData(Shader* _shader) const {
 }
 
 bool meshRendererCompare(const MeshRenderer* _a, const MeshRenderer* _b) {
-    if(_a->getShader()->isTransparent() == true && _b->getShader()->isTransparent() == true) {
-        return Vector3::distance(Camera::activeCam->transform->position, _a->transform->position)
-             > Vector3::distance(Camera::activeCam->transform->position, _b->transform->position);
-    }
-    return !_a->getShader()->isTransparent();
+    return Vector3::distance(Camera::activeCam->transform->position, _a->transform->position)
+         > Vector3::distance(Camera::activeCam->transform->position, _b->transform->position);
 }
 
 void Renderer::sortMeshRenderers() {
