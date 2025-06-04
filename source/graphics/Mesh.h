@@ -37,7 +37,7 @@ class Mesh {
              const std::vector<unsigned int>& _indices);
 
         void initialize();
-        void destroy() const;
+        void destroy();
 
         void bind() const;
 
@@ -50,9 +50,13 @@ class Mesh {
         friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
     private:
+        int boundAmount = 0;
+
         unsigned int vertexArrayObject = 0;
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
+
+        ~Mesh() = default;
 
         [[nodiscard]] std::vector<Vertex> combineData() const;
 

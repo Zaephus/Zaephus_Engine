@@ -6,6 +6,7 @@
 #include "MeshRenderer.h"
 
 class Bounds;
+struct Vector3;
 
 class BoundsRenderer : public MeshRenderer {
     public:

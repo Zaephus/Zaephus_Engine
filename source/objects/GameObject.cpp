@@ -6,26 +6,31 @@
 
 #include "Action.h"
 #include "Component.h"
+#include "Scene.h"
 #include "Transform.h"
 
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();
 Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(GameObject*)>();
 
-GameObject::GameObject() {
+GameObject::GameObject() : Destructible(&Scene::destroyObjectCall) {
     transform = new Transform();
 
     gameObjectCreatedCall.invoke(this);
 }
 
-GameObject::~GameObject() {
-    delete transform;
+void GameObject::markForDestruction() {
+    Destructible::markForDestruction();
 
     for(size_t i = 0; i < components.size(); i++) {
-        delete components[i];
+        components[i]->markForDestruction();
     }
 }
 
+
 void GameObject::destroy() {
+    std::cout << "Destroyed a game object: " << name << std::endl;
+    delete transform;
+
     gameObjectDestroyedCall.invoke(this);
 }
 
@@ -36,12 +41,13 @@ void GameObject::addComponent(Component* _component) {
     components.push_back(_component);
 }
 
-void GameObject::removeComponent(const Component* _component) {
+void GameObject::removeComponent(Component* _component) {
     const auto it = std::ranges::find(components.begin(), components.end(), _component);
     if(it == components.end()) {
         std::cout << "Component does not exist in game object." << std::endl;
         return;
     }
 
+    _component->markForDestruction();
     components.erase(it);
 }

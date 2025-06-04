@@ -20,6 +20,7 @@ class Scene {
 
         static Action<void()> startObjectCall;
         static Action<void()> updateObjectCall;
+        static Action<void()> destroyObjectCall;
 
         Action<void()> notifyEndOfFrame = Action<void()>();
 
@@ -41,15 +42,11 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
-        std::vector<GameObject*> gameObjectsToDestroy;
-
         void handleSetup();
         void handleExit();
 
         void internalStart();
         void internalUpdate();
-
-        void handleDestroyingGameObjects();
 
         void setupAxis();
 

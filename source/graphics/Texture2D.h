@@ -5,9 +5,8 @@
 #include <vector>
 
 #include "Color.h"
-#include "RenderItem.h"
 
-class Texture2D : public RenderItem {
+class Texture2D {
     public:
         int horizontalWrap;
         int verticalWrap;
@@ -26,15 +25,17 @@ class Texture2D : public RenderItem {
         explicit Texture2D(const std::string& _name);
         explicit Texture2D(const Color& _color);
 
-        void bind();
+        ~Texture2D() = default;
+
+        void initialize();
+        void destroy();
 
         void use() const;
         void setUnit(int _textureUnit);
 
-    protected:
-        void destroy() override;
-
     private:
+        int boundAmount = 0;
+
         unsigned int id = 0;
         int unit = -1;
 

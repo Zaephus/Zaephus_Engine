@@ -11,6 +11,7 @@
 #include "Vertex.h"
 #include "Mesh.h"
 #include "Model.h"
+#include "Renderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
@@ -20,17 +21,19 @@
 #endif
 
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
+Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
-MeshRenderer::MeshRenderer(Mesh* _mesh) {
+MeshRenderer::MeshRenderer() : Component(&Renderer::destroyRenderObjectCall) {}
+MeshRenderer::MeshRenderer(Mesh* _mesh) : Component(&Renderer::destroyRenderObjectCall) {
     setMesh(_mesh);
 }
 
-MeshRenderer::MeshRenderer(const Model _model) {
+MeshRenderer::MeshRenderer(const Model _model) : Component(&Renderer::destroyRenderObjectCall) {
     setMesh(_model.mesh);
     setShader(_model.shader);
 }
 
-MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
+MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) : Component(&Renderer::destroyRenderObjectCall) {
     setMesh(_mesh);
     setShader(_shader);
 }
@@ -43,11 +46,15 @@ void MeshRenderer::initialize() {
 }
 
 void MeshRenderer::destroy() {
+    std::cout << "Destroyed a meshrenderer on gameobject: " << gameObject->name << std::endl;
     mesh->destroy();
     shader->destroy();
+
+    meshRendererDestroyedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
+    // std::cout << "Rendered a meshrenderer on gameobject: " << gameObject->name << std::endl;
 #ifdef ENABLE_PROFILING
     ZoneScopedNC("MeshRenderer::Render", 0xbe33ff);
 #endif

@@ -28,6 +28,8 @@ Mesh::Mesh(const std::vector<Vector3>& _positions,
 }
 
 void Mesh::initialize() {
+    boundAmount++;
+
     if(vertexArrayObject != 0 && vertexBufferObject != 0 && elementBufferObject != 0) { return; }
 
     if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
@@ -40,10 +42,16 @@ void Mesh::initialize() {
     setVertexAttributes();
 }
 
-void Mesh::destroy() const {
+void Mesh::destroy() {
+    boundAmount--;
+
+    if(boundAmount > 0) { return; }
+
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
+
+    delete this;
 }
 
 void Mesh::bind() const {

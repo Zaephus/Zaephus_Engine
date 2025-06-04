@@ -11,6 +11,7 @@
 #include "Color.h"
 #include "Mesh.h"
 #include "Model.h"
+#include "Renderer.h"
 #include "Shader.h"
 #include "TimeUtils.h"
 #include "Transform.h"
@@ -20,6 +21,7 @@
 #endif
 
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererCreatedCall = Action<void(MultiMeshRenderer*)>();
+Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererDestroyedCall = Action<void(MultiMeshRenderer*)>();
 
 MultiMeshRenderer::MultiMeshRenderer() {
     mesh = nullptr;
@@ -34,7 +36,7 @@ MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const unsigned int _instanceCo
 MultiMeshRenderer::MultiMeshRenderer(const Model _model, const unsigned int _instanceCount)
     : MultiMeshRenderer(_model.mesh, _model.shader, _instanceCount) {}
 
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount) {
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount): Component(&Renderer::destroyRenderObjectCall)  {
     mesh = _mesh;
     shader = _shader;
     instanceCount = _instanceCount;
@@ -60,6 +62,8 @@ void MultiMeshRenderer::initialize() {
 void MultiMeshRenderer::destroy() {
     mesh->destroy();
     shader->destroy();
+
+    multiMeshRendererDestroyedCall.invoke(this);
 }
 
 void MultiMeshRenderer::render() {

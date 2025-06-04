@@ -23,6 +23,7 @@ Scene* Scene::activeScene = nullptr;
 
 Action<void()> Scene::startObjectCall = Action<void()>();
 Action<void()> Scene::updateObjectCall = Action<void()>();
+Action<void()> Scene::destroyObjectCall = Action<void()>();
 
 Scene::Scene() {
     activeScene = this;
@@ -59,8 +60,9 @@ void Scene::handleSetup() {
 
 void Scene::handleExit() {
     for(int i = static_cast<int>(gameObjects.size())-1; i >= 0; --i) {
-        delete gameObjects[i];
+        gameObjects[i]->markForDestruction();
     }
+    destroyObjectCall.invoke();
 
     Input::dispose();
 
@@ -89,8 +91,11 @@ void Scene::internalUpdate() {
 
     Time::tick();
 
-    handleDestroyingGameObjects();
-
+    if(!destroyObjectCall.isEmpty()) {
+        while(!renderer->testAndSetReadyForRender()) {}
+        renderer->waitForObjectDestruction();
+        destroyObjectCall.invoke();
+    }
     while(!renderer->testAndSetReadyForRender()) {}
 
     notifyEndOfFrame.invoke();
@@ -98,14 +103,6 @@ void Scene::internalUpdate() {
 #ifdef ENABLE_PROFILING
     FrameMark;
 #endif
-}
-
-void Scene::handleDestroyingGameObjects() {
-    for(size_t i = 0; i < gameObjectsToDestroy.size(); i++) {
-        delete gameObjectsToDestroy[i];
-    }
-
-    gameObjectsToDestroy.clear();
 }
 
 void Scene::setupAxis() {
@@ -151,12 +148,13 @@ void Scene::onGameObjectCreated(GameObject* _gameObject) {
 }
 
 void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
-    gameObjectsToDestroy.push_back(_gameObject);
-
+    std::cout << "Removed a gameobject from scene: " << _gameObject->name << std::endl;
     for(size_t i = 0; i < gameObjects.size(); i++) {
         if(_gameObject == gameObjects[i]) {
             gameObjects.erase(gameObjects.begin() + i);
             gameObjects.shrink_to_fit();
+
+            delete _gameObject;
             return;
         }
     }

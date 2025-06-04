@@ -16,7 +16,7 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
     boundsMesh->isDynamic = true;
 
     boundsMesh->positions = calculateVertices();
-    boundsMesh->indices = calculateIndices();
+    boundsMesh->indices   = calculateIndices();
 
     setMesh(boundsMesh);
 

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "Component.h"
-#include "RenderItem.h"
+#include "RenderObject.h"
 
 template <typename T>
 class Action;
@@ -12,11 +12,12 @@ class Shader;
 
 struct Model;
 
-class MeshRenderer : public Component, RenderItem {
+class MeshRenderer : public Component, RenderObject {
     public:
         static Action<void(MeshRenderer*)> meshRendererCreatedCall;
+        static Action<void(MeshRenderer*)> meshRendererDestroyedCall;
 
-        MeshRenderer() = default;
+        MeshRenderer();
         explicit MeshRenderer(Mesh* _mesh);
         explicit MeshRenderer(Model _model);
         MeshRenderer(Mesh* _mesh, Shader* _shader);

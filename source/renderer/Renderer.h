@@ -19,8 +19,8 @@ class RenderBuffer;
 
 class Renderer {
     public:
-        static Action<void()> initRenderItemCall;
-        static Action<void()> destroyRenderItemCall;
+        static Action<void()> initRenderObjectCall;
+        static Action<void()> destroyRenderObjectCall;
 
         Window* window = nullptr;
 
@@ -30,7 +30,11 @@ class Renderer {
         void initialize();
 
         [[nodiscard]] bool isInitialized() const;
+        bool isReadyForRender();
         bool testAndSetReadyForRender();
+
+        void waitForObjectDestruction();
+
 
         void setClearColor(float _r, float _g, float _b, float _a);
         void setClearColor(Color _c);
@@ -41,6 +45,7 @@ class Renderer {
 
         std::atomic<bool> initFlag = false;
         std::atomic<bool> readyForRenderFlag = false;
+        std::atomic<bool> waitingForObjectDestructionFlag = false;
 
         std::vector<DirectionalLight*> dirLights;
         std::vector<PointLight*> pointLights;
@@ -68,5 +73,8 @@ class Renderer {
         void onDirLightDestroyed(DirectionalLight* _light);
 
         void onMeshRendererCreated(MeshRenderer* _renderer);
+        void onMeshRendererDestroyed(MeshRenderer* _renderer);
+
         void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
+        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

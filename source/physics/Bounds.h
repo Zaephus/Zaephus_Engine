@@ -38,6 +38,9 @@ class Bounds : public Component {
         static bool shouldRender;
 
     private:
+        ~Bounds() override {}
+
+    private:
         [[nodiscard]] bool intersectsPlanesOnX(float _y, float _z) const;
         [[nodiscard]] bool intersectsPlanesOnY(float _x, float _z) const;
         [[nodiscard]] bool intersectsPlanesOnZ(float _x, float _y) const;

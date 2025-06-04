@@ -30,7 +30,7 @@ class Shader {
         Shader(const char* _vertexPath, const char* _fragmentPath);
 
         void initialize();
-        void destroy() const;
+        void destroy();
 
         void bind();
 
@@ -73,6 +73,8 @@ class Shader {
         static Shader* textureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
 
     private:
+        int boundAmount = 0;
+
         unsigned int id = 0;
 
         const char* vertexPath = "";
@@ -84,6 +86,8 @@ class Shader {
         std::map<std::string, ShaderUniformItem> uniformQueue;
 
         static Shader* activeShader;
+
+        ~Shader() = default;
 
         static std::string load(const std::string& _fileName);
 

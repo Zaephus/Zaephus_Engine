@@ -4,7 +4,7 @@
 #include <atomic>
 
 #include "Component.h"
-#include "RenderItem.h"
+#include "RenderObject.h"
 #include "Matrices/Matrix4x4.h"
 
 template <typename T>
@@ -19,14 +19,17 @@ struct Vector3;
 struct Quaternion;
 struct Matrix4x4;
 
-class MultiMeshRenderer : public Component, RenderItem {
+class MultiMeshRenderer : public Component, RenderObject {
     public:
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
+        static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
 
         MultiMeshRenderer();
         MultiMeshRenderer(Mesh* _mesh, unsigned int _instanceCount);
         MultiMeshRenderer(Model _model, unsigned int _instanceCount);
         MultiMeshRenderer(Mesh* _mesh, Shader* _shader, unsigned int _instanceCount);
+
+        void destroy() override;
 
         void render();
 
@@ -67,7 +70,6 @@ class MultiMeshRenderer : public Component, RenderItem {
     protected:
         void start() override;
         void initialize() override;
-        void destroy() override;
 
     private:
         Mesh* mesh = nullptr;

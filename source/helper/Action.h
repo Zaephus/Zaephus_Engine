@@ -56,6 +56,10 @@ class Action<R()> {
             }
         }
 
+        bool isEmpty() {
+            return stubs.empty();
+        }
+
         void invoke() {
             cleanStubs();
 
@@ -157,6 +161,10 @@ class Action<R(PARAM1)> {
             if(containsStub(s)) {
                 markStubForDeletion(s);
             }
+        }
+
+        bool isEmpty() {
+            return stubs.empty();
         }
 
         void invoke(PARAM1 param1) {
@@ -262,6 +270,10 @@ class Action<R(PARAM1, PARAM2)> {
             if(containsStub(s)) {
                 markStubForDeletion(s);
             }
+        }
+
+        bool isEmpty() {
+            return stubs.empty();
         }
 
         void invoke(PARAM1 param1, PARAM2 param2) {

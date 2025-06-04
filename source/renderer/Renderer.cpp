@@ -21,8 +21,8 @@
 #include <tracy/Tracy.hpp>
 #endif
 
-Action<void()> Renderer::initRenderItemCall = Action<void()>();
-Action<void()> Renderer::destroyRenderItemCall = Action<void()>();
+Action<void()> Renderer::initRenderObjectCall = Action<void()>();
+Action<void()> Renderer::destroyRenderObjectCall = Action<void()>();
 
 void Renderer::initialize() {
     initFlag = false;
@@ -44,6 +44,10 @@ bool Renderer::isInitialized() const {
     return initFlag;
 }
 
+bool Renderer::isReadyForRender() {
+    return readyForRenderFlag;
+}
+
 bool Renderer::testAndSetReadyForRender() {
     if(shouldExit) { return true; }
 
@@ -52,6 +56,12 @@ bool Renderer::testAndSetReadyForRender() {
     if(readyForRenderFlag) { readyForRenderFlag = false; }
 
     return val;
+}
+
+void Renderer::waitForObjectDestruction() {
+    // waitingForObjectDestructionFlag = true;
+
+    while(waitingForObjectDestructionFlag) {}
 }
 
 void Renderer::setClearColor(float _r, float _g, float _b, float _a) { setClearColor({_r, _g, _b, _a}); }
@@ -68,7 +78,10 @@ void Renderer::handleSetup() {
     PointLight::pointLightDestroyedCall.bind<Renderer, &Renderer::onPointLightDestroyed>(this);
 
     MeshRenderer::meshRendererCreatedCall.bind<Renderer, &Renderer::onMeshRendererCreated>(this);
+    MeshRenderer::meshRendererDestroyedCall.bind<Renderer, &Renderer::onMeshRendererDestroyed>(this);
+
     MultiMeshRenderer::multiMeshRendererCreatedCall.bind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
+    MultiMeshRenderer::multiMeshRendererDestroyedCall.bind<Renderer, &Renderer::onMultiMeshRendererDestroyed>(this);
 
     window = new Window();
     window->initialize(1200, 600, "Zaephus Engine");
@@ -87,7 +100,7 @@ void Renderer::handleSetup() {
 void Renderer::handleExit() {
     readyForRenderFlag = true;
 
-    destroyRenderItemCall.invoke();
+    destroyRenderObjectCall.invoke();
 
     pointLights.clear();
     meshRenderers.clear();
@@ -100,7 +113,10 @@ void Renderer::handleExit() {
     PointLight::pointLightDestroyedCall.unbind<Renderer, &Renderer::onPointLightDestroyed>(this);
 
     MeshRenderer::meshRendererCreatedCall.unbind<Renderer, &Renderer::onMeshRendererCreated>(this);
+    MeshRenderer::meshRendererDestroyedCall.unbind<Renderer, &Renderer::onMeshRendererDestroyed>(this);
+
     MultiMeshRenderer::multiMeshRendererCreatedCall.unbind<Renderer, &Renderer::onMultiMeshRendererCreated>(this);
+    MultiMeshRenderer::multiMeshRendererDestroyedCall.unbind<Renderer, &Renderer::onMultiMeshRendererDestroyed>(this);
 
     delete window;
 }
@@ -112,7 +128,11 @@ void Renderer::render() {
 
     while(readyForRenderFlag) {}
 
-    initRenderItemCall.invoke();
+    waitingForObjectDestructionFlag = true;
+    destroyRenderObjectCall.invoke();
+    waitingForObjectDestructionFlag = false;
+
+    initRenderObjectCall.invoke();
 
     if(clearColorChanged) {
         changeClearColor();
@@ -225,6 +245,31 @@ void Renderer::onMeshRendererCreated(MeshRenderer* _renderer) {
     meshRenderers.push_back(_renderer);
 }
 
+void Renderer::onMeshRendererDestroyed(MeshRenderer* _renderer) {
+    std::cout << "Removed a meshRenderer from renderer: " << _renderer->gameObject->name << std::endl;
+    for(size_t i = 0; i < meshRenderers.size(); i++) {
+        if(_renderer == meshRenderers[i]) {
+            meshRenderers.erase(meshRenderers.begin() + i);
+            meshRenderers.shrink_to_fit();
+
+            delete _renderer;
+            return;
+        }
+    }
+}
+
 void Renderer::onMultiMeshRendererCreated(MultiMeshRenderer* _renderer) {
     multiMeshRenderers.push_back(_renderer);
+}
+
+void Renderer::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
+    for(size_t i = 0; i < multiMeshRenderers.size(); i++) {
+        if(_renderer == multiMeshRenderers[i]) {
+            multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
+            multiMeshRenderers.shrink_to_fit();
+
+            delete _renderer;
+            return;
+        }
+    }
 }

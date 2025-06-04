@@ -42,20 +42,9 @@ Texture2D::Texture2D(const Color& _color) {
     color = _color;
 }
 
-void Texture2D::use() const {
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, id);
-}
+void Texture2D::initialize() {
+    boundAmount++;
 
-void Texture2D::setUnit(const int _textureUnit) {
-    unit = _textureUnit;
-}
-
-void Texture2D::destroy() {
-    glDeleteTextures(1, &id);
-}
-
-void Texture2D::bind() {
     const int loadedTextureIndex = checkForMatch(this);
     if(loadedTextureIndex >= 0) {
         *this = loadedTextures[loadedTextureIndex];
@@ -71,6 +60,25 @@ void Texture2D::bind() {
     bindData(data, width, height, format);
 
     if(path != "") { stbi_image_free(data); }
+}
+
+void Texture2D::destroy() {
+    boundAmount--;
+
+    if(boundAmount > 0) { return; }
+
+    glDeleteTextures(1, &id);
+
+    delete this;
+}
+
+void Texture2D::use() const {
+    glActiveTexture(GL_TEXTURE0 + unit);
+    glBindTexture(GL_TEXTURE_2D, id);
+}
+
+void Texture2D::setUnit(const int _textureUnit) {
+    unit = _textureUnit;
 }
 
 unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) const {
@@ -119,7 +127,7 @@ void Texture2D::bindData(const unsigned char* _data, const int _width, const int
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, GL_UNSIGNED_BYTE, _data);
         if(generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
 
-        loadedTextures.emplace_back(*this);
+        loadedTextures.push_back(*this);
     }
     else {
         std::cerr << "Failed to load texture!" << std::endl;
