@@ -33,7 +33,7 @@ DirectionalLight::~DirectionalLight() {
 
 void DirectionalLight::start() {
     if(renderDebugArrow) {
-        Mesh* mesh = ModelLoader::load(ModelLoader::arrow)[0].mesh;
+        Mesh* mesh = ModelLoader::load(ModelLoader::arrow)[0]->mesh;
         addComponent(new MeshRenderer(mesh, Shader::unlitShader(color)));
         transform->scale *= debugSize;
     }

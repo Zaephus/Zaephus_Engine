@@ -246,7 +246,6 @@ void Renderer::onMeshRendererCreated(MeshRenderer* _renderer) {
 }
 
 void Renderer::onMeshRendererDestroyed(MeshRenderer* _renderer) {
-    std::cout << "Removed a meshRenderer from renderer: " << _renderer->gameObject->name << std::endl;
     for(size_t i = 0; i < meshRenderers.size(); i++) {
         if(_renderer == meshRenderers[i]) {
             meshRenderers.erase(meshRenderers.begin() + i);

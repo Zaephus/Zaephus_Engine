@@ -19,7 +19,7 @@ class MeshRenderer : public Component, RenderObject {
 
         MeshRenderer();
         explicit MeshRenderer(Mesh* _mesh);
-        explicit MeshRenderer(Model _model);
+        explicit MeshRenderer(const Model* _model);
         MeshRenderer(Mesh* _mesh, Shader* _shader);
 
         void render() const;

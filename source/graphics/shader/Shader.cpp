@@ -12,6 +12,8 @@
 #include "Color.h"
 #include "DirectionalLight.h"
 #include "PointLight.h"
+#include "Renderer.h"
+#include "Scene.h"
 #include "ShaderUniformItem.h"
 #include "Texture2D.h"
 #include "Transform.h"
@@ -64,6 +66,10 @@ void Shader::destroy() {
     glDeleteProgram(id);
 
     delete this;
+}
+
+void Shader::bindToModel() {
+    boundAmount++;
 }
 
 void Shader::bind() {
@@ -236,8 +242,8 @@ Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) 
 }
 
 Shader* Shader::textureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
-    Texture2D* diffuse = new Texture2D(_diffusePath);
-    Texture2D* specular = new Texture2D(_specularPath);
+    Texture2D* diffuse = Texture2D::load(_diffusePath);
+    Texture2D* specular = Texture2D::load(_specularPath);
 
     return textureShader(diffuse, specular, _shininess);
 }

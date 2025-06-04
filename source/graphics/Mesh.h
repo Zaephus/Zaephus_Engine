@@ -39,6 +39,8 @@ class Mesh {
         void initialize();
         void destroy();
 
+        void bindToModel();
+
         void bind() const;
 
         void updateVertexData() const;

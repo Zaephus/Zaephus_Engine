@@ -6,6 +6,8 @@
 #include <glad/gl.h>
 #include <assimp/mesh.h>
 
+#include "Renderer.h"
+#include "Scene.h"
 #include "Shader.h"
 #include "Vertex.h"
 
@@ -52,6 +54,10 @@ void Mesh::destroy() {
     glDeleteBuffers(1, &elementBufferObject);
 
     delete this;
+}
+
+void Mesh::bindToModel() {
+    boundAmount++;
 }
 
 void Mesh::bind() const {

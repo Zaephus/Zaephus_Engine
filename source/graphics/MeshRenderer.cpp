@@ -28,9 +28,9 @@ MeshRenderer::MeshRenderer(Mesh* _mesh) : Component(&Renderer::destroyRenderObje
     setMesh(_mesh);
 }
 
-MeshRenderer::MeshRenderer(const Model _model) : Component(&Renderer::destroyRenderObjectCall) {
-    setMesh(_model.mesh);
-    setShader(_model.shader);
+MeshRenderer::MeshRenderer(const Model* _model) : Component(&Renderer::destroyRenderObjectCall) {
+    setMesh(_model->mesh);
+    setShader(_model->shader);
 }
 
 MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) : Component(&Renderer::destroyRenderObjectCall) {
@@ -46,7 +46,6 @@ void MeshRenderer::initialize() {
 }
 
 void MeshRenderer::destroy() {
-    std::cout << "Destroyed a meshrenderer on gameobject: " << gameObject->name << std::endl;
     mesh->destroy();
     shader->destroy();
 
@@ -54,7 +53,6 @@ void MeshRenderer::destroy() {
 }
 
 void MeshRenderer::render() const {
-    // std::cout << "Rendered a meshrenderer on gameobject: " << gameObject->name << std::endl;
 #ifdef ENABLE_PROFILING
     ZoneScopedNC("MeshRenderer::Render", 0xbe33ff);
 #endif

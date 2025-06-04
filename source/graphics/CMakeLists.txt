@@ -12,15 +12,15 @@ target_sources(Zaephus_Engine PRIVATE
     RenderObject.h
     Model.cpp
     Model.h
-    Texture2D.cpp
-    Texture2D.h
     Vertex.h
 )
 
 add_subdirectory(shader)
-add_subdirectory(Lighting)
+add_subdirectory(lighting)
+add_subdirectory(texture)
 
 target_include_directories(Zaephus_Engine PUBLIC
     shader
-    Lighting
+    lighting
+    texture
 )

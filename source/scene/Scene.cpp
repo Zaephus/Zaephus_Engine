@@ -63,8 +63,10 @@ void Scene::handleExit() {
         gameObjects[i]->markForDestruction();
     }
     destroyObjectCall.invoke();
+    renderer->destroyRenderObjectCall.invoke();
 
     Input::dispose();
+    ModelLoader::dispose();
 
     GameObject::gameObjectCreatedCall.unbind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.unbind<Scene, &Scene::onGameObjectDestroyed>(this);
@@ -110,7 +112,7 @@ void Scene::setupAxis() {
     Shader* yShader = Shader::unlitShader(Color::green());
     Shader* zShader = Shader::unlitShader(Color::blue());
 
-    Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
+    Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
 
     constexpr float lineDiameter = 0.005f;
     constexpr float cubeSize = 0.05f;
@@ -148,7 +150,6 @@ void Scene::onGameObjectCreated(GameObject* _gameObject) {
 }
 
 void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
-    std::cout << "Removed a gameobject from scene: " << _gameObject->name << std::endl;
     for(size_t i = 0; i < gameObjects.size(); i++) {
         if(_gameObject == gameObjects[i]) {
             gameObjects.erase(gameObjects.begin() + i);

@@ -15,10 +15,10 @@
 #include "Shader.h"
 #include "Texture2D.h"
 
-std::map<std::string, std::vector<Model>> ModelLoader::loadedModels = std::map<std::string, std::vector<Model>>();
+std::map<std::string, std::vector<Model*>> ModelLoader::loadedModels = std::map<std::string, std::vector<Model*>>();
 
-std::vector<Model> ModelLoader::load(const primitiveType _type) { return load(_type, false); }
-std::vector<Model> ModelLoader::load(primitiveType _type, const bool _loadUnique) {
+std::vector<Model*> ModelLoader::load(const primitiveType _type) { return load(_type, false); }
+std::vector<Model*> ModelLoader::load(const primitiveType _type, const bool _loadUnique) {
     switch(_type) {
         case arrow:    return load("ZE_arrow.obj", _loadUnique);
         case cube:     return load("ZE_cube.obj", _loadUnique);
@@ -33,15 +33,15 @@ std::vector<Model> ModelLoader::load(primitiveType _type, const bool _loadUnique
     }
 }
 
-std::vector<Model> ModelLoader::load(const std::string& _fileName) { return load(_fileName, false); }
-std::vector<Model> ModelLoader::load(const std::string& _fileName, const bool _loadUnique) {
+std::vector<Model*> ModelLoader::load(const std::string& _fileName) { return load(_fileName, false); }
+std::vector<Model*> ModelLoader::load(const std::string& _fileName, const bool _loadUnique) {
     const std::string path = "resources/models/" + _fileName;
 
-    std::vector<Model> models;
+    std::vector<Model*> models;
 
     if(!_loadUnique && loadedModels.contains(path)) {
         for(size_t i = 0; i < loadedModels.size(); i++) {
-            models.emplace_back(loadedModels[path][i]);
+            models.push_back(loadedModels[path][i]);
         }
         return models;
     }
@@ -60,6 +60,17 @@ std::vector<Model> ModelLoader::load(const std::string& _fileName, const bool _l
     return models;
 }
 
+void ModelLoader::dispose() {
+    for(auto it : loadedModels) {
+        for(size_t i = 0; i < it.second.size(); i++) {
+            it.second[i]->mesh->destroy();
+            it.second[i]->shader->destroy();
+        }
+    }
+
+    loadedModels.clear();
+}
+
 bool ModelLoader::isSceneValid(const aiScene* _scene, const Assimp::Importer* _importer) {
     if(_scene == nullptr || _scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || _scene->mRootNode == nullptr) {
         std::cerr << "Assimp error: " << _importer->GetErrorString() << std::endl;
@@ -69,19 +80,21 @@ bool ModelLoader::isSceneValid(const aiScene* _scene, const Assimp::Importer* _i
     return true;
 }
 
-void ModelLoader::processNode(std::vector<Model>* _models, const aiNode* _aiNode, const aiScene* _aiScene) {
+void ModelLoader::processNode(std::vector<Model*>* _models, const aiNode* _aiNode, const aiScene* _aiScene) {
     for(size_t i = 0; i < _aiNode->mNumMeshes; i++) {
         const aiMesh* loadedAiMesh = _aiScene->mMeshes[_aiNode->mMeshes[i]];
         Mesh* mesh = processMesh(loadedAiMesh);
+        mesh->bindToModel();
 
         Shader* shader = nullptr;
 
         if(_aiScene->HasMaterials()) {
             const aiMaterial* loadedMaterial = _aiScene->mMaterials[loadedAiMesh->mMaterialIndex];
             shader = processMaterial(loadedMaterial);
+            shader->bindToModel();
         }
 
-        _models->emplace_back(mesh, shader);
+        _models->push_back(new Model(mesh, shader));
     }
 
     for(size_t i = 0; i < _aiNode->mNumChildren; i++) {
@@ -150,7 +163,7 @@ Shader* ModelLoader::processMaterial(const aiMaterial* _mat) {
             specularTex = loadTexture(_mat, aiTextureType_SPECULAR);
         }
         else {
-            specularTex = new Texture2D(Color::white());
+            specularTex = Texture2D::load(Color::white());
         }
 
         return Shader::textureShader(diffuseTex, specularTex, shininess);
@@ -173,7 +186,5 @@ Texture2D* ModelLoader::loadTexture(const aiMaterial* _mat, unsigned int _type) 
         std::getline(stream, fileName, '/');
     }
 
-    std::cout << fileName << std::endl;
-
-    return new Texture2D(fileName);
+    return Texture2D::load(fileName);
 }

@@ -26,9 +26,7 @@ void GameObject::markForDestruction() {
     }
 }
 
-
 void GameObject::destroy() {
-    std::cout << "Destroyed a game object: " << name << std::endl;
     delete transform;
 
     gameObjectDestroyedCall.invoke(this);

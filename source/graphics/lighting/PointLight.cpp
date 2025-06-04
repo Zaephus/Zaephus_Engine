@@ -29,7 +29,7 @@ PointLight::~PointLight() {
 }
 
 void PointLight::start() {
-    Mesh* mesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
+    Mesh* mesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
     addComponent(new MeshRenderer(mesh, Shader::unlitShader(color)));
 
     transform->scale = Vector3(lightSize);

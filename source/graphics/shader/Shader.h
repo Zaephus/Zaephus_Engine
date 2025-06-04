@@ -32,6 +32,8 @@ class Shader {
         void initialize();
         void destroy();
 
+        void bindToModel();
+
         void bind();
 
         void applyUniforms();
