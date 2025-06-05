@@ -50,8 +50,8 @@ class CubesScene final : public Scene {
                 4.0f
             );
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
-            Mesh* cubeMesh = models[0].mesh;
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0]->mesh;
 
             multiCube = new GameObject();
             multiRenderer = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);

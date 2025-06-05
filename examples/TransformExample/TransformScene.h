@@ -27,8 +27,8 @@ class TransformScene final : public Scene {
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
-            Mesh* cubeMesh = models[0].mesh;
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0]->mesh;
 
             parent = new GameObject();
             parent->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(

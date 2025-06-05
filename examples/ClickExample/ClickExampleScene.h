@@ -18,7 +18,7 @@ class ClickExample final : public Scene {
 
     public:
         void start() override {
-            Bounds::shouldRender = false;
+            Bounds::shouldRender = true;
             shouldRenderAxis = false;
 
             light = new DirectionalLight();
@@ -31,7 +31,7 @@ class ClickExample final : public Scene {
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
+            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
 
             box = new ClickableObject();
             box->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
@@ -42,7 +42,7 @@ class ClickExample final : public Scene {
             box->transform->position = { -0.8f, 0.0f, 0.0f };
             box->transform->scale = Vector3::one() * 0.5f;
 
-            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0].mesh;
+            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0]->mesh;
 
             donut = new ClickableObject();
             donut->addComponent(new MeshRenderer(torusMesh, Shader::diffuseShader(

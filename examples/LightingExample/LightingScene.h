@@ -58,7 +58,7 @@ class LightingScene final : public Scene {
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0].mesh;
+            Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0]->mesh;
 
             floor = new GameObject();
             floor->addComponent(new MeshRenderer(quadMesh, Shader::diffuseShader(
@@ -69,7 +69,7 @@ class LightingScene final : public Scene {
             floor->transform->position = { 0.0f, -0.5f, 0.0f };
             floor->transform->scale = { 10.0f, 1.0f, 10.0f };
 
-            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0].mesh;
+            Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0]->mesh;
 
             donut = new GameObject();
             donut->addComponent(new MeshRenderer(torusMesh, Shader::diffuseShader(
@@ -78,7 +78,7 @@ class LightingScene final : public Scene {
             ));
             donut->name = "donut";
 
-            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0].mesh;
+            Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
 
             crate = new GameObject();
             crate->addComponent(new MeshRenderer(cubeMesh, Shader::textureShader(

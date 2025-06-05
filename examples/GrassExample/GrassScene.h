@@ -38,7 +38,7 @@ class GrassScene final : public Scene {
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            Mesh* groundMesh = ModelLoader::load(ModelLoader::quad)[0].mesh;
+            Mesh* groundMesh = ModelLoader::load(ModelLoader::quad)[0]->mesh;
 
             Shader* groundShader = Shader::diffuseShader(
                 {46.0f / 255.0f, 35.0f / 255.0f, 19.0f / 255.0f, 1.0f},
@@ -49,7 +49,7 @@ class GrassScene final : public Scene {
             ground->addComponent(new MeshRenderer(groundMesh, groundShader));
             ground->transform->scale = { groundSize, 1.0f, groundSize };
 
-            Mesh* grassMesh = ModelLoader::load("grass_blade.obj")[0].mesh;
+            Mesh* grassMesh = ModelLoader::load("grass_blade.obj")[0]->mesh;
 
             Shader* grassShader = new Shader("GrassVertex.glsl", "ZE_DiffuseFragment.glsl");
             grassShader->setColor("material.color", { 0.0f, 0.6f, 0.0f, 1.0f });

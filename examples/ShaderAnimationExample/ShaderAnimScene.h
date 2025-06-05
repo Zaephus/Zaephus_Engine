@@ -26,8 +26,8 @@ class ShaderAnimScene final : public Scene {
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::capsule);
-            Mesh* capsuleMesh = models[0].mesh;
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::capsule);
+            Mesh* capsuleMesh = models[0]->mesh;
 
             Shader* capsuleShader = new Shader("CapsuleVertex.glsl", "ZE_DiffuseFragment.glsl");
             capsuleShader->setColor("material.color", Color::green());

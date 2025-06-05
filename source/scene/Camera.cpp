@@ -79,7 +79,7 @@ RayCast3D Camera::screenToRay(const Vector2& _screenPos) const {
 }
 
 RayCast3D Camera::screenToRay(const Vector2& _screenPos, const bool _oneShot) const {
-    const Vector3 pos = screenToWorldPos(_screenPos);
+    const Vector3 pos = screenToWorldPos(_screenPos, 1.0f);
     const Vector3 dir = pos - transform->position;
 
     return { pos, dir, _oneShot };
