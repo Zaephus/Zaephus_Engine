@@ -23,26 +23,28 @@
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererCreatedCall = Action<void(MultiMeshRenderer*)>();
 Action<void(MultiMeshRenderer*)> MultiMeshRenderer::multiMeshRendererDestroyedCall = Action<void(MultiMeshRenderer*)>();
 
-MultiMeshRenderer::MultiMeshRenderer() {
-    mesh = nullptr;
-    shader = nullptr;
-
-    instanceCount = 0;
-}
-
+MultiMeshRenderer::MultiMeshRenderer()
+    : MultiMeshRenderer(nullptr, nullptr, 0) {}
 MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, const unsigned int _instanceCount)
     : MultiMeshRenderer(_mesh, nullptr, _instanceCount) {}
-
 MultiMeshRenderer::MultiMeshRenderer(const Model _model, const unsigned int _instanceCount)
     : MultiMeshRenderer(_model.mesh, _model.shader, _instanceCount) {}
-
-MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount): Component(&Renderer::destroyRenderObjectCall)  {
+MultiMeshRenderer::MultiMeshRenderer(Mesh* _mesh, Shader* _shader, const unsigned int _instanceCount) {
     mesh = _mesh;
     shader = _shader;
     instanceCount = _instanceCount;
 
     nextMatrixBuffer = new Matrix4x4[_instanceCount];
     currentMatrixBuffer = nextMatrixBuffer;
+}
+
+MultiMeshRenderer::~MultiMeshRenderer() {
+    beingDestroyedFlag = true;
+
+    mesh = nullptr;
+    shader = nullptr;
+
+    multiMeshRendererDestroyedCall.invoke(this);
 }
 
 void MultiMeshRenderer::start() {
@@ -57,13 +59,6 @@ void MultiMeshRenderer::initialize() {
     shader->initialize();
 
     initializeInstanceBuffer();
-}
-
-void MultiMeshRenderer::destroy() {
-    mesh->destroy();
-    shader->destroy();
-
-    multiMeshRendererDestroyedCall.invoke(this);
 }
 
 void MultiMeshRenderer::render() {
@@ -272,6 +267,10 @@ void MultiMeshRenderer::rotateInstance(const unsigned int _id, const Quaternion&
     const Matrix4x4 rotMatrix = Matrix4x4::rotateMatrix(_rot);
     const Matrix4x4 result = currentMatrixBuffer[_id] * rotMatrix;
     nextMatrixBuffer[_id] = result;
+}
+
+bool MultiMeshRenderer::isCurrentlyBeingDestroyed() {
+    return beingDestroyedFlag;
 }
 
 void MultiMeshRenderer::initializeInstanceBuffer() {

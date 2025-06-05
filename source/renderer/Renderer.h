@@ -21,6 +21,7 @@ class Renderer {
     public:
         static Action<void()> initRenderObjectCall;
         static Action<void()> destroyRenderObjectCall;
+        static Action<void()> cleanupRenderObjectsCall;
 
         Window* window = nullptr;
 
@@ -32,9 +33,9 @@ class Renderer {
         [[nodiscard]] bool isInitialized() const;
         bool isReadyForRender();
         bool testAndSetReadyForRender();
+        bool isSorting();
 
-        void waitForObjectDestruction();
-
+        void setReadyForCleanup();
 
         void setClearColor(float _r, float _g, float _b, float _a);
         void setClearColor(Color _c);
@@ -45,7 +46,8 @@ class Renderer {
 
         std::atomic<bool> initFlag = false;
         std::atomic<bool> readyForRenderFlag = false;
-        std::atomic<bool> waitingForObjectDestructionFlag = false;
+        std::atomic<bool> canStartCleanupFlag = false;
+        std::atomic<bool> duringSortFlag = false;
 
         std::vector<DirectionalLight*> dirLights;
         std::vector<PointLight*> pointLights;

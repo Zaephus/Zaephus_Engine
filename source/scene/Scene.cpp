@@ -49,8 +49,10 @@ void Scene::initialize() {
         internalUpdate();
     }
 
-    renderThread.join();
     handleExit();
+
+    renderThread.join();
+    delete renderer;
 }
 
 void Scene::handleSetup() {
@@ -59,14 +61,15 @@ void Scene::handleSetup() {
 }
 
 void Scene::handleExit() {
-    for(int i = static_cast<int>(gameObjects.size())-1; i >= 0; --i) {
-        gameObjects[i]->markForDestruction();
+    for(size_t i = 0; i < gameObjects.size(); i++) {
+        gameObjects[i]->destroy();
     }
     destroyObjectCall.invoke();
-    renderer->destroyRenderObjectCall.invoke();
 
     Input::dispose();
     ModelLoader::dispose();
+
+    renderer->setReadyForCleanup();
 
     GameObject::gameObjectCreatedCall.unbind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.unbind<Scene, &Scene::onGameObjectDestroyed>(this);
@@ -93,11 +96,10 @@ void Scene::internalUpdate() {
 
     Time::tick();
 
-    if(!destroyObjectCall.isEmpty()) {
-        while(!renderer->testAndSetReadyForRender()) {}
-        renderer->waitForObjectDestruction();
-        destroyObjectCall.invoke();
-    }
+    while(!renderer->isReadyForRender()) {}
+
+    destroyObjectCall.invoke();
+
     while(!renderer->testAndSetReadyForRender()) {}
 
     notifyEndOfFrame.invoke();

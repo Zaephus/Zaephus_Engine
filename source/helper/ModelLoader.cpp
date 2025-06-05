@@ -84,14 +84,12 @@ void ModelLoader::processNode(std::vector<Model*>* _models, const aiNode* _aiNod
     for(size_t i = 0; i < _aiNode->mNumMeshes; i++) {
         const aiMesh* loadedAiMesh = _aiScene->mMeshes[_aiNode->mMeshes[i]];
         Mesh* mesh = processMesh(loadedAiMesh);
-        mesh->bindToModel();
 
         Shader* shader = nullptr;
 
         if(_aiScene->HasMaterials()) {
             const aiMaterial* loadedMaterial = _aiScene->mMaterials[loadedAiMesh->mMaterialIndex];
             shader = processMaterial(loadedMaterial);
-            shader->bindToModel();
         }
 
         _models->push_back(new Model(mesh, shader));

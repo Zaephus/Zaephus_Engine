@@ -18,8 +18,6 @@ class Texture2D {
 
         Texture2D() = default;
 
-        ~Texture2D() = default;
-
         void initialize();
         void destroy();
 
@@ -34,14 +32,16 @@ class Texture2D {
         static Texture2D* load(const Color& _color, const TextureData& _data);
 
     private:
-        int boundAmount = 0;
-
         unsigned int id = 0;
         int unit = -1;
 
-        Color color;
+        Color color = Color::white();
 
         static std::vector<Texture2D*> loadedTextures;
+
+        ~Texture2D() = default;
+
+        void internalDestroy();
 
         unsigned char* loadFromDisk(int* _width, int* _height, int* _format) const;
         unsigned char* createFromColor(int* _width, int* _height, int* _format) const;

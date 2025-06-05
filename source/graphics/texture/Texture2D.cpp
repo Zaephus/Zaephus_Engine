@@ -8,10 +8,10 @@
 #include <stb_image.h>
 #include <glad/gl.h>
 
-void Texture2D::initialize() {
-    boundAmount++;
-    std::cout << "Texture is initialized: " << boundAmount << std::endl;
+#include "Action.h"
+#include "Renderer.h"
 
+void Texture2D::initialize() {
     if(id != 0) { return; }
 
     int width, height, format;
@@ -23,13 +23,17 @@ void Texture2D::initialize() {
     bindData(data, width, height, format);
 
     if(path != "") { stbi_image_free(data); }
+
+    Renderer::cleanupRenderObjectsCall.bind<Texture2D, &Texture2D::internalDestroy>(this);
 }
 
 void Texture2D::destroy() {
-    std::cout << "Texture is destroyed" << std::endl;
-    boundAmount--;
+    Renderer::destroyRenderObjectCall.bind<Texture2D, &Texture2D::internalDestroy>(this);
+}
 
-    if(boundAmount > 0) { return; }
+void Texture2D::internalDestroy() {
+    Renderer::destroyRenderObjectCall.unbind<Texture2D, &Texture2D::internalDestroy>(this);
+    Renderer::cleanupRenderObjectsCall.unbind<Texture2D, &Texture2D::internalDestroy>(this);
 
     glDeleteTextures(1, &id);
 
@@ -46,8 +50,6 @@ void Texture2D::setUnit(const int _textureUnit) {
 }
 
 unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) const {
-    std::cout << "Loaded a texture from disk: " << path << std::endl;
-
     int channelAmount;
 
     stbi_set_flip_vertically_on_load(data.flipVerticallyOnLoad);
@@ -64,8 +66,6 @@ unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) 
 }
 
 unsigned char* Texture2D::createFromColor(int* _width, int* _height, int* _format) const {
-    std::cout << "Created a texture from a color: " << color.toString() << std::endl;
-
     *_width = 1;
     *_height = 1;
     *_format = GL_RGBA;
@@ -90,8 +90,6 @@ void Texture2D::bindData(const unsigned char* _imageData, const int _width, cons
     if(_imageData) {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, GL_UNSIGNED_BYTE, _imageData);
         if(data.generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
-
-        loadedTextures.push_back(this);
     }
     else {
         std::cerr << "Failed to load texture!" << std::endl;
@@ -114,6 +112,8 @@ Texture2D* Texture2D::load(const std::string& _name, const TextureData& _data) {
     tex->path = path;
     tex->data = _data;
 
+    loadedTextures.push_back(tex);
+
     return tex;
 }
 
@@ -127,6 +127,8 @@ Texture2D* Texture2D::load(const Color& _color, const TextureData& _data) {
     Texture2D* tex = new Texture2D;
     tex->color = _color;
     tex->data = _data;
+
+    loadedTextures.push_back(tex);
 
     return tex;
 }

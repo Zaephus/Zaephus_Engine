@@ -23,19 +23,21 @@
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
-MeshRenderer::MeshRenderer() : Component(&Renderer::destroyRenderObjectCall) {}
-MeshRenderer::MeshRenderer(Mesh* _mesh) : Component(&Renderer::destroyRenderObjectCall) {
-    setMesh(_mesh);
-}
-
-MeshRenderer::MeshRenderer(const Model* _model) : Component(&Renderer::destroyRenderObjectCall) {
-    setMesh(_model->mesh);
-    setShader(_model->shader);
-}
-
-MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) : Component(&Renderer::destroyRenderObjectCall) {
+MeshRenderer::MeshRenderer() : MeshRenderer(nullptr, nullptr) {}
+MeshRenderer::MeshRenderer(Mesh* _mesh) : MeshRenderer(_mesh, nullptr) {}
+MeshRenderer::MeshRenderer(const Model* _model) : MeshRenderer(_model->mesh, _model->shader) {}
+MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
     setMesh(_mesh);
     setShader(_shader);
+}
+
+MeshRenderer::~MeshRenderer() {
+    beingDestroyedFlag = true;
+
+    mesh = nullptr;
+    shader = nullptr;
+
+    meshRendererDestroyedCall.invoke(this);
 }
 
 void MeshRenderer::initialize() {
@@ -43,13 +45,6 @@ void MeshRenderer::initialize() {
     shader->initialize();
 
     meshRendererCreatedCall.invoke(this);
-}
-
-void MeshRenderer::destroy() {
-    mesh->destroy();
-    shader->destroy();
-
-    meshRendererDestroyedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
@@ -88,3 +83,7 @@ void MeshRenderer::setShader(Shader* _shader) {
     shader = _shader;
 }
 Shader* MeshRenderer::getShader() const { return shader; }
+
+bool MeshRenderer::isCurrentlyBeingDestroyed() {
+    return beingDestroyedFlag;
+}

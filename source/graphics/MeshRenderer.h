@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "Component.h"
 #include "RenderObject.h"
 
@@ -21,6 +23,7 @@ class MeshRenderer : public Component, RenderObject {
         explicit MeshRenderer(Mesh* _mesh);
         explicit MeshRenderer(const Model* _model);
         MeshRenderer(Mesh* _mesh, Shader* _shader);
+        ~MeshRenderer() override;
 
         void render() const;
 
@@ -30,10 +33,14 @@ class MeshRenderer : public Component, RenderObject {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
+        bool isCurrentlyBeingDestroyed();
+
     protected:
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 
         void initialize() override;
-        void destroy() override;
+
+    private:
+        std::atomic<bool> beingDestroyedFlag = false;
 };

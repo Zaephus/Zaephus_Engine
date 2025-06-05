@@ -6,28 +6,36 @@
 
 #include "Action.h"
 #include "Component.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "Transform.h"
 
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();
 Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(GameObject*)>();
 
-GameObject::GameObject() : Destructible(&Scene::destroyObjectCall) {
+GameObject::GameObject() {
     transform = new Transform();
 
     gameObjectCreatedCall.invoke(this);
 }
 
-void GameObject::markForDestruction() {
-    Destructible::markForDestruction();
-
-    for(size_t i = 0; i < components.size(); i++) {
-        components[i]->markForDestruction();
-    }
+void GameObject::destroy() {
+    Scene::destroyObjectCall.bind<GameObject, &GameObject::internalDestroy>(this);
 }
 
-void GameObject::destroy() {
+void GameObject::internalDestroy() {
+    Scene::destroyObjectCall.unbind<GameObject, &GameObject::internalDestroy>(this);
+
+    while(Scene::activeScene->renderer->isSorting()) {}
+
     delete transform;
+    transform = nullptr;
+
+    for(size_t i = 0; i < components.size(); i++) {
+        delete components[i];
+    }
+
+    components.clear();
 
     gameObjectDestroyedCall.invoke(this);
 }
@@ -46,6 +54,6 @@ void GameObject::removeComponent(Component* _component) {
         return;
     }
 
-    _component->markForDestruction();
+    delete _component;
     components.erase(it);
 }

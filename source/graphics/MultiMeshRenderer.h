@@ -28,8 +28,7 @@ class MultiMeshRenderer : public Component, RenderObject {
         MultiMeshRenderer(Mesh* _mesh, unsigned int _instanceCount);
         MultiMeshRenderer(Model _model, unsigned int _instanceCount);
         MultiMeshRenderer(Mesh* _mesh, Shader* _shader, unsigned int _instanceCount);
-
-        void destroy() override;
+        ~MultiMeshRenderer() override;
 
         void render();
 
@@ -67,11 +66,15 @@ class MultiMeshRenderer : public Component, RenderObject {
         void rotateInstance(unsigned int _id, const Vector3& _eulerAngles);
         void rotateInstance(unsigned int _id, const Quaternion& _rot);
 
+        bool isCurrentlyBeingDestroyed();
+
     protected:
         void start() override;
         void initialize() override;
 
     private:
+        std::atomic<bool> beingDestroyedFlag = false;
+
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 

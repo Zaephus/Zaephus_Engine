@@ -5,7 +5,6 @@
 #include <typeinfo>
 #include <vector>
 
-#include "Destructible.h"
 #include "Object.h"
 
 template <typename T>
@@ -16,7 +15,7 @@ class Component;
 class Bounds;
 struct Vector2;
 
-class GameObject : public Object, public Destructible {
+class GameObject : public Object {
 
     public:
         static Action<void(GameObject*)> gameObjectCreatedCall;
@@ -31,9 +30,7 @@ class GameObject : public Object, public Destructible {
          * @note The game object is not destroyed immediately in order to avoid access violations.
          * It is destroyed before the start of the next frame.
          */
-        // void destroy();
-
-        void markForDestruction() override;
+        void destroy();
 
         /**
          * Adds a component to the game object.
@@ -66,5 +63,5 @@ class GameObject : public Object, public Destructible {
     private:
         std::vector<Component*> components;
 
-        void destroy() override;
+        void internalDestroy();
 };

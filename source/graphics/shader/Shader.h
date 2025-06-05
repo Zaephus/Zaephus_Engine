@@ -32,8 +32,6 @@ class Shader {
         void initialize();
         void destroy();
 
-        void bindToModel();
-
         void bind();
 
         void applyUniforms();
@@ -75,8 +73,6 @@ class Shader {
         static Shader* textureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
 
     private:
-        int boundAmount = 0;
-
         unsigned int id = 0;
 
         const char* vertexPath = "";
@@ -90,6 +86,8 @@ class Shader {
         static Shader* activeShader;
 
         ~Shader() = default;
+
+        void internalDestroy();
 
         static std::string load(const std::string& _fileName);
 

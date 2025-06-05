@@ -23,6 +23,7 @@
 
 Action<void()> Renderer::initRenderObjectCall = Action<void()>();
 Action<void()> Renderer::destroyRenderObjectCall = Action<void()>();
+Action<void()> Renderer::cleanupRenderObjectsCall = Action<void()>();
 
 void Renderer::initialize() {
     initFlag = false;
@@ -58,10 +59,12 @@ bool Renderer::testAndSetReadyForRender() {
     return val;
 }
 
-void Renderer::waitForObjectDestruction() {
-    // waitingForObjectDestructionFlag = true;
+bool Renderer::isSorting() {
+    return duringSortFlag;
+}
 
-    while(waitingForObjectDestructionFlag) {}
+void Renderer::setReadyForCleanup() {
+    canStartCleanupFlag = true;
 }
 
 void Renderer::setClearColor(float _r, float _g, float _b, float _a) { setClearColor({_r, _g, _b, _a}); }
@@ -88,11 +91,11 @@ void Renderer::handleSetup() {
 
     glEnable(GL_TEXTURE_2D);
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // glEnable(GL_DEPTH_TEST);
+    // glDepthFunc(GL_LESS);
+    //
+    // glEnable(GL_BLEND);
+    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     initFlag = true;
 }
@@ -100,7 +103,9 @@ void Renderer::handleSetup() {
 void Renderer::handleExit() {
     readyForRenderFlag = true;
 
-    destroyRenderObjectCall.invoke();
+    while(!canStartCleanupFlag) {}
+
+    cleanupRenderObjectsCall.invoke();
 
     pointLights.clear();
     meshRenderers.clear();
@@ -128,9 +133,7 @@ void Renderer::render() {
 
     while(readyForRenderFlag) {}
 
-    waitingForObjectDestructionFlag = true;
     destroyRenderObjectCall.invoke();
-    waitingForObjectDestructionFlag = false;
 
     initRenderObjectCall.invoke();
 
@@ -138,7 +141,7 @@ void Renderer::render() {
         changeClearColor();
     }
 
-    sortMeshRenderers();
+    // sortMeshRenderers();
 
     clearScreen();
 
@@ -176,11 +179,15 @@ void Renderer::renderObjects() const {
     }
 
     for(size_t i = 0; i < meshRenderers.size(); i++) {
+        if(meshRenderers[i]->isCurrentlyBeingDestroyed()) { continue; }
+
         setShaderData(meshRenderers[i]->getShader());
         meshRenderers[i]->render();
     }
 
     for(size_t i = 0; i < multiMeshRenderers.size(); i++) {
+        if(multiMeshRenderers[i]->isCurrentlyBeingDestroyed()) { continue; }
+
         setShaderData(multiMeshRenderers[i]->getShader());
         multiMeshRenderers[i]->render();
     }
@@ -212,7 +219,11 @@ void Renderer::sortMeshRenderers() {
     ZoneScopedNC("Renderer::SortMeshRenderers", 0x0062ff);
 #endif
 
+    duringSortFlag = true;
+
     std::ranges::sort(meshRenderers, meshRendererCompare);
+
+    duringSortFlag = false;
 }
 
 void Renderer::onPointLightCreated(PointLight* _light) {
@@ -251,7 +262,6 @@ void Renderer::onMeshRendererDestroyed(MeshRenderer* _renderer) {
             meshRenderers.erase(meshRenderers.begin() + i);
             meshRenderers.shrink_to_fit();
 
-            delete _renderer;
             return;
         }
     }
@@ -267,7 +277,6 @@ void Renderer::onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer) {
             multiMeshRenderers.erase(multiMeshRenderers.begin() + i);
             multiMeshRenderers.shrink_to_fit();
 
-            delete _renderer;
             return;
         }
     }

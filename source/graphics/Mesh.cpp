@@ -30,8 +30,6 @@ Mesh::Mesh(const std::vector<Vector3>& _positions,
 }
 
 void Mesh::initialize() {
-    boundAmount++;
-
     if(vertexArrayObject != 0 && vertexBufferObject != 0 && elementBufferObject != 0) { return; }
 
     if(isDynamic) { drawType = GL_DYNAMIC_DRAW; }
@@ -42,22 +40,23 @@ void Mesh::initialize() {
     initializeElementBuffer();
 
     setVertexAttributes();
+
+    Renderer::cleanupRenderObjectsCall.bind<Mesh, &Mesh::internalDestroy>(this);
 }
 
 void Mesh::destroy() {
-    boundAmount--;
+    Renderer::destroyRenderObjectCall.bind<Mesh, &Mesh::internalDestroy>(this);
+}
 
-    if(boundAmount > 0) { return; }
+void Mesh::internalDestroy() {
+    Renderer::destroyRenderObjectCall.unbind<Mesh, &Mesh::internalDestroy>(this);
+    Renderer::cleanupRenderObjectsCall.unbind<Mesh, &Mesh::internalDestroy>(this);
 
     glDeleteVertexArrays(1, &vertexArrayObject);
     glDeleteBuffers(1, &vertexBufferObject);
     glDeleteBuffers(1, &elementBufferObject);
 
     delete this;
-}
-
-void Mesh::bindToModel() {
-    boundAmount++;
 }
 
 void Mesh::bind() const {

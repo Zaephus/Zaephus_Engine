@@ -36,8 +36,6 @@ void Shader::initialize() {
     ZoneScopedNC("Shader::Initialize",0x006303);
 #endif
 
-    boundAmount++;
-
     if(id != 0) { return; }
 
     const std::string vertexCode = load(vertexPath);
@@ -51,12 +49,17 @@ void Shader::initialize() {
     for(Texture2D* boundTexture : boundTextures) {
         boundTexture->initialize();
     }
+
+    Renderer::cleanupRenderObjectsCall.bind<Shader, &Shader::internalDestroy>(this);
 }
 
 void Shader::destroy() {
-    boundAmount--;
+    Renderer::destroyRenderObjectCall.bind<Shader, &Shader::internalDestroy>(this);
+}
 
-    if(boundAmount > 0) { return; }
+void Shader::internalDestroy() {
+    Renderer::destroyRenderObjectCall.unbind<Shader, &Shader::internalDestroy>(this);
+    Renderer::cleanupRenderObjectsCall.unbind<Shader, &Shader::internalDestroy>(this);
 
     for(size_t i = 0; i < boundTextures.size(); i++) {
         boundTextures[i]->destroy();
@@ -66,10 +69,6 @@ void Shader::destroy() {
     glDeleteProgram(id);
 
     delete this;
-}
-
-void Shader::bindToModel() {
-    boundAmount++;
 }
 
 void Shader::bind() {

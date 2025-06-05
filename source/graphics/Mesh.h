@@ -39,8 +39,6 @@ class Mesh {
         void initialize();
         void destroy();
 
-        void bindToModel();
-
         void bind() const;
 
         void updateVertexData() const;
@@ -52,13 +50,14 @@ class Mesh {
         friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
     private:
-        int boundAmount = 0;
 
         unsigned int vertexArrayObject = 0;
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
 
         ~Mesh() = default;
+
+        void internalDestroy();
 
         [[nodiscard]] std::vector<Vertex> combineData() const;
 
