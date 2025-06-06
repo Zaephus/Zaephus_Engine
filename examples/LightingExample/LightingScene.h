@@ -81,7 +81,7 @@ class LightingScene final : public Scene {
             Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
 
             crate = new GameObject();
-            crate->addComponent(new MeshRenderer(cubeMesh, Shader::textureShader(
+            crate->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseTextureShader(
                 "container2.png",
                 "container2_specular.png",
                 32.0f

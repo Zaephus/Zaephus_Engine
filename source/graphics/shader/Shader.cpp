@@ -24,9 +24,9 @@
 
 Shader* Shader::activeShader = nullptr;
 
-Shader::Shader(const char* _fragmentPath) : Shader("ZE_BaseVertex.glsl", _fragmentPath) {}
+Shader::Shader(const std::string& _fragmentPath) : Shader("ZE_BaseVertex.glsl", _fragmentPath) {}
 
-Shader::Shader(const char* _vertexPath, const char* _fragmentPath) {
+Shader::Shader(const std::string& _vertexPath, const std::string& _fragmentPath) {
     vertexPath = _vertexPath;
     fragmentPath = _fragmentPath;
 }
@@ -189,11 +189,20 @@ bool Shader::isTransparent() const {
 Shader *Shader::unlitShader(const float _r, const float _g, const float _b, const float _a) {
     return unlitShader({ _r, _g, _b, _a } );
 }
-
 Shader* Shader::unlitShader(const Color& _c) {
     Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitFragment.glsl");
+    shader->setColor("material.color", _c);
 
-    shader->setColor("objectColor", _c);
+    return shader;
+}
+
+Shader* Shader::unlitTextureShader(const std::string& _texturePath) {
+    Texture2D* diffuse = Texture2D::load(_texturePath);
+    return unlitTextureShader(diffuse);
+}
+Shader* Shader::unlitTextureShader(Texture2D* _texture) {
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitTextureFragment.glsl");
+    shader->setTexture2D("material.diffuse", _texture);
 
     return shader;
 }
@@ -219,14 +228,51 @@ Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
     return shader;
 }
 
+Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
+    Texture2D* diffuse = Texture2D::load(_diffusePath);
+    Texture2D* specular = Texture2D::load(_specularPath);
+
+    return diffuseTextureShader(diffuse, specular, _shininess);
+}
+Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
+    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_DiffuseTextureFragment.glsl");
+
+    shader->setTexture2D("material.diffuse", _diffuse);
+    shader->setTexture2D("material.specular", _specular);
+    shader->setFloat("material.shininess", _shininess);
+
+    return shader;
+}
+
+Shader *Shader::instancedUnlitShader(const float _r, const float _g, const float _b, const float _a) {
+    return instancedUnlitShader({ _r, _g, _b, _a } );
+}
+Shader* Shader::instancedUnlitShader(const Color& _c) {
+    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_UnlitFragment.glsl");
+    shader->setColor("material.color", _c);
+
+    return shader;
+}
+
+Shader* Shader::instancedUnlitTextureShader(const std::string& _texturePath) {
+    Texture2D* diffuse = Texture2D::load(_texturePath);
+    return instancedUnlitTextureShader(diffuse);
+}
+Shader* Shader::instancedUnlitTextureShader(Texture2D* _texture) {
+    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_UnlitTextureFragment.glsl");
+    shader->setTexture2D("material.diffuse", _texture);
+
+    return shader;
+}
+
 Shader* Shader::instancedDiffuseShader(const float _r, const float _g, const float _b, const float _a) {
-    return diffuseShader({ _r, _g, _b, _a });
+    return instancedDiffuseShader({ _r, _g, _b, _a });
 }
 Shader* Shader::instancedDiffuseShader(const float _r, const float _g, const float _b, const float _a, const float _shininess) {
-    return diffuseShader({ _r, _g, _b, _a }, _shininess);
+    return instancedDiffuseShader({ _r, _g, _b, _a }, _shininess);
 }
 Shader* Shader::instancedDiffuseShader(const Color& _c) {
-    return diffuseShader(_c, 32.0f);
+    return instancedDiffuseShader(_c, 32.0f);
 }
 Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) {
     Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_DiffuseFragment.glsl");
@@ -240,15 +286,14 @@ Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) 
     return shader;
 }
 
-Shader* Shader::textureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
+Shader* Shader::instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
     Texture2D* diffuse = Texture2D::load(_diffusePath);
     Texture2D* specular = Texture2D::load(_specularPath);
 
-    return textureShader(diffuse, specular, _shininess);
+    return instancedDiffuseTextureShader(diffuse, specular, _shininess);
 }
-
-Shader* Shader::textureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_TextureFragment.glsl");
+Shader* Shader::instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
+    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_DiffuseTextureFragment.glsl");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
@@ -290,7 +335,7 @@ unsigned int Shader::compile(const std::string& _code, const GLenum _shaderType)
         char infoLog[512];
         glGetShaderInfoLog(shader, 512, nullptr, infoLog);
         std::string type = _shaderType == GL_FRAGMENT_SHADER ? "fragment" : "vertex";
-        throw std::runtime_error(std::format("Shader {0} compilation failed:\n {1}", type,infoLog));
+        throw std::runtime_error(std::format("Shader {0}, {1}, compilation failed:\n {2}", type, type == "fragment" ? fragmentPath : vertexPath, infoLog));
     }
 
     return shader;
@@ -308,7 +353,7 @@ unsigned int Shader::createProgram(const unsigned int& _vertexShader, const unsi
     if(!success) {
         char infoLog[512];
         glGetProgramInfoLog(id, 512, nullptr, infoLog);
-        throw std::runtime_error(std::format("Shader program linking failed:\n {0}", infoLog));
+        throw std::runtime_error(std::format("Shader program {0}, {1} linking failed:\n {2}", vertexPath, fragmentPath, infoLog));
     }
 
     glDeleteShader(_vertexShader);

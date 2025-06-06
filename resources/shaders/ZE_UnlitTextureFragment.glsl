@@ -2,7 +2,7 @@
 #version 330 core
 
 struct Material {
-    vec4 color;
+    sampler2D texture;
 };
 uniform Material material;
 
@@ -14,5 +14,5 @@ in vec3 normal;
 in vec2 uv;
 
 void main() {
-    fragColor = material.color;
+    fragColor = texture(material.texture, uv);
 }
