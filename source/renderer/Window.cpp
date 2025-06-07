@@ -58,7 +58,7 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
         glfwSetInputMode(glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
-    if(!gladLoaderLoadGL((GLADloadfunc) glfwGetProcAddress)) {
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD!" << std::endl;
         return;
     }
@@ -151,7 +151,7 @@ void Window::createContext(const int _w, const int _h, const std::string& _title
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glfwSetCursorPos(window, 0.0f, 0.0f);
 
-    if(!gladLoaderLoadGL((GLADloadfunc) glfwGetProcAddress)) {
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD!" << std::endl;
         return;
     }

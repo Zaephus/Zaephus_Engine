@@ -34,7 +34,7 @@ Scene::Scene() {
 void Scene::initialize() {
     handleSetup();
 
-    std::thread renderThread(Renderer::initialize, renderer);
+    std::thread renderThread(&Renderer::initialize, renderer);
 
     while(!renderer->isInitialized()) {}
 

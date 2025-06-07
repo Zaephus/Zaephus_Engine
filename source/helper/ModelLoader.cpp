@@ -5,9 +5,6 @@
 #include <sstream>
 
 #include <ZMath.h>
-#include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
-#include <assimp/scene.h>
 
 #include "Color.h"
 #include "Mesh.h"

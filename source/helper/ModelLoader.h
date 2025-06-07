@@ -5,11 +5,9 @@
 #include <string>
 #include <vector>
 
-class aiMaterial;
-class aiMesh;
-class aiNode;
-class aiScene;
-namespace Assimp { class Importer; }
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 class Mesh;
 class MeshRenderer;
@@ -46,6 +44,5 @@ class ModelLoader {
         static Mesh* processMesh(const aiMesh* _aiMesh);
         static Shader* processMaterial(const aiMaterial* _mat);
 
-        // TODO: Add texture support for loading materials.
         static Texture2D* loadTexture(const aiMaterial* _mat, unsigned int _type);
 };
