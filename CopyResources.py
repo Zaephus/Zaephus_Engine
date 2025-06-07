@@ -28,8 +28,6 @@ def copy_from_source(_root_dir):
         if shouldSkip:
             continue
 
-        print(path)
-
         for file in files:
             name, ext = os.path.splitext(file)
 
