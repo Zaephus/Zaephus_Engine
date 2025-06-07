@@ -4,8 +4,9 @@ import shutil
 import sys
 
 targetDir = sys.argv[1] + "/resources"
-sourceDir = sys.argv[2]
-gameDir = sys.argv[3]
+projectDir = sys.argv[2]
+sourceDir = sys.argv[3]
+gameDir = sys.argv[4]
 
 if not os.path.exists(targetDir):
     os.mkdir(targetDir)
@@ -14,8 +15,20 @@ modelDir = targetDir + "/models"
 shaderDir = targetDir + "/shaders"
 textureDir = targetDir + "/textures"
 
+excludedDirs = [".git", ".idea", ".vs", ".vscode", "cmake-build-debug", "cmake-build-release", "cmake-build-relwithprofiler", "cmake-build-relwithdebinfo", "build", "include"]
+
 def copy_from_source(_root_dir):
-    for path, subdirs, files in os.walk(_root_dir):
+    for path, subdirs, files in os.walk(_root_dir, True):
+        shouldSkip = False
+        for excludedDir in excludedDirs:
+            if path == projectDir + "\\" + excludedDir:
+                shouldSkip = True
+                subdirs[:] = []
+
+        if shouldSkip:
+            continue
+
+        print(path)
 
         for file in files:
             name, ext = os.path.splitext(file)
