@@ -28,17 +28,17 @@ Action<void()> Renderer::cleanupRenderObjectsCall = Action<void()>();
 void Renderer::initialize() {
     initFlag = false;
 
-#ifdef ENABLE_PROFILING
-    tracy::SetThreadName("Render Thread");
-#endif
+// #ifdef ENABLE_PROFILING
+//     tracy::SetThreadName("Render Thread");
+// #endif
 
     handleSetup();
 
-    while(!shouldExit) {
-        render();
-    }
+    // while(!shouldExit) {
+    //     render();
+    // }
 
-    handleExit();
+    // handleExit();
 }
 
 bool Renderer::isInitialized() const {
@@ -103,7 +103,7 @@ void Renderer::handleSetup() {
 void Renderer::handleExit() {
     readyForRenderFlag = true;
 
-    while(!canStartCleanupFlag) {}
+    // while(!canStartCleanupFlag) {}
 
     cleanupRenderObjectsCall.invoke();
 
@@ -131,7 +131,7 @@ void Renderer::render() {
     ZoneScopedNC("Renderer::Render", 0x0062ff);
 #endif
 
-    while(readyForRenderFlag) {}
+    // while(readyForRenderFlag) {}
 
     destroyRenderObjectCall.invoke();
 

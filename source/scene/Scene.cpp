@@ -34,9 +34,10 @@ Scene::Scene() {
 void Scene::initialize() {
     handleSetup();
 
-    std::thread renderThread(&Renderer::initialize, renderer);
+    // std::thread renderThread(&Renderer::initialize, renderer);
+    renderer->initialize();
 
-    while(!renderer->isInitialized()) {}
+    // while(!renderer->isInitialized()) {}
 
     Input::initialize();
 
@@ -51,7 +52,7 @@ void Scene::initialize() {
 
     handleExit();
 
-    renderThread.join();
+    // renderThread.join();
     delete renderer;
 }
 
@@ -69,7 +70,8 @@ void Scene::handleExit() {
     Input::dispose();
     ModelLoader::dispose();
 
-    renderer->setReadyForCleanup();
+    // renderer->setReadyForCleanup();
+    renderer->handleExit();
 
     GameObject::gameObjectCreatedCall.unbind<Scene, &Scene::onGameObjectCreated>(this);
     GameObject::gameObjectDestroyedCall.unbind<Scene, &Scene::onGameObjectDestroyed>(this);
@@ -96,11 +98,12 @@ void Scene::internalUpdate() {
 
     Time::tick();
 
-    while(!renderer->isReadyForRender()) {}
+    // while(!renderer->isReadyForRender()) {}
 
     destroyObjectCall.invoke();
 
-    while(!renderer->testAndSetReadyForRender()) {}
+    // while(!renderer->testAndSetReadyForRender()) {}
+    renderer->render();
 
     notifyEndOfFrame.invoke();
 

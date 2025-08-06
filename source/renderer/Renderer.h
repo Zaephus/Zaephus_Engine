@@ -29,6 +29,8 @@ class Renderer {
         bool shouldExit = false;
 
         void initialize();
+        void render();
+        void handleExit();
 
         [[nodiscard]] bool isInitialized() const;
         bool isReadyForRender();
@@ -56,8 +58,6 @@ class Renderer {
         std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
         void handleSetup();
-        void handleExit();
-        void render();
 
         void changeClearColor();
 
