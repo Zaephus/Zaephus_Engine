@@ -40,8 +40,9 @@ class CubesScene final : public Scene {
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 75.0f };
-            cam->addComponent(new DebugCameraController());
+            cam->transform->position = { 35.0f, 35.0f, 75.0f };
+            cam->transform->rotate(-20.0f, 20.0f, 0.0f);
+            // cam->addComponent(new DebugCameraController());
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
