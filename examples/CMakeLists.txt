@@ -31,3 +31,8 @@ add_executable(grassExample
     GrassExample/main.cpp
     GrassExample/GrassScene.h
 )
+
+add_executable(paperTest
+    PaperTest/main.cpp
+    PaperTest/TestScene.h
+)
