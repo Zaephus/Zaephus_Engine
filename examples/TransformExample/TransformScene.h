@@ -1,11 +1,11 @@
 
 #pragma once
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 class TransformScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -17,17 +17,18 @@ class TransformScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
+            light = new DirectionalLight();
             light-> name = "main_light";
-            light->transform->position = {1.0f, 2.0f, 3.0f };
+            light->transform->rotation = Quaternion::fromEuler({ -45.0f, 30.0f, 0.0f });
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 3.5f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+            cam->transform->position = { 0.0f, 0.0f, 4.5f };
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
-            Mesh* cubeMesh = models[0].mesh;
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0]->mesh;
 
             parent = new GameObject();
             parent->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(
@@ -46,7 +47,6 @@ class TransformScene final : public Scene {
             child->transform->parent = parent->transform;
             child->transform->position = { -0.75f, 0.0f, 0.0f };
             child->transform->scale = Vector3::one() * 0.5f;
-
         }
 
         void update() override {

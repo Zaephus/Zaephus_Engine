@@ -6,6 +6,7 @@ class Time {
         static float deltaTime;
 
         static void tick();
+        static float currentTime();
 
         static long long int milliseconds();
         static long long int microseconds();

@@ -11,12 +11,11 @@ struct Vector4;
 struct Matrix4x4;
 
 struct Vertex;
-class Color;
+struct Color;
 
 class Shader;
 
 class Mesh {
-
     public:
         std::vector<Vector3> positions;
         std::vector<Color> colors;
@@ -37,9 +36,9 @@ class Mesh {
              const std::vector<Vector3>& _normals,
              const std::vector<unsigned int>& _indices);
 
-        ~Mesh();
-
         void initialize();
+        void destroy();
+
         void bind() const;
 
         void updateVertexData() const;
@@ -51,9 +50,14 @@ class Mesh {
         friend bool operator!=(const Mesh& _lhs, const aiMesh& _rhs);
 
     private:
+
         unsigned int vertexArrayObject = 0;
         unsigned int vertexBufferObject = 0;
         unsigned int elementBufferObject = 0;
+
+        ~Mesh() = default;
+
+        void internalDestroy();
 
         [[nodiscard]] std::vector<Vertex> combineData() const;
 

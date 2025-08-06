@@ -1,32 +1,39 @@
 
 #pragma once
 
-#include <thread>
 #include <vector>
 
-template <typename T>
-class Action;
+#include "Action.h"
 
 class Window;
 class GameObject;
 class MeshRenderer;
 class MultiMeshRenderer;
-class Light;
+class PointLight;
+class Renderer;
+
+struct RenderBuffer;
 
 class Scene {
     public:
-        Window* window = nullptr;
-        std::vector<GameObject*> gameObjects;
-
         static Scene* activeScene;
 
+        static Action<void()> startObjectCall;
+        static Action<void()> updateObjectCall;
+        static Action<void()> destroyObjectCall;
+
+        Action<void()> notifyEndOfFrame = Action<void()>();
+
+        std::vector<GameObject*> gameObjects;
+
+        Renderer* renderer = nullptr;
+
         Scene();
-        virtual ~Scene() = 0;
+        virtual ~Scene() = default;
 
         void initialize();
 
-        static Action<void()> startGameObjectCall;
-        static Action<void()> updateGameObjectCall;
+        [[nodiscard]] Window* getWindow() const;
 
     protected:
         virtual void start() = 0;
@@ -35,36 +42,14 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
-        std::vector<GameObject*> gameObjectsToDestroy;
-
-        std::vector<Light*> lights;
-        std::vector<MeshRenderer*> opaques;
-        std::vector<MeshRenderer*> transparents;
-
-        std::vector<MultiMeshRenderer*> multiOpaques;
-
         void handleSetup();
+        void handleExit();
+
         void internalStart();
         void internalUpdate();
 
-        void handleDestroyingGameObjects();
-
         void setupAxis();
-        void setupLights() const;
-
-        void sortTransparents();
-
-        void render();
 
         void onGameObjectCreated(GameObject* _gameObject);
         void onGameObjectDestroyed(GameObject* _gameObject);
-
-        void onLightCreated(Light* _light);
-        void onLightDestroyed(Light* _light);
-
-        void onMeshRendererCreated(MeshRenderer* _renderer);
-        void onMeshRendererDestroyed(MeshRenderer* _renderer);
-
-        void onMultiMeshRendererCreated(MultiMeshRenderer* _renderer);
-        void onMultiMeshRendererDestroyed(MultiMeshRenderer* _renderer);
 };

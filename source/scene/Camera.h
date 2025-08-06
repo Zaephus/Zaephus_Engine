@@ -11,9 +11,7 @@ class Color;
 struct Vector3;
 
 class Camera : public GameObject {
-
     public:
-
         enum ProjectionType {
             none,
             perspective,
@@ -27,28 +25,21 @@ class Camera : public GameObject {
         float near = 0.1f;
         float far = 100.0f;
 
-        float speed = 3.0f;
-        float mouseSensitivity = 75.0f;
-
         bool projectionChanged = false;
 
         Camera();
+        ~Camera();
 
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
         [[nodiscard]] Matrix4x4 viewMatrix() const;
-
-        void setClearColor(float _r, float _g, float _b, float _a);
-        void setClearColor(Color _c);
 
         void setAsActive();
         void onWindowResized(int _w, int _h);
 
         [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos) const;
+        [[nodiscard]] Vector3 screenToWorldPos(const Vector2& _screenPos, float _depth) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos) const;
         [[nodiscard]] RayCast3D screenToRay(const Vector2& _screenPos, bool _oneShot) const;
-
-        void onKeyPressed(int _key, int _action);
-        void onCursorMovement(Vector2 _mouseDelta);
 
         static Camera* activeCam;
 

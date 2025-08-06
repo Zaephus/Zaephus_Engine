@@ -12,9 +12,12 @@ function(CopyResources target dir)
     add_custom_command(
         TARGET ${target}
         PRE_BUILD
-        COMMAND ${Python_EXECUTABLE} ${ENGINE_PATH}/CopyResources.py ${CMAKE_BINARY_DIR} ${ENGINE_PATH}/resources ${dir}
+        COMMAND python ${ENGINE_PATH}/CopyResources.py ${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR} ${ENGINE_PATH}/resources ${dir}
     )
 endfunction()
+
+message(STATUS ${ENGINE_PATH})
+message(STATUS ${CMAKE_SOURCE_DIR})
 
 set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include CACHE STRING "" FORCE)
 
@@ -71,3 +74,10 @@ target_include_directories(Zaephus_Engine PUBLIC
     ${INCLUDE_DIR}/Zaephus_Math/source
     source
 )
+
+if(NOT ${ENGINE_PATH} EQUAL ${CMAKE_SOURCE_DIR})
+    add_custom_target(copy_resources ALL)
+    CopyResources(copy_resources ${CMAKE_SOURCE_DIR})
+
+    add_dependencies(Zaephus_Engine copy_resources)
+endif()

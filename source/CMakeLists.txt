@@ -12,7 +12,7 @@ add_subdirectory(graphics)
 add_subdirectory(helper)
 add_subdirectory(objects)
 add_subdirectory(physics)
-add_subdirectory(program)
+add_subdirectory(renderer)
 add_subdirectory(scene)
 
 target_include_directories(Zaephus_Engine PUBLIC
@@ -20,6 +20,6 @@ target_include_directories(Zaephus_Engine PUBLIC
     helper
     objects
     physics
-    program
+    renderer
     scene
 )

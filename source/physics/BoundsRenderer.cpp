@@ -15,19 +15,34 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
 
     boundsMesh->isDynamic = true;
 
-    const std::vector<Vector3> newVertices {
-        bounds->getBottomLeftFront(),
-        bounds->getBottomRightFront(),
-        bounds->getTopLeftFront(),
-        bounds->getTopRightFront(),
-        bounds->getBottomLeftBack(),
-        bounds->getBottomRightBack(),
-        bounds->getTopLeftBack(),
-        bounds->getTopRightBack()
-    };
-    boundsMesh->positions = newVertices;
+    boundsMesh->positions = calculateVertices();
+    boundsMesh->indices   = calculateIndices();
 
-    const std::vector<unsigned int> newIndices {
+    setMesh(boundsMesh);
+
+    setShader(Shader::unlitShader(Color::yellow()));
+    shader->drawAsWireframe = true;
+}
+
+void BoundsRenderer::update() {
+    mesh->positions = calculateVertices();
+}
+
+std::vector<Vector3> BoundsRenderer::calculateVertices() const {
+    return {
+        bounds->getBottomLeftFront() * 1.00001,
+        bounds->getBottomRightFront() * 1.00001,
+        bounds->getTopLeftFront() * 1.00001,
+        bounds->getTopRightFront() * 1.00001,
+        bounds->getBottomLeftBack() * 1.00001,
+        bounds->getBottomRightBack() * 1.00001,
+        bounds->getTopLeftBack() * 1.00001,
+        bounds->getTopRightBack() * 1.00001
+    };
+}
+
+std::vector<unsigned int> BoundsRenderer::calculateIndices() const {
+    return {
         //Top
         2, 6, 7,
         2, 3, 7,
@@ -52,24 +67,4 @@ BoundsRenderer::BoundsRenderer(Bounds* _bounds) {
         4, 6, 7,
         4, 5, 7
     };
-    boundsMesh->indices = newIndices;
-
-    setMesh(boundsMesh);
-
-    setShader(Shader::unlitShader(Color::yellow()));
-    shader->drawAsWireframe = true;
-}
-
-void BoundsRenderer::update() {
-    const std::vector<Vector3> newVertices {
-        bounds->getBottomLeftFront(),
-        bounds->getBottomRightFront(),
-        bounds->getTopLeftFront(),
-        bounds->getTopRightFront(),
-        bounds->getBottomLeftBack(),
-        bounds->getBottomRightBack(),
-        bounds->getTopLeftBack(),
-        bounds->getTopRightBack()
-    };
-    mesh->positions = newVertices;
 }

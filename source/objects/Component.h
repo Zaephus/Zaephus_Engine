@@ -10,6 +10,4 @@ class Component : public Object {
     public:
         GameObject* gameObject = nullptr;
         Transform* transform = nullptr;
-
-        ~Component() override = default;
 };

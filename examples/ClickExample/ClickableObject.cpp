@@ -7,6 +7,9 @@ ClickableObject::ClickableObject() {
     addComponent(new Bounds());
 }
 
+void ClickableObject::start() {
+    shader = getComponent<MeshRenderer>()->getShader();
+}
 
 void ClickableObject::update() {
     if(isClicked) {
@@ -17,10 +20,7 @@ void ClickableObject::update() {
             timer = 0.0f;
             isClicked = false;
 
-            const MeshRenderer* renderer = getComponent<MeshRenderer>();
-            if(renderer != nullptr) {
-                renderer->getShader()->setColor("material.color", oldColor);
-            }
+            shader->setColor("material.color", oldColor);
         }
     }
 }
@@ -30,10 +30,7 @@ void ClickableObject::clicked() {
         isClicked = true;
         timer = maxTime;
 
-        const MeshRenderer* renderer = getComponent<MeshRenderer>();
-        if(renderer != nullptr) {
-            oldColor = renderer->getShader()->getColor("material.color");
-            renderer->getShader()->setColor("material.color", clickedColor);
-        }
+        oldColor = shader->getColor("material.color");
+        shader->setColor("material.color", clickedColor);
     }
 }

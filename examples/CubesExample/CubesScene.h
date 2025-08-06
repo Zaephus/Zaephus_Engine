@@ -4,15 +4,15 @@
 #include <vector>
 #include <thread>
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 #ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
 #endif
 
 class CubesScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -21,10 +21,10 @@ class CubesScene final : public Scene {
     GameObject* multiCube = nullptr;
     MultiMeshRenderer* multiRenderer = nullptr;
 
-    int cubeAmount = 1'000'000;
+    unsigned int cubeAmount = 1'000'000;
     float size = 25.0f;
 
-    int numThreads = 1;
+    unsigned int numThreads = 1;
 
     public:
         void start() override {
@@ -34,21 +34,25 @@ class CubesScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
-            light-> name = "main_light";
+            light = new DirectionalLight();
+            light->name = "main_light";
+            light->transform->rotate(-55.0f, 30.0f, 0.0f);
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.0f, 75.0f };
-            cam->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
+            cam->transform->position = { 35.0f, 35.0f, 75.0f };
+            cam->transform->rotate(-20.0f, 20.0f, 0.0f);
+            // cam->addComponent(new DebugCameraController());
+
+            renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             cubeShader = Shader::instancedDiffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
                 4.0f
             );
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
-            Mesh* cubeMesh = models[0].mesh;
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0]->mesh;
 
             multiCube = new GameObject();
             multiRenderer = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);
@@ -71,11 +75,11 @@ class CubesScene final : public Scene {
 
             std::vector<std::thread> threads;
 
-            const int chunkSize = cubeAmount / numThreads;
+            const unsigned int chunkSize = cubeAmount / numThreads;
 
             for(size_t i = 0; i < numThreads; i++) {
-                int start = i * chunkSize;
-                int length = chunkSize;
+                unsigned int start = i * chunkSize;
+                unsigned int length = chunkSize;
 
                 threads.emplace_back(&CubesScene::rotateCubes, this, start, length);
             }

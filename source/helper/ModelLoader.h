@@ -5,11 +5,9 @@
 #include <string>
 #include <vector>
 
-class aiMaterial;
-class aiMesh;
-class aiNode;
-class aiScene;
-namespace Assimp { class Importer; }
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 
 class Mesh;
 class MeshRenderer;
@@ -21,6 +19,7 @@ struct Model;
 class ModelLoader {
     public:
         enum primitiveType {
+            arrow,
             cube,
             quad,
             cylinder,
@@ -29,20 +28,21 @@ class ModelLoader {
             torus
         };
 
-        static std::vector<Model> load(primitiveType _type);
-        static std::vector<Model> load(primitiveType _type, bool _loadUnique);
-        static std::vector<Model> load(const std::string& _fileName);
-        static std::vector<Model> load(const std::string& _fileName, bool _loadUnique);
+        static std::vector<Model*> load(primitiveType _type);
+        static std::vector<Model*> load(primitiveType _type, bool _loadUnique);
+        static std::vector<Model*> load(const std::string& _fileName);
+        static std::vector<Model*> load(const std::string& _fileName, bool _loadUnique);
+
+        static void dispose();
 
     private:
-        static std::map<std::string, std::vector<Model>> loadedModels;
+        static std::map<std::string, std::vector<Model*>> loadedModels;
 
         static bool isSceneValid(const aiScene* _scene, const Assimp::Importer* _importer);
 
-        static void processNode(std::vector<Model>* _models, const aiNode* _aiNode, const aiScene* _aiScene);
+        static void processNode(std::vector<Model*>* _models, const aiNode* _aiNode, const aiScene* _aiScene);
         static Mesh* processMesh(const aiMesh* _aiMesh);
-        static Shader* processMaterial(const aiMaterial* _aiMaterial);
+        static Shader* processMaterial(const aiMaterial* _mat);
 
-        // TODO: Add texture support for loading materials.
-        // static Texture2D* loadTexture(const Mesh* _model, const aiMaterial* _material, unsigned int _type);
+        static Texture2D* loadTexture(const aiMaterial* _mat, unsigned int _type);
 };

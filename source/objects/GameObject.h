@@ -24,11 +24,11 @@ class GameObject : public Object {
         Transform* transform = nullptr;
 
         GameObject();
-        ~GameObject() override;
 
         /**
          * Marks this game object to be destroyed.
-         * @note The game object is not destroyed immediately in order to avoid access violations. It is destroyed before the start of the next frame.
+         * @note The game object is not destroyed immediately in order to avoid access violations.
+         * It is destroyed before the start of the next frame.
          */
         void destroy();
 
@@ -39,10 +39,10 @@ class GameObject : public Object {
         void addComponent(Component* _component);
 
         /**
-         * Removes a component from the game object.
+         * Removes and destroys a component from the game object.
          * @param _component The component you want to remove.
          */
-        void removeComponent(const Component* _component);
+        void removeComponent(Component* _component);
 
         /**
          * Finds and returns a component of type T.
@@ -62,4 +62,6 @@ class GameObject : public Object {
 
     private:
         std::vector<Component*> components;
+
+        void internalDestroy();
 };
