@@ -1,10 +1,10 @@
 
 #pragma once
 
-class RenderItem {
+class RenderObject {
     public:
-        RenderItem();
-        virtual ~RenderItem();
+        RenderObject();
+        virtual ~RenderObject();
 
     protected:
         virtual void initialize() {}

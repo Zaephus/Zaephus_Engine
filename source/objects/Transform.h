@@ -31,6 +31,8 @@ class Transform {
         void lookAt(const Vector3& _point);
         void lookAt(const Vector3& _point, const Vector3& _up);
 
+        [[nodiscard]] Vector3 globalPosition() const;
+
         [[nodiscard]] Vector3 right() const;
         [[nodiscard]] Vector3 forward() const;
         [[nodiscard]] Vector3 up() const;

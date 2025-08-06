@@ -4,15 +4,15 @@
 #include <vector>
 #include <thread>
 
-#include <ZMath.h>
 #include <ZEngine.h>
+#include <ZMath.h>
 
 #ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
 #endif
 
 class CubesScene final : public Scene {
-    Light* light = nullptr;
+    DirectionalLight* light = nullptr;
 
     Camera* cam = nullptr;
 
@@ -34,12 +34,14 @@ class CubesScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            light = new Light();
-            light-> name = "main_light";
+            light = new DirectionalLight();
+            light->name = "main_light";
+            light->transform->rotate(-55.0f, 30.0f, 0.0f);
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 1000.0f);
             cam->name = "camera";
             cam->transform->position = { 0.0f, 0.0f, 75.0f };
+            cam->addComponent(new DebugCameraController());
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
@@ -48,8 +50,8 @@ class CubesScene final : public Scene {
                 4.0f
             );
 
-            const std::vector<Model> models = ModelLoader::load(ModelLoader::cube, true);
-            Mesh* cubeMesh = models[0].mesh;
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
+            Mesh* cubeMesh = models[0]->mesh;
 
             multiCube = new GameObject();
             multiRenderer = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);

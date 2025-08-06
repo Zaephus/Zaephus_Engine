@@ -9,7 +9,7 @@ class Window;
 class GameObject;
 class MeshRenderer;
 class MultiMeshRenderer;
-class Light;
+class PointLight;
 class Renderer;
 
 struct RenderBuffer;
@@ -20,6 +20,7 @@ class Scene {
 
         static Action<void()> startObjectCall;
         static Action<void()> updateObjectCall;
+        static Action<void()> destroyObjectCall;
 
         Action<void()> notifyEndOfFrame = Action<void()>();
 
@@ -28,7 +29,7 @@ class Scene {
         Renderer* renderer = nullptr;
 
         Scene();
-        virtual ~Scene() = 0;
+        virtual ~Scene() = default;
 
         void initialize();
 
@@ -41,13 +42,11 @@ class Scene {
         bool shouldRenderAxis = false;
 
     private:
-        std::vector<GameObject*> gameObjectsToDestroy;
-
         void handleSetup();
+        void handleExit();
+
         void internalStart();
         void internalUpdate();
-
-        void handleDestroyingGameObjects();
 
         void setupAxis();
 

@@ -5,11 +5,13 @@
 #include <string>
 #include <vector>
 
-class ShaderUniformItem;
-class Color;
-class Texture2D;
-class Light;
+#include "ShaderUniformItem.h"
 
+class DirectionalLight;
+class Texture2D;
+class PointLight;
+
+struct Color;
 struct Vector3;
 struct Matrix4x4;
 
@@ -24,11 +26,12 @@ class Shader {
         bool depthTestEnabled = true;
         bool drawAsWireframe = false;
 
-        explicit Shader(const char* _fragmentPath);
-        Shader(const char* _vertexPath, const char* _fragmentPath);
-        ~Shader();
+        explicit Shader(const std::string& _fragmentPath);
+        Shader(const std::string& _vertexPath, const std::string& _fragmentPath);
 
         void initialize();
+        void destroy();
+
         void bind();
 
         void applyUniforms();
@@ -48,31 +51,44 @@ class Shader {
         void setMatrix4x4(const std::string& _name, const Matrix4x4& _value);
         void setTexture2D(const std::string& _name, Texture2D* _texture);
 
-        void setLight(const std::string& _name, const Light* _light);
+        void setDirLight(const std::string& _name, const DirectionalLight* _light);
+        void setPointLight(const std::string& _name, const PointLight* _light);
 
         [[nodiscard]] bool isTransparent() const;
 
         static Shader* unlitShader(float _r, float _g, float _b, float _a);
         static Shader* unlitShader(const Color& _c);
 
+        static Shader* unlitTextureShader(const std::string& _texturePath);
+        static Shader* unlitTextureShader(Texture2D* _texture);
+
         static Shader* diffuseShader(float _r, float _g, float _b, float _a);
         static Shader* diffuseShader(float _r, float _g, float _b, float _a, float _shininess);
         static Shader* diffuseShader(const Color& _c);
         static Shader* diffuseShader(const Color& _c, float _shininess);
+
+        static Shader* diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _shininess);
+        static Shader* diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
+
+        static Shader* instancedUnlitShader(float _r, float _g, float _b, float _a);
+        static Shader* instancedUnlitShader(const Color& _c);
+
+        static Shader* instancedUnlitTextureShader(const std::string& _texturePath);
+        static Shader* instancedUnlitTextureShader(Texture2D* _texture);
 
         static Shader* instancedDiffuseShader(float _r, float _g, float _b, float _a);
         static Shader* instancedDiffuseShader(float _r, float _g, float _b, float _a, float _shininess);
         static Shader* instancedDiffuseShader(const Color& _c);
         static Shader* instancedDiffuseShader(const Color& _c, float _shininess);
 
-        static Shader* textureShader(const std::string& _diffusePath, const std::string& _specularPath, float _shininess);
-        static Shader* textureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
+        static Shader* instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _shininess);
+        static Shader* instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
 
     private:
         unsigned int id = 0;
 
-        const char* vertexPath = "";
-        const char* fragmentPath = "";
+        std::string vertexPath = "";
+        std::string fragmentPath = "";
 
         std::map<std::string, Color> assignedColors;
         std::vector<Texture2D*> boundTextures;
@@ -81,8 +97,12 @@ class Shader {
 
         static Shader* activeShader;
 
+        ~Shader() = default;
+
+        void internalDestroy();
+
         static std::string load(const std::string& _fileName);
 
-        static unsigned int compile(const std::string& _code, unsigned int _shaderType);
-        static unsigned int createProgram(const unsigned int& _vertexShader, const unsigned int& _fragmentShader);
+        unsigned int compile(const std::string& _code, unsigned int _shaderType);
+        unsigned int createProgram(const unsigned int& _vertexShader, const unsigned int& _fragmentShader);
 };

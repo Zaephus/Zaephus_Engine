@@ -10,6 +10,14 @@ class Action {};
 template <typename R>
 class Action<R()> {
     public:
+        ~Action() {
+            cleanStubs();
+
+            if(!stubs.empty()) {
+                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
+            }
+        }
+
         template <R (*Function)()>
         void bind() {
             Stub s(nullptr, &functionStub<Function>);
@@ -46,6 +54,10 @@ class Action<R()> {
             if(containsStub(s)) {
                 markStubForDeletion(s);
             }
+        }
+
+        bool isEmpty() {
+            return stubs.empty();
         }
 
         void invoke() {
@@ -105,6 +117,14 @@ class Action<R()> {
 template <typename R, typename PARAM1>
 class Action<R(PARAM1)> {
     public:
+        ~Action() {
+            cleanStubs();
+
+            if(!stubs.empty()) {
+                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
+            }
+        }
+
         template <R (*Function)(PARAM1)>
         void bind() {
             Stub s(nullptr, &functionStub<Function>);
@@ -141,6 +161,10 @@ class Action<R(PARAM1)> {
             if(containsStub(s)) {
                 markStubForDeletion(s);
             }
+        }
+
+        bool isEmpty() {
+            return stubs.empty();
         }
 
         void invoke(PARAM1 param1) {
@@ -202,6 +226,14 @@ class Action<R(PARAM1)> {
 template <typename R, typename PARAM1, typename PARAM2>
 class Action<R(PARAM1, PARAM2)> {
     public:
+        ~Action() {
+            cleanStubs();
+
+            if(!stubs.empty()) {
+                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
+            }
+        }
+
         template <R (*Function)(PARAM1, PARAM2)>
         void bind() {
             Stub s(nullptr, &functionStub<Function>);
@@ -238,6 +270,10 @@ class Action<R(PARAM1, PARAM2)> {
             if(containsStub(s)) {
                 markStubForDeletion(s);
             }
+        }
+
+        bool isEmpty() {
+            return stubs.empty();
         }
 
         void invoke(PARAM1 param1, PARAM2 param2) {

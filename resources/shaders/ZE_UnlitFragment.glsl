@@ -1,4 +1,10 @@
+
 #version 330 core
+
+struct Material {
+    vec4 color;
+};
+uniform Material material;
 
 out vec4 fragColor;
 
@@ -7,8 +13,6 @@ in vec4 vertexColor;
 in vec3 normal;
 in vec2 uv;
 
-uniform vec4 objectColor;
-
 void main() {
-    fragColor = objectColor;
+    fragColor = material.color;
 }

@@ -40,67 +40,84 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
     const int width = mode->width;
     const int height = mode->height;
 
-    window = glfwCreateWindow(width, height, "Zaephus Renderer", glfwGetPrimaryMonitor(), nullptr);
-    if(window == nullptr) {
+    glfwWindow = glfwCreateWindow(width, height, "Zaephus Renderer", glfwGetPrimaryMonitor(), nullptr);
+    if(glfwWindow == nullptr) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
         return;
     }
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(glfwWindow);
     glfwSwapInterval(0);
-    glfwSetFramebufferSizeCallback(window, onScreenSizeChange);
-    glfwSetKeyCallback(window, onKeyPressed);
-    glfwSetMouseButtonCallback(window, onMouseButtonPressed);
-    glfwSetCursorPosCallback(window, onCursorMoved);
-    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    // glfwSetCursorPos(window, 0.0f, 0.0f);
+    glfwSetFramebufferSizeCallback(glfwWindow, onScreenSizeChange);
+    glfwSetKeyCallback(glfwWindow, onKeyPressed);
+    glfwSetMouseButtonCallback(glfwWindow, onMouseButtonPressed);
+    // glfwSetCursorPosCallback(window, onCursorMoved);
+    // glfwSetInputMode(glfwWindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    // glfwSetCursorPos(glfwWindow, 0.0f, 0.0f);
 
-    if(!gladLoaderLoadGL((GLADloadfunc) glfwGetProcAddress)) {
+    if(glfwRawMouseMotionSupported()) {
+        glfwSetInputMode(glfwWindow, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+    }
+
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD!" << std::endl;
         return;
     }
 }
 
+void Window::processCallStack() {
+#ifdef ENABLE_PROFILING
+    ZoneScopedNC("Window::ProcessCallStack", 0x0062ff);
+#endif
+    for(auto [mode, value] : inputModeStack) {
+        glfwSetInputMode(glfwWindow, mode, value);
+    }
+}
+
 void Window::presentFrame() const {
 #ifdef ENABLE_PROFILING
-    ZoneScopedC(0x0062ff);
+    ZoneScopedNC("Window::PresentFrame", 0x0062ff);
 #endif
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(glfwWindow);
     glfwPollEvents();
+}
+
+void Window::requestInputModeChange(const int _mode, const int _value) {
+    inputModeStack[_mode] = _value;
 }
 
 Vector2Int Window::getSize() const {
     Vector2Int size;
-    glfwGetWindowSize(window, &size.x, &size.y);
+    glfwGetWindowSize(glfwWindow, &size.x, &size.y);
     return size;
 }
 void Window::setSize(const int _w, const int _h) const {
-    glfwSetWindowSize(window, _w, _h);
+    glfwSetWindowSize(glfwWindow, _w, _h);
 }
 
 std::string Window::getTitle() const {
-    return glfwGetWindowTitle(window);
+    return glfwGetWindowTitle(glfwWindow);
 }
 
 void Window::setTitle(const std::string& _title) const {
-    glfwSetWindowTitle(window, _title.c_str());
+    glfwSetWindowTitle(glfwWindow, _title.c_str());
 }
 
 bool Window::shouldClose() const {
-    return glfwWindowShouldClose(window);
+    return glfwWindowShouldClose(glfwWindow);
 }
 
 Vector2 Window::screenToClip(const Vector2& _pos) const {
     const Vector2Int screenSize = getSize();
     Vector2 pos;
-    pos.x = _pos.x / screenSize.x;
-    pos.y = _pos.y / screenSize.y;
+    pos.x = _pos.x / static_cast<float>(screenSize.x);
+    pos.y = _pos.y / static_cast<float>(screenSize.y);
 
     pos.x = 2 * pos.x - 1;
     pos.y = 1 - 2 * pos.y;
     return pos;
 }
 
-void Window::createContext(int _w, int _h, std::string& _title, bool _isFullscreen) {
+void Window::createContext(const int _w, const int _h, const std::string& _title, const bool _isFullscreen) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -121,20 +138,20 @@ void Window::createContext(int _w, int _h, std::string& _title, bool _isFullscre
         height = _h;
     }
 
-    window = glfwCreateWindow(width, height, _title.c_str(), monitor, nullptr);
-    if(window == nullptr) {
+    glfwWindow = glfwCreateWindow(width, height, _title.c_str(), monitor, nullptr);
+    if(glfwWindow == nullptr) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
         return;
     }
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, onScreenSizeChange);
-    glfwSetKeyCallback(window, onKeyPressed);
-    glfwSetMouseButtonCallback(window, onMouseButtonPressed);
-    glfwSetCursorPosCallback(window, onCursorMoved);
+    glfwMakeContextCurrent(glfwWindow);
+    glfwSetFramebufferSizeCallback(glfwWindow, onScreenSizeChange);
+    glfwSetKeyCallback(glfwWindow, onKeyPressed);
+    glfwSetMouseButtonCallback(glfwWindow, onMouseButtonPressed);
+    glfwSetCursorPosCallback(glfwWindow, onCursorMoved);
     // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     // glfwSetCursorPos(window, 0.0f, 0.0f);
 
-    if(!gladLoaderLoadGL((GLADloadfunc) glfwGetProcAddress)) {
+    if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD!" << std::endl;
         return;
     }

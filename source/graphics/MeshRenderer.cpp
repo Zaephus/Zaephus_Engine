@@ -11,7 +11,9 @@
 #include "Vertex.h"
 #include "Mesh.h"
 #include "Model.h"
+#include "Renderer.h"
 #include "Shader.h"
+#include "TimeUtils.h"
 #include "Transform.h"
 
 #ifdef ENABLE_PROFILING
@@ -21,34 +23,28 @@
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
 
-MeshRenderer::MeshRenderer(Mesh* _mesh) {
-    setMesh(_mesh);
-}
-
-MeshRenderer::MeshRenderer(const Model _model) {
-    setMesh(_model.mesh);
-    setShader(_model.shader);
-}
-
+MeshRenderer::MeshRenderer() : MeshRenderer(nullptr, nullptr) {}
+MeshRenderer::MeshRenderer(Mesh* _mesh) : MeshRenderer(_mesh, nullptr) {}
+MeshRenderer::MeshRenderer(const Model* _model) : MeshRenderer(_model->mesh, _model->shader) {}
 MeshRenderer::MeshRenderer(Mesh* _mesh, Shader* _shader) {
     setMesh(_mesh);
     setShader(_shader);
 }
 
 MeshRenderer::~MeshRenderer() {
+    beingDestroyedFlag = true;
+
+    mesh = nullptr;
+    shader = nullptr;
+
     meshRendererDestroyedCall.invoke(this);
-
-    delete mesh;
-    delete shader;
-}
-
-void MeshRenderer::start() {
-    meshRendererCreatedCall.invoke(this);
 }
 
 void MeshRenderer::initialize() {
     mesh->initialize();
     shader->initialize();
+
+    meshRendererCreatedCall.invoke(this);
 }
 
 void MeshRenderer::render() const {
@@ -61,10 +57,12 @@ void MeshRenderer::render() const {
 
     shader->bind();
 
+    shader->setFloat("TIME", Time::currentTime());
+
     const Matrix4x4 modelMatrix = transform->objectMatrix();
     shader->setMatrix4x4("modelMatrix", modelMatrix);
 
-    const Matrix4x4 normalMatrix = modelMatrix.inverse().transposed();
+    const Matrix4x4 normalMatrix = transform->directionMatrix();
     shader->setMatrix4x4("normalMatrix", normalMatrix);
 
     shader->setMatrix4x4("viewMatrix", Camera::activeCam->viewMatrix());
@@ -85,3 +83,7 @@ void MeshRenderer::setShader(Shader* _shader) {
     shader = _shader;
 }
 Shader* MeshRenderer::getShader() const { return shader; }
+
+bool MeshRenderer::isCurrentlyBeingDestroyed() {
+    return beingDestroyedFlag;
+}

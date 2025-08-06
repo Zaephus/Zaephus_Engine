@@ -1,35 +1,30 @@
 
 #pragma once
 
+#include <atomic>
+
 #include "Component.h"
-#include "RenderItem.h"
+#include "RenderObject.h"
 
 template <typename T>
 class Action;
 
-class Color;
-class Light;
 class Mesh;
 class Shader;
-class Texture2D;
 
 struct Model;
-struct Matrix4x4;
-struct Vector3;
-struct Vertex;
 
-class MeshRenderer : public Component, RenderItem {
+class MeshRenderer : public Component, RenderObject {
     public:
         static Action<void(MeshRenderer*)> meshRendererCreatedCall;
         static Action<void(MeshRenderer*)> meshRendererDestroyedCall;
 
-        MeshRenderer() = default;
+        MeshRenderer();
         explicit MeshRenderer(Mesh* _mesh);
-        explicit MeshRenderer(Model _model);
+        explicit MeshRenderer(const Model* _model);
         MeshRenderer(Mesh* _mesh, Shader* _shader);
         ~MeshRenderer() override;
 
-        void initialize() override;
         void render() const;
 
         void setMesh(Mesh* _mesh);
@@ -38,9 +33,14 @@ class MeshRenderer : public Component, RenderItem {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
+        bool isCurrentlyBeingDestroyed();
+
     protected:
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 
-        void start() override;
+        void initialize() override;
+
+    private:
+        std::atomic<bool> beingDestroyedFlag = false;
 };

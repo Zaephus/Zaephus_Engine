@@ -15,12 +15,14 @@ Camera* Camera::activeCam = nullptr;
 
 Camera::Camera() {
     Window::sizeChangedCall.bind<Camera, &Camera::onWindowResized>(this);
-    Window::keyPressedCall.bind<Camera, &Camera::onKeyPressed>(this);
-    Window::cursorMovedCall.bind<Camera, &Camera::onCursorMovement>(this);
 
     if(activeCam == nullptr) {
         activeCam = this;
     }
+}
+
+Camera::~Camera() {
+    Window::sizeChangedCall.unbind<Camera, &Camera::onWindowResized>(this);
 }
 
 void Camera::update() {
@@ -55,7 +57,21 @@ void Camera::onWindowResized(const int _w, const int _h) {
 Vector3 Camera::screenToWorldPos(const Vector2& _screenPos) const {
     const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
     const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
-    return viewMatrix().inverse() * viewPos;
+    const Vector3 nearPlanePos = viewMatrix().inverse() * viewPos;
+    const Vector3 direction = (transform->position - nearPlanePos).normalized();
+
+    const float angle = Vector3::angle(Vector3::up(), direction);
+    const float depth = transform->position.y / std::cos(angle);
+
+    return transform->position - direction * depth;
+}
+
+Vector3 Camera::screenToWorldPos(const Vector2& _screenPos, const float _depth) const {
+    const Vector2 clipPos = Window::activeWindow->screenToClip(_screenPos);
+    const Vector3 viewPos = projectionMatrix.inverse() * Vector3(clipPos.x, clipPos.y, 0.0f);
+    const Vector3 nearPlanePos = viewMatrix().inverse() * viewPos;
+    const Vector3 direction = (transform->position - nearPlanePos).normalized();
+    return transform->position - direction * _depth;
 }
 
 RayCast3D Camera::screenToRay(const Vector2& _screenPos) const {
@@ -63,59 +79,10 @@ RayCast3D Camera::screenToRay(const Vector2& _screenPos) const {
 }
 
 RayCast3D Camera::screenToRay(const Vector2& _screenPos, const bool _oneShot) const {
-    const Vector3 pos = screenToWorldPos(_screenPos);
+    const Vector3 pos = screenToWorldPos(_screenPos, 1.0f);
     const Vector3 dir = pos - transform->position;
 
     return { pos, dir, _oneShot };
-}
-
-void Camera::onKeyPressed(int _key, int _action) {
-    // if(_action == GLFW_PRESS) {
-    //     switch(_key) {
-    //         case GLFW_KEY_W:
-    //             transform->position -= Time::deltaTime * speed * transform->forward();
-    //             break;
-    //         case GLFW_KEY_S:
-    //             transform->position += Time::deltaTime * speed * transform->forward();
-    //             break;
-    //         case GLFW_KEY_D:
-    //             transform->position += Time::deltaTime * speed * transform->right();
-    //             break;
-    //         case GLFW_KEY_A:
-    //             transform->position -= Time::deltaTime * speed * transform->right();
-    //             break;
-    //         case GLFW_KEY_SPACE:
-    //             transform->position += Time::deltaTime * speed * Vector3::up();
-    //             break;
-    //         case GLFW_KEY_LEFT_SHIFT:
-    //             transform->position -= Time::deltaTime * speed * Vector3::up();
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
-}
-
-void Camera::onCursorMovement(const Vector2 _mouseDelta) { // NOLINT(*-unnecessary-value-param)
-//     Vector2 camRot = {
-//         _mouseDelta.x * mouseSensitivity * Time::deltaTime,
-//         _mouseDelta.y * mouseSensitivity * Time::deltaTime
-//     };
-//
-// //    if(abs(Vector3::dot(transform->forward(), Vector3::up())) >= 0.9f ) {
-// //        camRot.x = 0;
-// //    }
-//
-//     Vector3 oldRot = transform->rotation.toEuler();
-//     transform->rotation = Quaternion::identity();
-//     transform->rotate(0.0f, oldRot.y - camRot.x, 0.0f);
-//     transform->rotate(oldRot.x - camRot.y, 0.0f, 0.0f);
-//
-// //    transform->rotate(-camRot.y, -camRot.x, 0.0f);
-// //    transform->rotate(Quaternion::fromAxisAngle(Vector3::up(), camRot.y * Math::deg2rad));
-// //    transform->rotate(Quaternion::fromAxisAngle(transform->right(), camRot.x * Math::deg2rad));
-// //    transform->rotation *= Quaternion::fromEuler(camRot.x, camRot.y, 0.0f);
-// //    std::cout << "Current camera rotation: " << transform->rotation.toEuler().toString() << std::endl;
 }
 
 Camera* Camera::createPerspectiveCamera(const float _fovY, const float _near, const float _far) {

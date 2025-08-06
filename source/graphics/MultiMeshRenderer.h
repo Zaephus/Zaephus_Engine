@@ -2,10 +2,9 @@
 #pragma once
 
 #include <atomic>
-#include <vector>
 
 #include "Component.h"
-#include "RenderItem.h"
+#include "RenderObject.h"
 #include "Matrices/Matrix4x4.h"
 
 template <typename T>
@@ -20,15 +19,15 @@ struct Vector3;
 struct Quaternion;
 struct Matrix4x4;
 
-class MultiMeshRenderer : public Component, RenderItem {
+class MultiMeshRenderer : public Component, RenderObject {
     public:
         static Action<void(MultiMeshRenderer*)> multiMeshRendererCreatedCall;
         static Action<void(MultiMeshRenderer*)> multiMeshRendererDestroyedCall;
 
         MultiMeshRenderer();
-        MultiMeshRenderer(Mesh* _mesh, int _instanceCount);
-        MultiMeshRenderer(Model _model, int _instanceCount);
-        MultiMeshRenderer(Mesh* _mesh, Shader* _shader, int _instanceCount);
+        MultiMeshRenderer(Mesh* _mesh, unsigned int _instanceCount);
+        MultiMeshRenderer(Model _model, unsigned int _instanceCount);
+        MultiMeshRenderer(Mesh* _mesh, Shader* _shader, unsigned int _instanceCount);
         ~MultiMeshRenderer() override;
 
         void render();
@@ -39,43 +38,59 @@ class MultiMeshRenderer : public Component, RenderItem {
         void setShader(Shader* _shader);
         [[nodiscard]] Shader* getShader() const;
 
-        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id);
+        [[nodiscard]] Vector3 getInstancePosition(unsigned int _id) const;
+        [[nodiscard]] Vector3 getInstanceScale(unsigned int _id) const;
+        [[nodiscard]] Quaternion getInstanceRotation(unsigned int _id) const;
+        [[nodiscard]] Matrix4x4 getInstanceRotationMatrix(unsigned int _id) const;
+        [[nodiscard]] Matrix4x4 getInstanceMatrix(unsigned int _id) const;
 
+        void setInstancePosition(unsigned int _id, float _x, float _y, float _z);
         void setInstancePosition(unsigned int _id, const Vector3& _pos);
+
+        void setInstanceScale(unsigned int _id, float _x, float _y, float _z);
+        void setInstanceScale(unsigned int _id, const Vector3& _scale);
+
+        void setInstanceRotation(unsigned int _id, float _xDeg, float _yDeg, float _zDeg);
         void setInstanceRotation(unsigned int _id, const Vector3& _eulerAngles);
         void setInstanceRotation(unsigned int _id, const Quaternion& _rot);
+
         void setInstanceMatrix(unsigned int _id, const Matrix4x4& _mat);
 
+        void translateInstance(unsigned int _id, float _x, float _y, float _z);
+        void translateInstance(unsigned int _id, const Vector3& _translate);
+
+        void scaleInstance(unsigned int _id, float _x, float _y, float _z);
+        void scaleInstance(unsigned int _id, const Vector3& _scale);
+
+        void rotateInstance(unsigned int _id, float _xDeg, float _yDeg, float _zDeg);
         void rotateInstance(unsigned int _id, const Vector3& _eulerAngles);
+        void rotateInstance(unsigned int _id, const Quaternion& _rot);
+
+        bool isCurrentlyBeingDestroyed();
 
     protected:
         void start() override;
         void initialize() override;
 
     private:
+        std::atomic<bool> beingDestroyedFlag = false;
+
         Mesh* mesh = nullptr;
         Shader* shader = nullptr;
 
-        int instanceCount;
+        unsigned int instanceCount;
 
         unsigned int instanceBuffer = 0;
 
         std::atomic<bool> instancesNotAccessibleFlag = false;
 
-        // std::vector<Matrix4x4> matrices;
-        // std::vector<Matrix4x4> bufferedMatrices;
-
-        Matrix4x4* prevMatrixBuffer = nullptr;
         Matrix4x4* currentMatrixBuffer = nullptr;
         Matrix4x4* nextMatrixBuffer = nullptr;
 
         void initializeInstanceBuffer();
 
-        void swapPrevNext();
-        void swapCurrentPrev();
+        void swapBuffers();
+        void copyBuffer(const Matrix4x4* _source, Matrix4x4* _dest);
 
-        void copyBuffers(const Matrix4x4* _from, Matrix4x4* _to) const;
-
-        void copyInstanceBuffer();
         void updateInstanceBuffer() const;
 };

@@ -6,45 +6,57 @@
 
 #include "Color.h"
 
+class DirectionalLight;
 template <typename T>
 class Action;
 
-class Light;
+class PointLight;
 class MeshRenderer;
 class MultiMeshRenderer;
+class Shader;
 class Window;
 class RenderBuffer;
 
 class Renderer {
     public:
-        static Action<void()> initRenderItemCall;
+        static Action<void()> initRenderObjectCall;
+        static Action<void()> destroyRenderObjectCall;
+        static Action<void()> cleanupRenderObjectsCall;
 
         Window* window = nullptr;
 
         bool hasFinishedSetup = false;
-
-        ~Renderer();
+        bool shouldExit = false;
 
         void initialize();
 
-        bool isInitialized() const;
+        [[nodiscard]] bool isInitialized() const;
+        bool isReadyForRender();
         bool testAndSetReadyForRender();
+        bool isSorting();
+
+        void setReadyForCleanup();
 
         void setClearColor(float _r, float _g, float _b, float _a);
         void setClearColor(Color _c);
 
     private:
-        Color clearColor = Color::white();
+        Color clearColor = Color::black();
         bool clearColorChanged = true;
 
         std::atomic<bool> initFlag = false;
         std::atomic<bool> readyForRenderFlag = false;
+        std::atomic<bool> canStartCleanupFlag = false;
+        std::atomic<bool> duringSortFlag = false;
 
-        std::vector<Light*> lights;
+        std::vector<DirectionalLight*> dirLights;
+        std::vector<PointLight*> pointLights;
+
         std::vector<MeshRenderer*> meshRenderers;
         std::vector<MultiMeshRenderer*> multiMeshRenderers;
 
         void handleSetup();
+        void handleExit();
         void render();
 
         void changeClearColor();
@@ -52,10 +64,15 @@ class Renderer {
         void clearScreen() const;
         void renderObjects() const;
 
+        void setShaderData(Shader* _shader) const;
+
         void sortMeshRenderers();
 
-        void onLightCreated(Light* _light);
-        void onLightDestroyed(Light* _light);
+        void onPointLightCreated(PointLight* _light);
+        void onPointLightDestroyed(PointLight* _light);
+
+        void onDirLightCreated(DirectionalLight* _light);
+        void onDirLightDestroyed(DirectionalLight* _light);
 
         void onMeshRendererCreated(MeshRenderer* _renderer);
         void onMeshRendererDestroyed(MeshRenderer* _renderer);
