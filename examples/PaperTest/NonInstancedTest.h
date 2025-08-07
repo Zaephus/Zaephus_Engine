@@ -18,10 +18,9 @@ class TestScene final : public Scene {
 
     Shader* cubeShader = nullptr;
 
-    GameObject* multiCube = nullptr;
-    MultiMeshRenderer* multiRenderer = nullptr;
+    std::vector<GameObject*> cubes = std::vector<GameObject*>();
 
-    unsigned int cubeAmount = 100'000;
+    unsigned int cubeAmount = 10'000;
     float size = 25.0f;
 
     unsigned int numThreads = 1;
@@ -44,27 +43,20 @@ class TestScene final : public Scene {
             cam->transform->rotate(-20.0f, 20.0f, 0.0f);
             // cam->addComponent(new DebugCameraController());
 
+            cubes.resize(cubeAmount);
+
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
-            cubeShader = Shader::instancedDiffuseShader(
+            cubeShader = Shader::diffuseShader(
                 { 0.0f, 0.6f, 0.0f, 1.0f },
                 4.0f
             );
 
-            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cylinder, true);
+            const std::vector<Model*> models = ModelLoader::load(ModelLoader::cube, true);
             Mesh* cubeMesh = models[0]->mesh;
 
-            multiCube = new GameObject();
-            multiRenderer = new MultiMeshRenderer(cubeMesh, cubeShader, cubeAmount);
-            multiCube->addComponent(multiRenderer);
-            multiCube->name = "Multi-cube";
-
-            for(int i = 0; i < cubeAmount; i++) {
-                multiRenderer->setInstancePosition(i, {
-                     Random::range(-size, size),
-                     Random::range(-size, size),
-                     Random::range(-size, size)
-                });
+            for(size_t i = 0; i < cubeAmount; i++) {
+                createCube(cubeMesh, cubeShader, i);
             }
         }
 
@@ -91,7 +83,22 @@ class TestScene final : public Scene {
 
         void rotateCubes(const int _start, const int _length) const {
             for(size_t i = _start; i < _start + _length; i++) {
-                multiRenderer->rotateInstance(i, multiRenderer->getInstancePosition(i).normalized() * 25.0f * Time::deltaTime);
+                cubes[i]->transform->rotate(cubes[i]->transform->position.normalized() * 25.0f * Time::deltaTime);
             }
+        }
+
+        void createCube(Mesh* _mesh, Shader* _shader, const int _index) {
+            GameObject* cube = new GameObject();
+
+            MeshRenderer* renderer = new MeshRenderer(_mesh, _shader);
+            cube->addComponent(renderer);
+
+            cube->transform->position = {
+                Random::range(-size, size),
+                Random::range(-size, size),
+                Random::range(-size, size)
+            };
+
+            cubes[_index] = cube;
         }
 };

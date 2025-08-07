@@ -35,4 +35,6 @@ add_executable(grassExample
 add_executable(paperTest
     PaperTest/main.cpp
     PaperTest/TestScene.h
+    PaperTest/NonInstancedTest.h
+    PaperTest/ProgressiveTest.h
 )
