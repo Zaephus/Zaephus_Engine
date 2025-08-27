@@ -1,7 +1,8 @@
 
 add_library(Zaephus_Engine STATIC
-        ZEngine.h
-        ZEngineFwd.h
+    ZEngine.h
+    ZEngineFwd.h
+    Settings.h
 )
 
 if(ENABLE_PROFILING)

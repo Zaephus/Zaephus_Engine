@@ -1,28 +1,40 @@
 
-vec4 calcDirLight(DirectionalLight _dirLight, vec3 _normal, vec3 _viewDir, vec4 _diffuse, vec4 _specular, float _shininess) {
-    vec4 ambient = _dirLight.ambientStrength * _dirLight.color * _diffuse;
+vec4 calcAmbient(float _ambientStrength, vec4 _lightColor, vec4 _diffuseColor) {
+    return _ambientStrength * _lightColor * _diffuseColor;
+}
+
+vec4 calcDiffuse(vec3 _normal, vec3 _lightDir, vec4 _lightColor, vec4 _diffuseColor) {
+    float diff = max(dot(_normal, _lightDir), 0.0);
+    return _lightColor * diff * _diffuseColor;
+}
+
+vec4 calcSpecular(vec3 _normal, vec3 _lightDir, vec3 _viewDir, vec4 _lightColor, vec4 _specularColor, float _specularStrength, float _shininess) {
+//    vec3 reflectDir = reflect(-_lightDir, _normal);
+//    float spec = pow(max(dot(_viewDir, reflectDir), 0.0), _shininess/2);
+    vec3 halfwayDir = normalize(_lightDir + _viewDir);
+    float spec = pow(max(dot(_normal, halfwayDir), 0.0), _shininess);
+
+    return _lightColor * _specularStrength * spec * _specularColor;
+}
+
+vec4 calcDirLight(DirectionalLight _dirLight, vec3 _normal, vec3 _viewDir, vec4 _diffuseColor, vec4 _specularColor, float _shininess) {
+    vec4 ambient = calcAmbient(_dirLight.ambientStrength, _dirLight.color, _diffuseColor);
 
     vec3 lightDir = normalize(_dirLight.direction);
-    float diff = max(dot(_normal, lightDir), 0.0);
-    vec4 diffuse = _dirLight.color * diff * _diffuse;
+    vec4 diffuse = calcDiffuse(_normal, lightDir, _dirLight.color, _diffuseColor);
 
-    vec3 reflectDir = reflect(-lightDir, _normal);
-    float spec = pow(max(dot(_viewDir, reflectDir), 0.0), _shininess);
-    vec4 specular = _dirLight.color * _dirLight.specularStrength * spec * _specular;
+    vec4 specular = calcSpecular(_normal, lightDir, _viewDir, _dirLight.color, _specularColor, _dirLight.specularStrength, _shininess);
 
     return _dirLight.intensity * (ambient + diffuse + specular);
 }
 
-vec4 calcPointLight(PointLight _pointLight, vec3 _normal, vec3 _viewDir, vec4 _diffuse, vec4 _specular, float _shininess) {
-    vec4 ambient = _pointLight.ambientStrength * _pointLight.color * _diffuse;
+vec4 calcPointLight(PointLight _pointLight, vec3 _normal, vec3 _viewDir, vec4 _diffuseColor, vec4 _specularColor, float _shininess) {
+    vec4 ambient = calcAmbient(_pointLight.ambientStrength, _pointLight.color, _diffuseColor);
 
     vec3 lightDir = normalize(_pointLight.position - fragPos);
-    float diff = max(dot(_normal, lightDir), 0.0);
-    vec4 diffuse = _pointLight.color * diff * _diffuse;
+    vec4 diffuse = calcDiffuse(_normal, lightDir, _pointLight.color, _diffuseColor);
 
-    vec3 reflectDir = reflect(-lightDir, _normal);
-    float spec = pow(max(dot(_viewDir, reflectDir), 0.0), _shininess);
-    vec4 specular = _pointLight.color * _pointLight.specularStrength * spec * _specular;
+    vec4 specular = calcSpecular(_normal, lightDir, _viewDir, _pointLight.color, _specularColor, _pointLight.specularStrength, _shininess);
 
     float dist = length(_pointLight.position - fragPos);
     float attenuation = 1.0 / (_pointLight.constant + _pointLight.linear * dist + _pointLight.quadratic * dist * dist);

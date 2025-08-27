@@ -34,3 +34,5 @@
 
 #include "Camera.h"
 #include "Scene.h"
+
+#include "Settings.h"

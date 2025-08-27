@@ -161,7 +161,7 @@ Shader* ModelLoader::processMaterial(const aiMaterial* _mat) {
             specularTex = Texture2D::load(Color::white());
         }
 
-        return Shader::diffuseTextureShader(diffuseTex, specularTex, shininess);
+        return Shader::diffuseTextureShader(diffuseTex, specularTex, 1.0f, shininess);
     }
 
     aiColor3D color;

@@ -13,6 +13,7 @@
 #include "PointLight.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
+#include "Settings.h"
 #include "Window.h"
 #include "Shader.h"
 #include "Transform.h"

@@ -59,30 +59,30 @@ class Shader {
         static Shader* unlitShader(float _r, float _g, float _b, float _a);
         static Shader* unlitShader(const Color& _c);
 
-        static Shader* unlitTextureShader(const std::string& _texturePath);
-        static Shader* unlitTextureShader(Texture2D* _texture);
+        static Shader* unlitTextureShader(const std::string& _texturePath, float _uvScale);
+        static Shader* unlitTextureShader(Texture2D* _texture, float _uvScale);
 
         static Shader* diffuseShader(float _r, float _g, float _b, float _a);
         static Shader* diffuseShader(float _r, float _g, float _b, float _a, float _shininess);
         static Shader* diffuseShader(const Color& _c);
         static Shader* diffuseShader(const Color& _c, float _shininess);
 
-        static Shader* diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _shininess);
-        static Shader* diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
+        static Shader* diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _uvScale, float _shininess);
+        static Shader* diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _uvScale, float _shininess);
 
         static Shader* instancedUnlitShader(float _r, float _g, float _b, float _a);
         static Shader* instancedUnlitShader(const Color& _c);
 
-        static Shader* instancedUnlitTextureShader(const std::string& _texturePath);
-        static Shader* instancedUnlitTextureShader(Texture2D* _texture);
+        static Shader* instancedUnlitTextureShader(const std::string& _texturePath, float _uvScale);
+        static Shader* instancedUnlitTextureShader(Texture2D* _texture, float _uvScale);
 
         static Shader* instancedDiffuseShader(float _r, float _g, float _b, float _a);
         static Shader* instancedDiffuseShader(float _r, float _g, float _b, float _a, float _shininess);
         static Shader* instancedDiffuseShader(const Color& _c);
         static Shader* instancedDiffuseShader(const Color& _c, float _shininess);
 
-        static Shader* instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _shininess);
-        static Shader* instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _shininess);
+        static Shader* instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _uvScale, float _shininess);
+        static Shader* instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _uvScale, float _shininess);
 
     private:
         unsigned int id = 0;

@@ -199,13 +199,14 @@ Shader* Shader::unlitShader(const Color& _c) {
     return shader;
 }
 
-Shader* Shader::unlitTextureShader(const std::string& _texturePath) {
+Shader* Shader::unlitTextureShader(const std::string& _texturePath, const float _uvScale) {
     Texture2D* diffuse = Texture2D::load(_texturePath);
-    return unlitTextureShader(diffuse);
+    return unlitTextureShader(diffuse, _uvScale);
 }
-Shader* Shader::unlitTextureShader(Texture2D* _texture) {
+Shader* Shader::unlitTextureShader(Texture2D* _texture, const float _uvScale) {
     Shader* shader = new Shader("ZE_Base.vert", "ZE_UnlitTexture.frag");
-    shader->setTexture2D("material.diffuse", _texture);
+    shader->setTexture2D("material.texture", _texture);
+    shader->setFloat("material.uvScale", _uvScale);
 
     return shader;
 }
@@ -231,17 +232,18 @@ Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
     return shader;
 }
 
-Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
+Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _uvScale, const float _shininess) {
     Texture2D* diffuse = Texture2D::load(_diffusePath);
     Texture2D* specular = Texture2D::load(_specularPath);
 
-    return diffuseTextureShader(diffuse, specular, _shininess);
+    return diffuseTextureShader(diffuse, specular, _uvScale, _shininess);
 }
-Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
+Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _uvScale, const float _shininess) {
     Shader* shader = new Shader("ZE_Base.vert", "ZE_DiffuseTexture.frag");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
+    shader->setFloat("material.uvScale", _uvScale);
     shader->setFloat("material.shininess", _shininess);
 
     return shader;
@@ -257,13 +259,14 @@ Shader* Shader::instancedUnlitShader(const Color& _c) {
     return shader;
 }
 
-Shader* Shader::instancedUnlitTextureShader(const std::string& _texturePath) {
+Shader* Shader::instancedUnlitTextureShader(const std::string& _texturePath, const float _uvScale) {
     Texture2D* diffuse = Texture2D::load(_texturePath);
-    return instancedUnlitTextureShader(diffuse);
+    return instancedUnlitTextureShader(diffuse, _uvScale);
 }
-Shader* Shader::instancedUnlitTextureShader(Texture2D* _texture) {
+Shader* Shader::instancedUnlitTextureShader(Texture2D* _texture, const float _uvScale) {
     Shader* shader = new Shader("ZE_Instanced.vert", "ZE_UnlitTexture.frag");
-    shader->setTexture2D("material.diffuse", _texture);
+    shader->setTexture2D("material.texture", _texture);
+    shader->setFloat("material.uvScale", _uvScale);
 
     return shader;
 }
@@ -289,17 +292,18 @@ Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) 
     return shader;
 }
 
-Shader* Shader::instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _shininess) {
+Shader* Shader::instancedDiffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _uvScale, const float _shininess) {
     Texture2D* diffuse = Texture2D::load(_diffusePath);
     Texture2D* specular = Texture2D::load(_specularPath);
 
-    return instancedDiffuseTextureShader(diffuse, specular, _shininess);
+    return instancedDiffuseTextureShader(diffuse, specular, _uvScale, _shininess);
 }
-Shader* Shader::instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
+Shader* Shader::instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _uvScale, const float _shininess) {
     Shader* shader = new Shader("ZE_Instanced.vert", "ZE_DiffuseTexture.frag");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
+    shader->setFloat("material.uvScale", _uvScale);
     shader->setFloat("material.shininess", _shininess);
 
     return shader;
