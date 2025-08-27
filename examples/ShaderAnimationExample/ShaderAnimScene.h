@@ -29,7 +29,7 @@ class ShaderAnimScene final : public Scene {
             const std::vector<Model*> models = ModelLoader::load(ModelLoader::capsule);
             Mesh* capsuleMesh = models[0]->mesh;
 
-            Shader* capsuleShader = new Shader("CapsuleVertex.glsl", "ZE_DiffuseFragment.glsl");
+            Shader* capsuleShader = new Shader("Capsule.vert", "ZE_Diffuse.frag");
             capsuleShader->setColor("material.color", Color::green());
             capsuleShader->setFloat("material.shininess", 32.0f);
             capsuleShader->setFloat("speed", 3.5f);

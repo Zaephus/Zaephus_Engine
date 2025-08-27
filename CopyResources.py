@@ -34,7 +34,7 @@ def copy_from_source(_root_dir):
             match ext:
                 case ".obj" | ".mtl":
                     output_dir = modelDir
-                case ".glsl":
+                case ".glsl" | ".shard" | ".vert" | ".frag":
                     output_dir = shaderDir
                 case ".png" | ".jpg" | ".jpeg":
                     output_dir = textureDir

@@ -87,13 +87,15 @@ class Shader {
     private:
         unsigned int id = 0;
 
-        std::string vertexPath = "";
-        std::string fragmentPath = "";
+        std::string vertexPath;
+        std::string fragmentPath;
 
         std::map<std::string, Color> assignedColors;
         std::vector<Texture2D*> boundTextures;
 
         std::map<std::string, ShaderUniformItem> uniformQueue;
+
+        static const std::string shaderVersion;
 
         static Shader* activeShader;
 
@@ -101,7 +103,11 @@ class Shader {
 
         void internalDestroy();
 
+        static std::string processVertexCode(const std::string& _vertexPath);
+        static std::string processFragmentCode(const std::string& _fragmentPath);
+
         static std::string load(const std::string& _fileName);
+        static std::vector<std::string> convertToLines(const std::string& _fileText);
 
         unsigned int compile(const std::string& _code, unsigned int _shaderType);
         unsigned int createProgram(const unsigned int& _vertexShader, const unsigned int& _fragmentShader);

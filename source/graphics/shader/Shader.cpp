@@ -6,6 +6,7 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
+#include <cstring>
 
 #include <glad/gl.h>
 
@@ -22,9 +23,11 @@
 #include <tracy/Tracy.hpp>
 #endif
 
+const std::string Shader::shaderVersion = "#version 330 core";
+
 Shader* Shader::activeShader = nullptr;
 
-Shader::Shader(const std::string& _fragmentPath) : Shader("ZE_BaseVertex.glsl", _fragmentPath) {}
+Shader::Shader(const std::string& _fragmentPath) : Shader("ZE_Base.vert", _fragmentPath) {}
 
 Shader::Shader(const std::string& _vertexPath, const std::string& _fragmentPath) {
     vertexPath = _vertexPath;
@@ -38,10 +41,10 @@ void Shader::initialize() {
 
     if(id != 0) { return; }
 
-    const std::string vertexCode = load(vertexPath);
-    const std::string fragmentCode = load(fragmentPath);
-
+    const std::string vertexCode = processVertexCode(vertexPath);
     const unsigned int vertexShader = compile(vertexCode, GL_VERTEX_SHADER);
+
+    const std::string fragmentCode = processFragmentCode(fragmentPath);
     const unsigned int fragmentShader = compile(fragmentCode, GL_FRAGMENT_SHADER);
 
     id = createProgram(vertexShader, fragmentShader);
@@ -106,7 +109,7 @@ void Shader::applyUniforms() {
 #endif
 
     for(auto& [_name, _item] : uniformQueue) {
-        _item.apply(id, _name.c_str());
+        _item.apply(static_cast<int>(id), _name.c_str());
     }
     uniformQueue.clear();
 }
@@ -190,7 +193,7 @@ Shader *Shader::unlitShader(const float _r, const float _g, const float _b, cons
     return unlitShader({ _r, _g, _b, _a } );
 }
 Shader* Shader::unlitShader(const Color& _c) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitFragment.glsl");
+    Shader* shader = new Shader("ZE_Base.vert", "ZE_Unlit.frag");
     shader->setColor("material.color", _c);
 
     return shader;
@@ -201,7 +204,7 @@ Shader* Shader::unlitTextureShader(const std::string& _texturePath) {
     return unlitTextureShader(diffuse);
 }
 Shader* Shader::unlitTextureShader(Texture2D* _texture) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_UnlitTextureFragment.glsl");
+    Shader* shader = new Shader("ZE_Base.vert", "ZE_UnlitTexture.frag");
     shader->setTexture2D("material.diffuse", _texture);
 
     return shader;
@@ -217,7 +220,7 @@ Shader* Shader::diffuseShader(const Color& _c) {
     return diffuseShader(_c, 32.0f);
 }
 Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_DiffuseFragment.glsl");
+    Shader* shader = new Shader("ZE_Base.vert", "ZE_Diffuse.frag");
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -235,7 +238,7 @@ Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, const std:
     return diffuseTextureShader(diffuse, specular, _shininess);
 }
 Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
-    Shader* shader = new Shader("ZE_BaseVertex.glsl", "ZE_DiffuseTextureFragment.glsl");
+    Shader* shader = new Shader("ZE_Base.vert", "ZE_DiffuseTexture.frag");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
@@ -248,7 +251,7 @@ Shader *Shader::instancedUnlitShader(const float _r, const float _g, const float
     return instancedUnlitShader({ _r, _g, _b, _a } );
 }
 Shader* Shader::instancedUnlitShader(const Color& _c) {
-    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_UnlitFragment.glsl");
+    Shader* shader = new Shader("ZE_Instanced.vert", "ZE_Unlit.frag");
     shader->setColor("material.color", _c);
 
     return shader;
@@ -259,7 +262,7 @@ Shader* Shader::instancedUnlitTextureShader(const std::string& _texturePath) {
     return instancedUnlitTextureShader(diffuse);
 }
 Shader* Shader::instancedUnlitTextureShader(Texture2D* _texture) {
-    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_UnlitTextureFragment.glsl");
+    Shader* shader = new Shader("ZE_Instanced.vert", "ZE_UnlitTexture.frag");
     shader->setTexture2D("material.diffuse", _texture);
 
     return shader;
@@ -275,7 +278,7 @@ Shader* Shader::instancedDiffuseShader(const Color& _c) {
     return instancedDiffuseShader(_c, 32.0f);
 }
 Shader* Shader::instancedDiffuseShader(const Color& _c, const float _shininess) {
-    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_DiffuseFragment.glsl");
+    Shader* shader = new Shader("ZE_Instanced.vert", "ZE_Diffuse.frag");
 
     if(_c.a < 1.0f) { shader->order = transparents; }
     else { shader->order = opaques; }
@@ -293,13 +296,61 @@ Shader* Shader::instancedDiffuseTextureShader(const std::string& _diffusePath, c
     return instancedDiffuseTextureShader(diffuse, specular, _shininess);
 }
 Shader* Shader::instancedDiffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _shininess) {
-    Shader* shader = new Shader("ZE_InstancedVertex.glsl", "ZE_DiffuseTextureFragment.glsl");
+    Shader* shader = new Shader("ZE_Instanced.vert", "ZE_DiffuseTexture.frag");
 
     shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
     shader->setFloat("material.shininess", _shininess);
 
     return shader;
+}
+
+std::string Shader::processVertexCode(const std::string& _vertexPath) {
+    const std::string vertexCode = load(_vertexPath);
+    std::vector<std::string> vertLines = convertToLines(vertexCode);
+
+    if(std::strstr(vertLines[0].c_str(), "#version") == nullptr) {
+        vertLines.insert(vertLines.begin(), shaderVersion + "\n");
+    }
+
+    const std::string globalShaderVars = load("GlobalVars.shard");
+    const std::string vertexLayout = load("VertLayout.shard");
+    const std::string vertexOutVars = load("VertOutVars.shard");
+    const std::string vertexUniforms = load("VertUniforms.shard");
+    const std::string vertShards = globalShaderVars + "\n" + vertexLayout + "\n" + vertexOutVars + "\n" + vertexUniforms + "\n";
+
+    vertLines.insert(vertLines.begin()+1, vertShards);
+
+    std::string finalVertexCode;
+    for(size_t i = 0; i < vertLines.size(); i++) {
+        finalVertexCode += vertLines[i];
+    }
+    return finalVertexCode;
+}
+
+std::string Shader::processFragmentCode(const std::string& _fragmentPath) {
+    const std::string fragmentCode = load(_fragmentPath);
+    std::vector<std::string> fragLines = convertToLines(fragmentCode);
+
+    if(std::strstr(fragLines[0].c_str(), "#version") == nullptr) {
+        fragLines.insert(fragLines.begin(), shaderVersion + "\n");
+    }
+
+    const std::string globalShaderVars = load("GlobalVars.shard");
+    const std::string fragOutVars = load("FragOutVars.shard");
+    const std::string fragInVars = load("FragInVars.shard");
+    const std::string lightingData = load("LightingData.shard");
+    const std::string lightingFunctions = load("LightingFunctions.shard");
+    const std::string fragShards = globalShaderVars + "\n" + fragOutVars + "\n" + fragInVars + "\n" + lightingData + "\n" + lightingFunctions + "\n";
+
+    fragLines.insert(fragLines.begin()+1, fragShards);
+
+    std::string finalFragmentCode;
+    for(size_t i = 0; i < fragLines.size(); i++) {
+        finalFragmentCode += fragLines[i];
+    }
+
+    return finalFragmentCode;
 }
 
 std::string Shader::load(const std::string& _fileName) {
@@ -332,32 +383,48 @@ unsigned int Shader::compile(const std::string& _code, const GLenum _shaderType)
 
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if(!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+        int maxLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+
+        char errorLog[maxLength];
+        glGetShaderInfoLog(shader, maxLength, &maxLength, errorLog);
         std::string type = _shaderType == GL_FRAGMENT_SHADER ? "fragment" : "vertex";
-        throw std::runtime_error(std::format("Shader {0}, {1}, compilation failed:\n {2}", type, type == "fragment" ? fragmentPath : vertexPath, infoLog));
+        throw std::runtime_error(std::format("Shader {0}, {1}, compilation failed:\n {2}", type, type == "fragment" ? fragmentPath : vertexPath, std::string(errorLog)));
     }
 
     return shader;
 }
 
 unsigned int Shader::createProgram(const unsigned int& _vertexShader, const unsigned int& _fragmentShader) {
-    const unsigned int id = glCreateProgram();
-    glAttachShader(id, _vertexShader);
-    glAttachShader(id, _fragmentShader);
-    glLinkProgram(id);
+    const unsigned int programID = glCreateProgram();
+    glAttachShader(programID, _vertexShader);
+    glAttachShader(programID, _fragmentShader);
+    glLinkProgram(programID);
 
     int success;
 
-    glGetProgramiv(id, GL_LINK_STATUS, &success);
+    glGetProgramiv(programID, GL_LINK_STATUS, &success);
     if(!success) {
         char infoLog[512];
-        glGetProgramInfoLog(id, 512, nullptr, infoLog);
+        glGetProgramInfoLog(programID, 512, nullptr, infoLog);
         throw std::runtime_error(std::format("Shader program {0}, {1} linking failed:\n {2}", vertexPath, fragmentPath, infoLog));
     }
 
     glDeleteShader(_vertexShader);
     glDeleteShader(_fragmentShader);
 
-    return id;
+    return programID;
+}
+
+std::vector<std::string> Shader::convertToLines(const std::string& _fileText) {
+    std::vector<std::string> lines;
+    std::stringstream ss(_fileText);
+    std::string line;
+    while(std::getline(ss, line, '\n')) {
+        if(!line.empty()) {
+            lines.emplace_back(line + "\n");
+        }
+    }
+
+    return lines;
 }

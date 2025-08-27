@@ -1,25 +1,4 @@
 
-#version 330 core
-
-#define PI 3.1415926535897932384626433832795
-
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec4 aColor;
-layout (location = 2) in vec2 aUV;
-layout (location = 3) in vec3 aNormal;
-
-out vec3 fragPos;
-out vec4 vertexColor;
-out vec3 normal;
-out vec2 uv;
-
-uniform float TIME;
-
-uniform mat4 modelMatrix;
-uniform mat4 normalMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
-
 uniform float speed;
 
 void main() {

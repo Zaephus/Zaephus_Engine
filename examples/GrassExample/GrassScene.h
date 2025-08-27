@@ -51,7 +51,7 @@ class GrassScene final : public Scene {
 
             Mesh* grassMesh = ModelLoader::load("grass_blade.obj")[0]->mesh;
 
-            Shader* grassShader = new Shader("GrassVertex.glsl", "ZE_DiffuseFragment.glsl");
+            Shader* grassShader = new Shader("Grass.vert", "ZE_Diffuse.frag");
             grassShader->setColor("material.color", { 0.0f, 0.6f, 0.0f, 1.0f });
             grassShader->setFloat("material.shininess", 1.0f);
             grassShader->setFloat("speed", 0.8f);

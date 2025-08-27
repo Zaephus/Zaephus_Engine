@@ -1,0 +1,32 @@
+
+struct DirectionalLight {
+    vec3 direction;
+
+    vec4 color;
+
+    float intensity;
+    float ambientStrength;
+    float specularStrength;
+};
+#define MAX_DIR_LIGHTS 5
+uniform DirectionalLight dirLights[MAX_DIR_LIGHTS];
+uniform int dirLightAmount;
+
+struct PointLight {
+    vec3 position;
+
+    vec4 color;
+
+    float intensity;
+    float ambientStrength;
+    float specularStrength;
+
+    float constant;
+    float linear;
+    float quadratic;
+};
+#define MAX_POINT_LIGHTS 12
+uniform PointLight pointLights[MAX_POINT_LIGHTS];
+uniform int pointLightAmount;
+
+uniform vec3 viewPos;
