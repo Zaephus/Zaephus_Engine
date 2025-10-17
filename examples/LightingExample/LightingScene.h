@@ -24,9 +24,9 @@ class LightingScene final : public Scene {
             Bounds::shouldRender = false;
             shouldRenderAxis = false;
 
-            // dirLight = new DirectionalLight();
-            // dirLight->name = "dir_light";
-            // dirLight->transform->rotate(-55.0f, 30.0f, 0.0f);
+            dirLight = new DirectionalLight();
+            dirLight->name = "dir_light";
+            dirLight->transform->rotate(-55.0f, 30.0f, 0.0f);
 
             pointLights[0] = new PointLight();
             pointLights[0]->range = 12.0f;
@@ -68,7 +68,6 @@ class LightingScene final : public Scene {
             floor = new GameObject();
             floor->addComponent(new MeshRenderer(quadMesh, Shader::diffuseTextureShader(
                 floorTexture,
-                floorTexture,
                 5.0f,
                 32.0f)
             ));
@@ -86,18 +85,22 @@ class LightingScene final : public Scene {
                 // ));
                 // donut->name = "donut";
                 //
-                // Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
-                //
-                // crate = new GameObject();
-                // crate->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseTextureShader(
-                //     "container2.png",
-                //     "container2_specular.png",
-                //     32.0f
-                // )));
-                // crate->name = "crate";
-                // crate->transform->position = { -1.5f, 0.75f, -0.5f };
-                // crate->transform->scale = Vector3::one() * 0.5f;
-                // crate->transform->rotate(20.0f, 35.0f, 0.0f);
+                Mesh* cubeMesh = ModelLoader::load(ModelLoader::cube)[0]->mesh;
+
+                Texture2D* container = Texture2D::load("container2.png");
+                Texture2D* spec = Texture2D::load("container2_specular.png");
+
+                crate = new GameObject();
+                crate->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseTextureShader(
+                    container,
+                    spec,
+                    1.0f,
+                    32.0f
+                )));
+                crate->name = "crate";
+                crate->transform->position = { -1.5f, 0.75f, -0.5f };
+                crate->transform->scale = Vector3::one() * 0.5f;
+                crate->transform->rotate(20.0f, 35.0f, 0.0f);
                 //
                 // redGlassBox = new GameObject();
                 // redGlassBox->addComponent(new MeshRenderer(cubeMesh, Shader::diffuseShader(

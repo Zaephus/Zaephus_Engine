@@ -105,6 +105,7 @@ Texture2D* Texture2D::load(const std::string& _name, const TextureData& _data) {
 
     const int loadedTextureIndex = checkForMatch(path, Color::white(), _data);
     if(loadedTextureIndex >= 0) {
+        std::cout << "Re-used texture" << std::endl;
         return loadedTextures[loadedTextureIndex];
     }
 

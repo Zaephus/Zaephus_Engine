@@ -232,17 +232,26 @@ Shader* Shader::diffuseShader(const Color& _c, const float _shininess) {
     return shader;
 }
 
+Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, float _uvScale, float _shininess) {
+    Texture2D* diffuse = Texture2D::load(_diffusePath);
+    Texture2D* specular = Texture2D::load(Color::grey());
+
+    return diffuseTextureShader(diffuse, specular, _uvScale, _shininess);
+}
 Shader* Shader::diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, const float _uvScale, const float _shininess) {
     Texture2D* diffuse = Texture2D::load(_diffusePath);
     Texture2D* specular = Texture2D::load(_specularPath);
 
     return diffuseTextureShader(diffuse, specular, _uvScale, _shininess);
 }
+Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, float _uvScale, float _shininess) {
+    return diffuseTextureShader(_diffuse, Texture2D::load(Color::grey()), _uvScale, _shininess);
+}
 Shader* Shader::diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, const float _uvScale, const float _shininess) {
     Shader* shader = new Shader("ZE_Base.vert", "ZE_DiffuseTexture.frag");
 
-    shader->setTexture2D("material.diffuse", _diffuse);
     shader->setTexture2D("material.specular", _specular);
+    shader->setTexture2D("material.diffuse", _diffuse);
     shader->setFloat("material.uvScale", _uvScale);
     shader->setFloat("material.shininess", _shininess);
 

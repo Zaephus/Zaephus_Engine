@@ -91,6 +91,7 @@ void Renderer::handleSetup() {
     window->initialize(1200, 600, "Zaephus Engine");
 
     glEnable(GL_TEXTURE_2D);
+    glEnable(GL_STENCIL_TEST);
 
     // glEnable(GL_DEPTH_TEST);
     // glDepthFunc(GL_LESS);
@@ -167,7 +168,7 @@ void Renderer::clearScreen() const { // NOLINT(*-convert-member-functions-to-sta
     ZoneScopedNC("Renderer::ClearScreen", 0x0062ff);
 #endif
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 void Renderer::renderObjects() const {

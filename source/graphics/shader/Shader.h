@@ -67,7 +67,9 @@ class Shader {
         static Shader* diffuseShader(const Color& _c);
         static Shader* diffuseShader(const Color& _c, float _shininess);
 
+        static Shader* diffuseTextureShader(const std::string& _diffusePath, float _uvScale, float _shininess);
         static Shader* diffuseTextureShader(const std::string& _diffusePath, const std::string& _specularPath, float _uvScale, float _shininess);
+        static Shader* diffuseTextureShader(Texture2D* _diffuse, float _uvScale, float _shininess);
         static Shader* diffuseTextureShader(Texture2D* _diffuse, Texture2D* _specular, float _uvScale, float _shininess);
 
         static Shader* instancedUnlitShader(float _r, float _g, float _b, float _a);
