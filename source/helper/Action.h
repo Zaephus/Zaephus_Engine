@@ -4,61 +4,100 @@
 #include <iostream>
 #include <vector>
 
+#define ACTION_DESTRUCTOR                                                                               \
+    ~Action() {                                                                                         \
+        cleanStubs();                                                                                   \
+        if(!stubs.empty()) {                                                                            \
+            std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;   \
+        }                                                                                               \
+    }
+
+#define ACTION_BIND_TO_FUNC                                                                             \
+    void bind() {                                                                                       \
+        Stub s(nullptr, &functionStub<Function>);                                                       \
+        if(containsStub(s)) {                                                                           \
+            std::cout << "Action is already bound." << std::endl;                                       \
+            return;                                                                                     \
+        }                                                                                               \
+        stubs.push_back(s);                                                                             \
+    }
+
+#define ACTION_UNBIND_FROM_FUNC                                                                         \
+    void unbind() {                                                                                     \
+        Stub s(nullptr, &functionStub<Function>);                                                       \
+        if(containsStub(s)) {                                                                           \
+            markStubForDeletion(s);                                                                     \
+        }                                                                                               \
+    }
+
+#define ACTION_BIND_TO_CLASS                                                                            \
+    void bind(C* instance) {                                                                            \
+        Stub s(instance, &classMethodStub<C, Function>);                                                \
+        if(containsStub(s)) {                                                                           \
+            std::cout << "Action is already bound." << std::endl;                                       \
+            return;                                                                                     \
+        }                                                                                               \
+        stubs.push_back(s);                                                                             \
+    }
+
+#define ACTION_UNBIND_FROM_CLASS                                                                        \
+    void unbind(C* instance) {                                                                          \
+        Stub s(instance, &classMethodStub<C, Function>);                                                \
+        if(containsStub(s)) {                                                                           \
+            markStubForDeletion(s);                                                                     \
+        }                                                                                               \
+    }
+
+#define ACTION_EMPTY_CHECK bool isEmpty() { return stubs.empty(); }
+
+#define ACTION_CONTAINS_STUB                                                                            \
+    bool containsStub(Stub other) {                                                                     \
+        for(Stub stub : stubs) {                                                                        \
+            if(stub.first == other.first && stub.second == other.second) {                              \
+                return true;                                                                            \
+            }                                                                                           \
+        }                                                                                               \
+        return false;                                                                                   \
+    }
+
+#define ACTION_MARK_STUB_FOR_DELETION                                                                   \
+    void markStubForDeletion(Stub s) {                                                                  \
+        for(size_t i = 0; i < stubs.size(); i++) {                                                      \
+            if(stubs[i].first == s.first && stubs[i].second == s.second) {                              \
+                stubs.erase(stubs.begin() + i);                                                         \
+                return;                                                                                 \
+            }                                                                                           \
+        }                                                                                               \
+    }
+
+#define ACTION_CLEAN_STUBS                                                                              \
+    void cleanStubs() {                                                                                 \
+        for(int i = stubs.size()-1; i >= 0; --i) {                                                      \
+            if(stubs[i].first == nullptr && stubs[i].second == nullptr) {                               \
+                stubs.erase(stubs.begin() + i);                                                         \
+            }                                                                                           \
+        }                                                                                               \
+    }
+
 template <typename T>
 class Action {};
 
 template <typename R>
 class Action<R()> {
     public:
-        ~Action() {
-            cleanStubs();
-
-            if(!stubs.empty()) {
-                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
-            }
-        }
+        ACTION_DESTRUCTOR
 
         template <R (*Function)()>
-        void bind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_FUNC;
         template <R (*Function)()>
-        void unbind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_FUNC;
 
         template <class C, R (C::*Function)()>
-        void bind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_CLASS;
         template <class C, R (C::*Function)()>
-        void unbind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_CLASS;
 
-        bool isEmpty() {
-            return stubs.empty();
-        }
+        ACTION_EMPTY_CHECK;
 
         void invoke() {
             cleanStubs();
@@ -76,32 +115,9 @@ class Action<R()> {
 
         std::vector<Stub> stubs = {};
 
-        bool containsStub(Stub other) {
-            for(Stub stub : stubs) {
-                if(stub.first == other.first && stub.second == other.second) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void markStubForDeletion(Stub s) {
-            for(size_t i = 0; i < stubs.size(); i++) {
-                if(stubs[i].first == s.first && stubs[i].second == s.second) {
-                    stubs.erase(stubs.begin() + i);
-                    return;
-                }
-            }
-        }
-
-        void cleanStubs() {
-            for(int i = stubs.size()-1; i >= 0; --i) {
-                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
-                    stubs.erase(stubs.begin() + i);
-                }
-            }
-        }
+        ACTION_CONTAINS_STUB;
+        ACTION_MARK_STUB_FOR_DELETION;
+        ACTION_CLEAN_STUBS;
 
         template <R (*Function)()>
         static R functionStub(InstancePtr) {
@@ -117,55 +133,19 @@ class Action<R()> {
 template <typename R, typename PARAM1>
 class Action<R(PARAM1)> {
     public:
-        ~Action() {
-            cleanStubs();
-
-            if(!stubs.empty()) {
-                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
-            }
-        }
+        ACTION_DESTRUCTOR
 
         template <R (*Function)(PARAM1)>
-        void bind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_FUNC;
         template <R (*Function)(PARAM1)>
-        void unbind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_FUNC;
 
         template <class C, R (C::*Function)(PARAM1)>
-        void bind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_CLASS;
         template <class C, R (C::*Function)(PARAM1)>
-        void unbind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_CLASS;
 
-        bool isEmpty() {
-            return stubs.empty();
-        }
+        ACTION_EMPTY_CHECK;
 
         void invoke(PARAM1 param1) {
             cleanStubs();
@@ -184,33 +164,9 @@ class Action<R(PARAM1)> {
 
         std::vector<Stub> stubs = {};
 
-        bool containsStub(Stub other) {
-            for(Stub stub : stubs) {
-                if(stub.first == other.first && stub.second == other.second) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void markStubForDeletion(Stub s) {
-            for(size_t i = 0; i < stubs.size(); i++) {
-                if(stubs[i].first == s.first && stubs[i].second == s.second) {
-                    stubs[i].first = nullptr;
-                    stubs[i].second = nullptr;
-                    return;
-                }
-            }
-        }
-
-        void cleanStubs() {
-            for(int i = stubs.size()-1; i >= 0; --i) {
-                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
-                    stubs.erase(stubs.begin() + i);
-                }
-            }
-        }
+        ACTION_CONTAINS_STUB;
+        ACTION_MARK_STUB_FOR_DELETION;
+        ACTION_CLEAN_STUBS;
 
         template <R (*Function)(PARAM1)>
         static R functionStub(InstancePtr, PARAM1 param1) {
@@ -226,55 +182,19 @@ class Action<R(PARAM1)> {
 template <typename R, typename PARAM1, typename PARAM2>
 class Action<R(PARAM1, PARAM2)> {
     public:
-        ~Action() {
-            cleanStubs();
-
-            if(!stubs.empty()) {
-                std::cerr << "An Action is still bound to " << stubs.size() << " functions" << std::endl;
-            }
-        }
+        ACTION_DESTRUCTOR
 
         template <R (*Function)(PARAM1, PARAM2)>
-        void bind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_FUNC;
         template <R (*Function)(PARAM1, PARAM2)>
-        void unbind() {
-            Stub s(nullptr, &functionStub<Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_FUNC;
 
         template <class C, R (C::*Function)(PARAM1, PARAM2)>
-        void bind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                std::cout << "Action is already bound." << std::endl;
-                return;
-            }
-
-            stubs.push_back(s);
-        }
-
+        ACTION_BIND_TO_CLASS;
         template <class C, R (C::*Function)(PARAM1, PARAM2)>
-        void unbind(C* instance) {
-            Stub s(instance, &classMethodStub<C, Function>);
-            if(containsStub(s)) {
-                markStubForDeletion(s);
-            }
-        }
+        ACTION_UNBIND_FROM_CLASS;
 
-        bool isEmpty() {
-            return stubs.empty();
-        }
+        ACTION_EMPTY_CHECK;
 
         void invoke(PARAM1 param1, PARAM2 param2) {
             cleanStubs();
@@ -293,33 +213,9 @@ class Action<R(PARAM1, PARAM2)> {
 
         std::vector<Stub> stubs = {};
 
-        bool containsStub(Stub other) {
-            for(Stub stub : stubs) {
-                if(stub.first == other.first && stub.second == other.second) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        void markStubForDeletion(Stub s) {
-            for(size_t i = 0; i < stubs.size(); i++) {
-                if(stubs[i].first == s.first && stubs[i].second == s.second) {
-                    stubs[i].first = nullptr;
-                    stubs[i].second = nullptr;
-                    return;
-                }
-            }
-        }
-
-        void cleanStubs() {
-            for(int i = stubs.size()-1; i >= 0; --i) {
-                if(stubs[i].first == nullptr && stubs[i].second == nullptr) {
-                    stubs.erase(stubs.begin() + i);
-                }
-            }
-        }
+        ACTION_CONTAINS_STUB;
+        ACTION_MARK_STUB_FOR_DELETION;
+        ACTION_CLEAN_STUBS;
 
         template <R (*Function)(PARAM1, PARAM2)>
         static R functionStub(InstancePtr, PARAM1 param1, PARAM2 param2) {
@@ -331,3 +227,17 @@ class Action<R(PARAM1, PARAM2)> {
             return (static_cast<C*>(instance)->*Function)(param1, param2);
         }
 };
+
+#undef ACTION_DESTRUCTOR
+
+#undef ACTION_BIND_TO_FUNC
+#undef ACTION_UNBIND_FROM_FUNC
+
+#undef ACTION_BIND_TO_CLASS
+#undef ACTION_UNBIND_FROM_CLASS
+
+#undef ACTION_EMPTY_CHECK
+
+#undef ACTION_CONTAINS_STUB
+#undef ACTION_MARK_STUB_FOR_DELETION
+#undef ACTION_CLEAN_STUBS
