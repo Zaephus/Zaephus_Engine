@@ -10,6 +10,8 @@
 #include "Scene.h"
 #include "Transform.h"
 
+#include <tracy/Tracy.hpp>
+
 Action<void(GameObject*)> GameObject::gameObjectCreatedCall = Action<void(GameObject*)>();
 Action<void(GameObject*)> GameObject::gameObjectDestroyedCall = Action<void(GameObject*)>();
 
@@ -24,6 +26,8 @@ void GameObject::destroy() {
 }
 
 void GameObject::internalDestroy() {
+    ZoneScopedNC("GameObject::Destroy", 0xff0000);
+
     Scene::destroyObjectCall.unbind<GameObject, &GameObject::internalDestroy>(this);
 
     while(Scene::activeScene->renderer->isSorting()) {}
@@ -38,6 +42,8 @@ void GameObject::internalDestroy() {
     components.clear();
 
     gameObjectDestroyedCall.invoke(this);
+
+    delete this;
 }
 
 void GameObject::addComponent(Component* _component) {

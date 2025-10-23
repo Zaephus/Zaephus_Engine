@@ -28,7 +28,6 @@ class Camera : public GameObject {
         bool projectionChanged = false;
 
         Camera();
-        ~Camera();
 
         Matrix4x4 projectionMatrix = Matrix4x4::identity();
         [[nodiscard]] Matrix4x4 viewMatrix() const;
@@ -51,6 +50,7 @@ class Camera : public GameObject {
 
         Matrix4x4 lastProjMatrix;
 
+        ~Camera() override;
         void update() override;
 
         static Matrix4x4 perspectiveMatrix(float _fovY, float _aspect, float _near, float _far);

@@ -16,9 +16,6 @@ function(CopyResources target dir)
     )
 endfunction()
 
-message(STATUS ${ENGINE_PATH})
-message(STATUS ${CMAKE_SOURCE_DIR})
-
 set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include CACHE STRING "" FORCE)
 
 set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}")
@@ -49,17 +46,12 @@ add_subdirectory(${INCLUDE_DIR}/glfw include/glfw)
 add_subdirectory(${INCLUDE_DIR}/glad include/glad)
 add_subdirectory(${INCLUDE_DIR}/assimp include/assimp)
 add_subdirectory(${INCLUDE_DIR}/Zaephus_Math include/Zaephus_Math)
+add_subdirectory(${INCLUDE_DIR}/tracy include/tracy)
 
 if(ENABLE_PROFILING)
-    message(profiling enabled)
     set(TRACY_ENABLE    ON CACHE BOOL "" FORCE)
     set(TRACY_ON_DEMAND ON CACHE BOOL "" FORCE)
-
-    add_subdirectory(${INCLUDE_DIR}/tracy include/tracy)
-    target_link_libraries(Zaephus_Engine Tracy::TracyClient)
-    target_include_directories(Zaephus_Engine PUBLIC ${INCLUDE_DIR}/tracy/public)
 else()
-    message(profiling disabled)
     set(TRACY_ENABLE    OFF CACHE BOOL "" FORCE)
     set(TRACY_ON_DEMAND OFF CACHE BOOL "" FORCE)
 endif()
@@ -68,10 +60,12 @@ target_link_libraries(Zaephus_Engine glfw)
 target_link_libraries(Zaephus_Engine glad)
 target_link_libraries(Zaephus_Engine assimp)
 target_link_libraries(Zaephus_Engine Zaephus_Math)
+target_link_libraries(Zaephus_Engine Tracy::TracyClient)
 
 target_include_directories(Zaephus_Engine PUBLIC
     ${INCLUDE_DIR}/stb_image
     ${INCLUDE_DIR}/Zaephus_Math/source
+    ${INCLUDE_DIR}/tracy/public
     source
 )
 

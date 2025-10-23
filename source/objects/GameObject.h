@@ -60,8 +60,10 @@ class GameObject : public Object {
             return nullptr;
         }
 
+    protected:
+        ~GameObject() override = default;
+
     private:
         std::vector<Component*> components;
-
         void internalDestroy();
 };

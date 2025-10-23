@@ -17,12 +17,12 @@ void Texture2D::initialize() {
     int width, height, format;
     unsigned char* data = nullptr;
 
-    if(path != "") { data = loadFromDisk(&width, &height, & format); }
+    if(!path.empty()) { data = loadFromDisk(&width, &height, & format); }
     else { data = createFromColor(&width, &height, & format); }
 
     bindData(data, width, height, format);
 
-    if(path != "") { stbi_image_free(data); }
+    if(!path.empty()) { stbi_image_free(data); }
 
     Renderer::cleanupRenderObjectsCall.bind<Texture2D, &Texture2D::internalDestroy>(this);
 }

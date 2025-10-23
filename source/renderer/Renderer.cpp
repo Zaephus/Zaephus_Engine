@@ -13,14 +13,11 @@
 #include "PointLight.h"
 #include "MeshRenderer.h"
 #include "MultiMeshRenderer.h"
-#include "Settings.h"
 #include "Window.h"
 #include "Shader.h"
 #include "Transform.h"
 
-#ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
-#endif
 
 Action<void()> Renderer::initRenderObjectCall = Action<void()>();
 Action<void()> Renderer::destroyRenderObjectCall = Action<void()>();
@@ -29,9 +26,7 @@ Action<void()> Renderer::cleanupRenderObjectsCall = Action<void()>();
 void Renderer::initialize() {
     initFlag = false;
 
-#ifdef ENABLE_PROFILING
     tracy::SetThreadName("Render Thread");
-#endif
 
     handleSetup();
 
@@ -128,9 +123,7 @@ void Renderer::handleExit() {
 }
 
 void Renderer::render() {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Renderer::Render", 0x0062ff);
-#endif
 
     while(readyForRenderFlag) {}
 
@@ -163,17 +156,13 @@ void Renderer::changeClearColor() {
 
 // ReSharper disable once CppMemberFunctionMayBeStatic
 void Renderer::clearScreen() const { // NOLINT(*-convert-member-functions-to-static)
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Renderer::ClearScreen", 0x0062ff);
-#endif
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Renderer::renderObjects() const {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Renderer::RenderObjects", 0x0062ff);
-#endif
 
     for(size_t i = 0; i < pointLights.size(); i++) {
         pointLights[i]->calculateAttenuation();
@@ -216,9 +205,7 @@ bool meshRendererCompare(const MeshRenderer* _a, const MeshRenderer* _b) {
 }
 
 void Renderer::sortMeshRenderers() {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Renderer::SortMeshRenderers", 0x0062ff);
-#endif
 
     duringSortFlag = true;
 
