@@ -26,10 +26,10 @@ class DirectionalLight : public GameObject {
         explicit DirectionalLight(const Color& _c);
         DirectionalLight(const Color& _c, float _ambientStrength, float _specularStrength);
 
-        ~DirectionalLight() override;
-
         void start() override;
 
     private:
         float debugSize = 0.4f;
+
+        ~DirectionalLight() override;
 };

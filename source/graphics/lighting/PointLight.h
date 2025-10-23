@@ -29,8 +29,6 @@ class PointLight : public GameObject {
         explicit PointLight(const Color& _c);
         PointLight(const Color& _c, float _ambientStrength, float _specularStrength);
 
-        ~PointLight() override;
-
         void start() override;
 
         void calculateAttenuation();
@@ -61,4 +59,6 @@ class PointLight : public GameObject {
         };
 
         float lightSize = 0.1f;
+
+        ~PointLight() override;
 };

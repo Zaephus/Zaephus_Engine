@@ -15,9 +15,7 @@
 #include "TimeUtils.h"
 #include "Transform.h"
 
-#ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
-#endif
 
 Scene* Scene::activeScene = nullptr;
 
@@ -39,8 +37,6 @@ void Scene::initialize() {
     while(!renderer->isInitialized()) {}
 
     Input::initialize();
-
-    if(shouldRenderAxis) { setupAxis(); }
 
     start();
     internalStart();
@@ -88,9 +84,7 @@ void Scene::internalUpdate() {
     updateObjectCall.invoke();
 
     {
-#ifdef ENABLE_PROFILING
-        ZoneNamedN(UpdateZone, "update", true);
-#endif
+        ZoneNamedN(UpdateZone, "Scene::Update", true);
         update();
     }
 
@@ -104,9 +98,7 @@ void Scene::internalUpdate() {
 
     notifyEndOfFrame.invoke();
 
-#ifdef ENABLE_PROFILING
     FrameMark;
-#endif
 }
 
 void Scene::setupAxis() {
@@ -152,12 +144,12 @@ void Scene::onGameObjectCreated(GameObject* _gameObject) {
 }
 
 void Scene::onGameObjectDestroyed(GameObject* _gameObject) {
+    ZoneScopedN("Scene::OnGameObjectDestroyed");
+
     for(size_t i = 0; i < gameObjects.size(); i++) {
         if(_gameObject == gameObjects[i]) {
             gameObjects.erase(gameObjects.begin() + i);
             gameObjects.shrink_to_fit();
-
-            delete _gameObject;
             return;
         }
     }

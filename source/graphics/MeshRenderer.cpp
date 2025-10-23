@@ -8,7 +8,6 @@
 
 #include "Action.h"
 #include "Camera.h"
-#include "Vertex.h"
 #include "Mesh.h"
 #include "Model.h"
 #include "Renderer.h"
@@ -16,9 +15,7 @@
 #include "TimeUtils.h"
 #include "Transform.h"
 
-#ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
-#endif
 
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererCreatedCall = Action<void(MeshRenderer*)>();
 Action<void(MeshRenderer*)> MeshRenderer::meshRendererDestroyedCall = Action<void(MeshRenderer*)>();
@@ -48,9 +45,7 @@ void MeshRenderer::initialize() {
 }
 
 void MeshRenderer::render() const {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("MeshRenderer::Render", 0xbe33ff);
-#endif
 
     mesh->bind();
     if(mesh->isDynamic) { mesh->updateVertexData(); }

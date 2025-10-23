@@ -8,9 +8,7 @@
 
 #include "Action.h"
 
-#ifdef ENABLE_PROFILING
 #include <tracy/Tracy.hpp>
-#endif
 
 Action<void(int, int)> Window::sizeChangedCall      = Action<void(int, int)>();
 Action<void(int, int)> Window::keyPressedCall       = Action<void(int, int)>();
@@ -65,18 +63,14 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
 }
 
 void Window::processCallStack() {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Window::ProcessCallStack", 0x0062ff);
-#endif
     for(auto [mode, value] : inputModeStack) {
         glfwSetInputMode(glfwWindow, mode, value);
     }
 }
 
 void Window::presentFrame() const {
-#ifdef ENABLE_PROFILING
     ZoneScopedNC("Window::PresentFrame", 0x0062ff);
-#endif
     glfwSwapBuffers(glfwWindow);
     glfwPollEvents();
 }
