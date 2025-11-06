@@ -6,6 +6,8 @@
 #include <ZEngine.h>
 #include <ZMath.h>
 
+#include "Noise.h"
+
 class LightingScene final : public Scene {
     DirectionalLight* dirLight = nullptr;
     std::vector<PointLight*> pointLights = std::vector<PointLight*>(4);
@@ -63,15 +65,16 @@ class LightingScene final : public Scene {
 
             Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0]->mesh;
 
-            Texture2D* floorTexture = Texture2D::load("wood_floor.png");
+            // Texture2D* floorTexture = Texture2D::load("wood_floor.png");
+            Texture2D* floorTexture = Noise::perlinTexture(256, 256, 100000.0f, 0.0f, 15.0f, 3, 0.5f);
+
+            Shader* floorShader = Shader::unlitTextureShader(
+                floorTexture,
+                1.0f
+            );
 
             floor = new GameObject();
-            floor->addComponent(new MeshRenderer(quadMesh, Shader::diffuseTextureShader(
-                floorTexture,
-                floorTexture,
-                5.0f,
-                32.0f)
-            ));
+            floor->addComponent(new MeshRenderer(quadMesh, floorShader));
             floor->name = "floor";
             floor->transform->position = { 0.0f, -0.5f, 0.0f };
             floor->transform->scale = { 10.0f, 1.0f, 10.0f };

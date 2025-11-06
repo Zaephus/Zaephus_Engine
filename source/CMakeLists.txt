@@ -3,6 +3,8 @@ add_library(Zaephus_Engine STATIC
     ZEngine.h
     ZEngineFwd.h
     Settings.h
+        helper/Noise.cpp
+        helper/Noise.h
 )
 
 if(ENABLE_PROFILING)

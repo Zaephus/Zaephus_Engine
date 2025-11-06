@@ -35,10 +35,10 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    const int width = mode->width;
-    const int height = mode->height;
+    const int width = 1200;//mode->width;
+    const int height = 800;//mode->height;
 
-    glfwWindow = glfwCreateWindow(width, height, "Zaephus Renderer", glfwGetPrimaryMonitor(), nullptr);
+    glfwWindow = glfwCreateWindow(width, height, "Zaephus Renderer", nullptr, nullptr);
     if(glfwWindow == nullptr) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
         return;
