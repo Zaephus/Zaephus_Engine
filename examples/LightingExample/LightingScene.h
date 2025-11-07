@@ -66,7 +66,8 @@ class LightingScene final : public Scene {
             Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0]->mesh;
 
             // Texture2D* floorTexture = Texture2D::load("wood_floor.png");
-            Texture2D* floorTexture = Noise::perlinTexture(256, 256, 100000.0f, 0.0f, 15.0f, 3, 0.5f);
+            // Texture2D* floorTexture = Noise::perlinTexture(256, 256, 100000.0f, 0.0f, 15.0f, 3, 0.5f);
+            Texture2D* floorTexture = Noise::whiteNoiseTexture(256, 256);
 
             Shader* floorShader = Shader::unlitTextureShader(
                 floorTexture,

@@ -4,7 +4,9 @@
 #include <cmath>
 #include <iostream>
 
+#include "Random.h"
 #include "Texture2D.h"
+#include "ZMath.h"
 
 int Noise::perm[] = {
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140,
@@ -55,6 +57,26 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
             texels[i] = static_cast<unsigned char>(val * 255);
             texels[i+1] = static_cast<unsigned char>(val * 255);
             texels[i+2] = static_cast<unsigned char>(val * 255);
+
+            i += 3;
+        }
+    }
+
+    return Texture2D::create(&texels[0], _w, _h, GL_RGB);
+}
+
+Texture2D* Noise::whiteNoiseTexture(int _w, int _h) {
+    unsigned char* texels = new unsigned char[_w * _h * 3];
+
+    int i = 0;
+
+    for(int x = 0; x < _w; x++) {
+        for(int y = 0; y < _h; y++) {
+            const char val = Random::range(0, 255);
+
+            texels[i] = val;
+            texels[i+1] = val;
+            texels[i+2] = val;
 
             i += 3;
         }
@@ -116,17 +138,17 @@ float Noise::calcPerlin(const float _x, const float _y, const float _z) {
     const int bab = perm[perm[perm[xi+1] + yi  ] + zi+1];
     const int bbb = perm[perm[perm[xi+1] + yi+1] + zi+1];
 
-    float x1 = lerp(grad(aaa, xf, yf, zf), grad(baa, xf-1, yf, zf), u);
-    float x2 = lerp(grad(aba, xf, yf-1, zf), grad(bba, xf-1, yf-1, zf), u);
+    float x1 = ZMath::lerp(grad(aaa, xf, yf, zf), grad(baa, xf-1, yf, zf), u);
+    float x2 = ZMath::lerp(grad(aba, xf, yf-1, zf), grad(bba, xf-1, yf-1, zf), u);
 
-    const float y1 = lerp(x1, x2, v);
+    const float y1 = ZMath::lerp(x1, x2, v);
 
-    x1 = lerp(grad(aab, xf, yf, zf-1), grad(bab, xf-1, yf, zf-1), u);
-    x2 = lerp(grad(abb, xf, yf-1, zf-1), grad(bbb, xf-1, yf-1, zf-1), u);
+    x1 = ZMath::lerp(grad(aab, xf, yf, zf-1), grad(bab, xf-1, yf, zf-1), u);
+    x2 = ZMath::lerp(grad(abb, xf, yf-1, zf-1), grad(bbb, xf-1, yf-1, zf-1), u);
 
-    const float y2 = lerp(x1, x2, v);
+    const float y2 = ZMath::lerp(x1, x2, v);
 
-    return (lerp(y1, y2, w) + 1) / 2;
+    return (ZMath::lerp(y1, y2, w) + 1) / 2;
 }
 
 float Noise::fade(const float _t) {
@@ -153,8 +175,4 @@ float Noise::grad(const int _hash, const float _x, const float _y, const float _
         case 0xF: return -_y - _z;
         default: return 0;
     }
-}
-
-float Noise::lerp(const float _a, const float _b, const float _t) {
-    return _a + _t * (_b - _a);
 }
