@@ -42,7 +42,7 @@ int Noise::perm[] = {
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 };
 
-Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _size, const unsigned int _octaves, const float _persistence) {
+Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
     unsigned char* texels = new unsigned char[_w * _h * 3];
 
     int i = 0;
@@ -52,7 +52,7 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
             const float xVal = static_cast<float>(x);
             const float yVal = static_cast<float>(y);
 
-            const float val = perlin((_xOffset + xVal) / _size, (_yOffset + yVal) / _size, 0, _octaves, _persistence);
+            const float val = perlin((_xOffset + xVal) / _cellSize, (_yOffset + yVal) / _cellSize, 0, _octaves, _persistence);
 
             texels[i] = static_cast<unsigned char>(val * 255);
             texels[i+1] = static_cast<unsigned char>(val * 255);
@@ -65,14 +65,57 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
     return Texture2D::create(&texels[0], _w, _h, GL_RGB);
 }
 
-Texture2D* Noise::whiteNoiseTexture(int _w, int _h) {
+Texture2D* Noise::voronoiTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
+    unsigned char* texels = new unsigned char[_w * _h * 3];
+
+    const int xCell = _w / static_cast<int>(std::floor(_cellSize));
+    const int yCell = _h / static_cast<int>(std::floor(_cellSize));
+
+    std::vector<Vector2> points;
+
+    for(int x = 0; x < xCell; x++) {
+        for(int y = 0; y < yCell; y++) {
+            points.emplace_back(
+                static_cast<float>(x) * _cellSize + Random::range(0.0f, _cellSize),
+                static_cast<float>(y) * _cellSize + Random::range(0.0f, _cellSize)
+            );
+        }
+    }
+
+    int i = 0;
+
+    for(int x = 0; x < _w; x++) {
+        for(int y = 0; y < _h; y++) {
+            float minDist = 1000.0f;
+            for(int p = 0; p < points.size(); p++) {
+                Vector2 pos = Vector2(static_cast<float>(x), static_cast<float>(y));
+
+                float dist = Vector2::distance(pos, points[p]);
+                minDist = std::min(minDist, dist);
+            }
+
+            const float val = minDist / _cellSize;
+
+            texels[i] = static_cast<char>(val * 255);
+            texels[i+1] = static_cast<char>(val * 255);
+            texels[i+2] = static_cast<char>(val * 255);
+
+            i += 3;
+        }
+    }
+
+    return Texture2D::create(&texels[0], _w, _h, GL_RGB);
+}
+
+
+Texture2D* Noise::whiteNoiseTexture(const int _w, const int _h) {
     unsigned char* texels = new unsigned char[_w * _h * 3];
 
     int i = 0;
 
     for(int x = 0; x < _w; x++) {
         for(int y = 0; y < _h; y++) {
-            const char val = Random::range(0, 255);
+            const char val = Random::range(static_cast<char>(0), static_cast<char>(255));
 
             texels[i] = val;
             texels[i+1] = val;
@@ -109,8 +152,6 @@ float Noise::perlin(const float _x, const float _y, const float _z, const unsign
         amp *= _persistence;
         freq *= 2;
     }
-
-    // std::cout << total << std::endl;
 
     return total / maxVal;
 }
