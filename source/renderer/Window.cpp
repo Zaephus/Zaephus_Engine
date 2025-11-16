@@ -41,6 +41,10 @@ void Window::initialize(const size_t _w, const size_t _h, const std::string& _ti
     glfwWindow = glfwCreateWindow(width, height, "Zaephus Renderer", nullptr, nullptr);
     if(glfwWindow == nullptr) {
         std::cerr << "Failed to create GLFW window!" << std::endl;
+        const char* error;
+        int num = glfwGetError(&error);
+        std::cerr << num << ": " << error << std::endl;
+
         return;
     }
     glfwMakeContextCurrent(glfwWindow);

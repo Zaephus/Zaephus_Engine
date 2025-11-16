@@ -59,21 +59,21 @@ unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) 
     return imageData;
 }
 
-unsigned char* Texture2D::createFromColor(int* _width, int* _height, int* _format) const {
+float* Texture2D::createFromColor(int* _width, int* _height, int* _format) const {
     *_width = 1;
     *_height = 1;
     *_format = GL_RGBA;
 
-    unsigned char* texel = new unsigned char[4];
-    texel[0] = static_cast<unsigned char>(color.r * 255);
-    texel[1] = static_cast<unsigned char>(color.g * 255);
-    texel[2] = static_cast<unsigned char>(color.b * 255);
-    texel[3] = static_cast<unsigned char>(color.a * 255);
+    float* texel = new float[4];
+    texel[0] = color.r * 255;
+    texel[1] = color.g * 255;
+    texel[2] = color.b * 255;
+    texel[3] = color.a * 255;
 
     return &texel[0];
 }
 
-void Texture2D::bindData(const unsigned char* _imageData, const int _width, const int _height, const int _format) {
+void Texture2D::bindData(const void* _imageData, const int _width, const int _height, const int _format) {
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
@@ -81,8 +81,9 @@ void Texture2D::bindData(const unsigned char* _imageData, const int _width, cons
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texInfo.verticalWrap);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texInfo.minFilter);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texInfo.magFilter);
+
     if(_imageData) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, GL_UNSIGNED_BYTE, _imageData);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, type, _imageData);
         if(texInfo.generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
     }
     else {
@@ -105,6 +106,7 @@ Texture2D* Texture2D::load(const std::string& _name, const TextureInfo& _info) {
     Texture2D* tex = new Texture2D;
     tex->path = path;
     tex->texInfo = _info;
+    tex->type = GL_UNSIGNED_BYTE;
 
     loadedTextures.push_back(tex);
 
@@ -123,6 +125,7 @@ Texture2D* Texture2D::load(const Color& _color, const TextureInfo& _info) {
     Texture2D* tex = new Texture2D;
     tex->color = _color;
     tex->texInfo = _info;
+    tex->type = GL_FLOAT;
 
     loadedTextures.push_back(tex);
 
@@ -131,13 +134,14 @@ Texture2D* Texture2D::load(const Color& _color, const TextureInfo& _info) {
     return tex;
 }
 
-Texture2D* Texture2D::create(unsigned char* _data, const int _w, const int _h, const int _format) {
+Texture2D* Texture2D::create(float* _data, const int _w, const int _h, const int _format) {
     Texture2D* tex = new Texture2D;
     tex->texInfo = TextureInfo();
 
     tex->width = _w;
     tex->height = _h;
     tex->format = _format;
+    tex->type = GL_FLOAT;
 
     tex->data = _data;
 

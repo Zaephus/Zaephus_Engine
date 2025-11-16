@@ -43,7 +43,7 @@ int Noise::perm[] = {
 };
 
 Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
-    unsigned char* texels = new unsigned char[_w * _h * 3];
+    float* texels = new float[_w * _h * 3];
 
     int i = 0;
 
@@ -52,11 +52,17 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
             const float xVal = static_cast<float>(x);
             const float yVal = static_cast<float>(y);
 
-            const float val = perlin((_xOffset + xVal) / _cellSize, (_yOffset + yVal) / _cellSize, 0, _octaves, _persistence);
+            const float val = perlin(
+                (_xOffset + xVal) / _cellSize,
+                (_yOffset + yVal) / _cellSize,
+                0,
+                _octaves,
+                _persistence
+            );
 
-            texels[i] = static_cast<unsigned char>(val * 255);
-            texels[i+1] = static_cast<unsigned char>(val * 255);
-            texels[i+2] = static_cast<unsigned char>(val * 255);
+            texels[i]   = val;
+            texels[i+1] = val;
+            texels[i+2] = val;
 
             i += 3;
         }
@@ -65,57 +71,119 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
     return Texture2D::create(&texels[0], _w, _h, GL_RGB);
 }
 
-Texture2D* Noise::voronoiTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
-    unsigned char* texels = new unsigned char[_w * _h * 3];
+Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset, const Vector2Int& _cellAmount, const unsigned int _octaves, const float _persistence) {
+    float* texels = new float[_size.x * _size.y * 3] {};
 
-    const int xCell = _w / static_cast<int>(std::floor(_cellSize));
-    const int yCell = _h / static_cast<int>(std::floor(_cellSize));
-
-    std::vector<Vector2> points;
-
-    for(int x = 0; x < xCell; x++) {
-        for(int y = 0; y < yCell; y++) {
-            points.emplace_back(
-                static_cast<float>(x) * _cellSize + Random::range(0.0f, _cellSize),
-                static_cast<float>(y) * _cellSize + Random::range(0.0f, _cellSize)
-            );
-        }
+    unsigned int octaves;
+    if(_octaves <= 0) {
+        octaves = 1;
+        std::cerr << "ERROR: Using an octaves setting of zero." << std::endl;
+    }
+    else {
+        octaves = _octaves;
     }
 
-    int i = 0;
+    float freq = 1.0f;
+    float amp = 1.0f;
+    float maxVal = 0.0f;
 
-    for(int x = 0; x < _w; x++) {
-        for(int y = 0; y < _h; y++) {
-            float minDist = 1000.0f;
-            for(int p = 0; p < points.size(); p++) {
-                Vector2 pos = Vector2(static_cast<float>(x), static_cast<float>(y));
+    for(int octave = 0; octave < octaves; octave++) {
+        Vector2Int cellAmount = {
+            _cellAmount.x * static_cast<int>(freq) + 1,
+            _cellAmount.y * static_cast<int>(freq) + 1
+        };
 
-                float dist = Vector2::distance(pos, points[p]);
-                minDist = std::min(minDist, dist);
+        const float cellWidth = static_cast<float>(_size.x) / static_cast<float>(cellAmount.y - 1);
+        const float cellHeight = static_cast<float>(_size.y) / static_cast<float>(cellAmount.x - 1);
+
+        Vector2 points[cellAmount.x][cellAmount.y];
+
+        for(int x = 0; x < cellAmount.x; x++) {
+            for(int y = 0; y < cellAmount.y; y++) {
+                points[x][y] = {
+                    (static_cast<float>(x) - 0.5f) * cellWidth + Random::range(0.0f, cellWidth),
+                    (static_cast<float>(y) - 0.5f) * cellHeight + Random::range(0.0f, cellHeight)
+                };
             }
-
-            const float val = minDist / _cellSize;
-
-            texels[i] = static_cast<char>(val * 255);
-            texels[i+1] = static_cast<char>(val * 255);
-            texels[i+2] = static_cast<char>(val * 255);
-
-            i += 3;
         }
+
+        int i = 0;
+
+        // Pixel Calc
+        for(int x = 0; x < _size.x; x++) {
+            for(int y = 0; y < _size.y; y++) {
+                Vector2 uv = {
+                    static_cast<float>(x) / cellWidth - 0.5f,
+                    static_cast<float>(y) / cellHeight - 0.5f
+                };
+
+                // Cell number
+                Vector2Int grid(
+                    static_cast<int>(std::floor(uv.x)),
+                    static_cast<int>(std::floor(uv.y))
+                );
+
+                float pointDistance = 10000.0f;
+
+                for(int nx = -1; nx <= 1; nx++) {
+                    for(int ny = -1; ny <= 1; ny++) {
+                        Vector2Int num = {
+                            grid.x + nx,
+                            grid.y + ny
+                        };
+
+                        if(num.x < 0 || num.x >= cellAmount.x || num.y < 0 || num.y >= cellAmount.y) {
+                            continue;
+                        }
+
+                        Vector2 point = {
+                            points[num.x][num.y].x / cellWidth,
+                            points[num.x][num.y].y / cellHeight
+                        };
+
+                        float dist = Vector2::distance(uv, point);
+                        pointDistance = std::min(dist, pointDistance);
+                    }
+                }
+
+                float distVal = ZMath::smoothStep(1.7f - pointDistance, 0.2f, 2.0f);
+                distVal = 1 - distVal;
+
+                Vector3 col(distVal, distVal, distVal);
+
+                col *= amp;
+
+                // Apply colors to pixels
+                texels[i]   += col.x;
+                texels[i+1] += col.y;
+                texels[i+2] += col.z;
+
+                i += 3;
+            }
+        }
+
+        maxVal  += amp;
+
+        amp *= _persistence;
+        freq *= 2.0f;
     }
 
-    return Texture2D::create(&texels[0], _w, _h, GL_RGB);
+    for(int i = 0; i < _size.x * _size.y * 3; i++) {
+        texels[i] /= maxVal;
+    }
+
+    return Texture2D::create(&texels[0], _size.x, _size.y, GL_RGB);
 }
 
 
 Texture2D* Noise::whiteNoiseTexture(const int _w, const int _h) {
-    unsigned char* texels = new unsigned char[_w * _h * 3];
+    float* texels = new float[_w * _h * 3];
 
     int i = 0;
 
     for(int x = 0; x < _w; x++) {
         for(int y = 0; y < _h; y++) {
-            const char val = Random::range(static_cast<char>(0), static_cast<char>(255));
+            const float val = Random::range(0.0f, 1.0f);
 
             texels[i] = val;
             texels[i+1] = val;

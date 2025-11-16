@@ -29,16 +29,17 @@ class Texture2D {
         static Texture2D* load(const Color& _color);
         static Texture2D* load(const Color& _color, const TextureInfo& _info);
 
-        static Texture2D* create(unsigned char* _data, int _w, int _h, int _format);
+        static Texture2D* create(float* _data, int _w, int _h, int _format);
 
     private:
         unsigned int id = 0;
         int unit = -1;
 
-        unsigned char* data = nullptr;
+        void* data = nullptr;
         int width = 0;
         int height = 0;
         int format = 0;
+        int type = 0;
 
         Color color = Color::white();
 
@@ -49,9 +50,9 @@ class Texture2D {
         void internalDestroy();
 
         unsigned char* loadFromDisk(int* _width, int* _height, int* _format) const;
-        unsigned char* createFromColor(int* _width, int* _height, int* _format) const;
+        float* createFromColor(int* _width, int* _height, int* _format) const;
 
-        void bindData(const unsigned char* _imageData, int _width, int _height, int _format);
+        void bindData(const void* _imageData, int _width, int _height, int _format);
 
         static int checkForMatch(const std::string& _path, const Color& _color, const TextureInfo& _info);
 };

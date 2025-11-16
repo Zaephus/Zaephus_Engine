@@ -30,11 +30,11 @@ class LightingScene final : public Scene {
             // dirLight->name = "dir_light";
             // dirLight->transform->rotate(-55.0f, 30.0f, 0.0f);
 
-            pointLights[0] = new PointLight();
-            pointLights[0]->range = 12.0f;
-            pointLights[0]->specularStrength = 2.0f;
-            pointLights[0]->name = "point_light_0";
-            pointLights[0]->transform->position = Vector3(0.0f, 0.2f, 0.0f);
+            // pointLights[0] = new PointLight();
+            // pointLights[0]->range = 12.0f;
+            // pointLights[0]->specularStrength = 2.0f;
+            // pointLights[0]->name = "point_light_0";
+            // pointLights[0]->transform->position = Vector3(0.0f, 0.2f, 0.0f);
 
             {
                 // pointLights[1] = new PointLight({ 0.8f, 0.1f, 0.0f, 1.0f });
@@ -58,16 +58,23 @@ class LightingScene final : public Scene {
 
             cam = Camera::createPerspectiveCamera(45.0f * ZMath::deg2rad, 0.1f, 100.0f);
             cam->name = "camera";
-            cam->transform->position = { 0.0f, 0.5f, 3.0f };
-            cam->addComponent(new DebugCameraController());
+            cam->transform->position = { 0.0f, 1.0f, 0.0f };
+            cam->transform->rotate(-90.0f, 0.0f, 0.0);
+            // cam->addComponent(new DebugCameraController());
 
             renderer->setClearColor(0.2f, 0.25f, 0.4f, 1.0f);
 
             Mesh* quadMesh = ModelLoader::load(ModelLoader::quad)[0]->mesh;
 
             // Texture2D* floorTexture = Texture2D::load("wood_floor.png");
-            // Texture2D* floorTexture = Noise::perlinTexture(256, 256, 100000.0f, 0.0f, 15.0f, 3, 0.5f);
-            Texture2D* floorTexture = Noise::voronoiTexture(256, 256, 0.0f, 0.0f, 25.0f, 1, 0.5f);
+            // Texture2D* floorTexture = Noise::perlinTexture(250, 250, 0.0f, 0.0f, 35.0f, 1, 0.5f);
+            Texture2D* floorTexture = Noise::voronoiTexture(
+                {512, 512},
+                {0.0f, 0.0f},
+                {5, 5},
+                6,
+                0.5f
+            );
             // Texture2D* floorTexture = Noise::whiteNoiseTexture(256, 256);
 
             Shader* floorShader = Shader::unlitTextureShader(
@@ -79,7 +86,7 @@ class LightingScene final : public Scene {
             floor->addComponent(new MeshRenderer(quadMesh, floorShader));
             floor->name = "floor";
             floor->transform->position = { 0.0f, -0.5f, 0.0f };
-            floor->transform->scale = { 10.0f, 1.0f, 10.0f };
+            floor->transform->scale = { 1.0f, 1.0f, 1.0f };
 
             {
                 // Mesh* torusMesh = ModelLoader::load(ModelLoader::torus)[0]->mesh;

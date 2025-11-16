@@ -1,12 +1,14 @@
 
 #pragma once
+#include "Vectors/Vector2.h"
+#include "Vectors/Vector2Int.h"
 
 class Texture2D;
 
 class Noise {
     public:
         static Texture2D* perlinTexture(int _w, int _h, float _xOffset, float _yOffset, float _cellSize, unsigned int _octaves, float _persistence);
-        static Texture2D* voronoiTexture(int _w, int _h, float _xOffset, float _yOffset, float _cellSize, unsigned int _octaves, float _persistence);
+        static Texture2D* voronoiTexture(const Vector2Int& _size, const Vector2& _offset, const Vector2Int&, unsigned int _octaves, float _persistence);
         static Texture2D* whiteNoiseTexture(int _w, int _h);
 
         static float perlin(float _x, float _y, float _z, unsigned int _octaves, float _persistence);
