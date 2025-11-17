@@ -5,7 +5,7 @@
 
 #include <glad/gl.h>
 
-struct TextureData {
+struct TextureInfo {
     int horizontalWrap = GL_REPEAT;
     int verticalWrap = GL_REPEAT;
 
@@ -16,6 +16,6 @@ struct TextureData {
 
     bool flipVerticallyOnLoad = false;
 
-    bool operator==(const TextureData& _data) const;
-    bool operator!=(const TextureData& _data) const;
+    bool operator==(const TextureInfo& _info) const;
+    bool operator!=(const TextureInfo& _info) const;
 };

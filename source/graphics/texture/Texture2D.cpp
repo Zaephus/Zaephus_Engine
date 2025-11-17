@@ -14,12 +14,6 @@
 void Texture2D::initialize() {
     if(id != 0) { return; }
 
-    int width, height, format;
-    unsigned char* data = nullptr;
-
-    if(!path.empty()) { data = loadFromDisk(&width, &height, & format); }
-    else { data = createFromColor(&width, &height, & format); }
-
     bindData(data, width, height, format);
 
     if(!path.empty()) { stbi_image_free(data); }
@@ -52,7 +46,7 @@ void Texture2D::setUnit(const int _textureUnit) {
 unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) const {
     int channelAmount;
 
-    stbi_set_flip_vertically_on_load(data.flipVerticallyOnLoad);
+    stbi_set_flip_vertically_on_load(texInfo.flipVerticallyOnLoad);
     unsigned char* imageData = stbi_load(path.c_str(), _width, _height, &channelAmount, 0);
 
     switch(channelAmount) {
@@ -65,31 +59,32 @@ unsigned char* Texture2D::loadFromDisk(int* _width, int* _height, int* _format) 
     return imageData;
 }
 
-unsigned char* Texture2D::createFromColor(int* _width, int* _height, int* _format) const {
+float* Texture2D::createFromColor(int* _width, int* _height, int* _format) const {
     *_width = 1;
     *_height = 1;
     *_format = GL_RGBA;
 
-    unsigned char* data = new unsigned char[4];
-    data[0] = static_cast<unsigned char>(color.r * 255);
-    data[1] = static_cast<unsigned char>(color.g * 255);
-    data[2] = static_cast<unsigned char>(color.b * 255);
-    data[3] = static_cast<unsigned char>(color.a * 255);
+    float* texel = new float[4];
+    texel[0] = color.r * 255;
+    texel[1] = color.g * 255;
+    texel[2] = color.b * 255;
+    texel[3] = color.a * 255;
 
-    return &data[0];
+    return &texel[0];
 }
 
-void Texture2D::bindData(const unsigned char* _imageData, const int _width, const int _height, const int _format) {
+void Texture2D::bindData(const void* _imageData, const int _width, const int _height, const int _format) {
     glGenTextures(1, &id);
     glBindTexture(GL_TEXTURE_2D, id);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, data.horizontalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, data.verticalWrap);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, data.minFilter);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, data.magFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, texInfo.horizontalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, texInfo.verticalWrap);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texInfo.minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texInfo.magFilter);
+
     if(_imageData) {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, GL_UNSIGNED_BYTE, _imageData);
-        if(data.generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _width, _height, 0, _format, type, _imageData);
+        if(texInfo.generateMipmaps) { glGenerateMipmap(GL_TEXTURE_2D); }
     }
     else {
         std::cerr << "Failed to load texture!" << std::endl;
@@ -97,49 +92,69 @@ void Texture2D::bindData(const unsigned char* _imageData, const int _width, cons
     }
 }
 
-Texture2D* Texture2D::load(const char* _name) { return load(std::string(_name), TextureData()); }
-Texture2D* Texture2D::load(const char* _name, const TextureData& _data) { return load(std::string(_name), _data); }
-Texture2D* Texture2D::load(const std::string& _name) { return load(_name, TextureData()); }
-Texture2D* Texture2D::load(const std::string& _name, const TextureData& _data) {
+Texture2D* Texture2D::load(const char* _name) { return load(std::string(_name), TextureInfo()); }
+Texture2D* Texture2D::load(const char* _name, const TextureInfo& _info) { return load(std::string(_name), _info); }
+Texture2D* Texture2D::load(const std::string& _name) { return load(_name, TextureInfo()); }
+Texture2D* Texture2D::load(const std::string& _name, const TextureInfo& _info) {
     const std::string path = "resources/textures/" + _name;
 
-    const int loadedTextureIndex = checkForMatch(path, Color::white(), _data);
+    const int loadedTextureIndex = checkForMatch(path, Color::white(), _info);
     if(loadedTextureIndex >= 0) {
         return loadedTextures[loadedTextureIndex];
     }
 
     Texture2D* tex = new Texture2D;
     tex->path = path;
-    tex->data = _data;
+    tex->texInfo = _info;
+    tex->type = GL_UNSIGNED_BYTE;
 
     loadedTextures.push_back(tex);
+
+    tex->data = tex->loadFromDisk(&tex->width, &tex->height, &tex->format);
 
     return tex;
 }
 
-Texture2D* Texture2D::load(const Color& _color) { return load(_color, TextureData()); }
-Texture2D* Texture2D::load(const Color& _color, const TextureData& _data) {
-    const int loadedTextureIndex = checkForMatch("", _color, _data);
+Texture2D* Texture2D::load(const Color& _color) { return load(_color, TextureInfo()); }
+Texture2D* Texture2D::load(const Color& _color, const TextureInfo& _info) {
+    const int loadedTextureIndex = checkForMatch("", _color, _info);
     if(loadedTextureIndex >= 0) {
         return loadedTextures[loadedTextureIndex];
     }
 
     Texture2D* tex = new Texture2D;
     tex->color = _color;
-    tex->data = _data;
+    tex->texInfo = _info;
+    tex->type = GL_FLOAT;
 
     loadedTextures.push_back(tex);
+
+    tex->data = tex->createFromColor(&tex->width, &tex->height, &tex->format);
+
+    return tex;
+}
+
+Texture2D* Texture2D::create(float* _data, const int _w, const int _h, const int _format) {
+    Texture2D* tex = new Texture2D;
+    tex->texInfo = TextureInfo();
+
+    tex->width = _w;
+    tex->height = _h;
+    tex->format = _format;
+    tex->type = GL_FLOAT;
+
+    tex->data = _data;
 
     return tex;
 }
 
 std::vector<Texture2D*> Texture2D::loadedTextures;
 
-int Texture2D::checkForMatch(const std::string& _path, const Color& _color, const TextureData& _data) {
+int Texture2D::checkForMatch(const std::string& _path, const Color& _color, const TextureInfo& _info) {
     for(int i = 0; i < loadedTextures.size(); i++) {
         if(_path  != loadedTextures[i]->path)  { continue; }
         if(_color != loadedTextures[i]->color) { continue; }
-        if(_data  != loadedTextures[i]->data)  { continue; }
+        if(_info  != loadedTextures[i]->texInfo)  { continue; }
 
         return i;
     }
