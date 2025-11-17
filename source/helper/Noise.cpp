@@ -42,19 +42,19 @@ int Noise::perm[] = {
     222, 114, 67, 29, 24, 72, 243, 141, 128, 195, 78, 66, 215, 61, 156, 180
 };
 
-Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset, const float _yOffset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
-    float* texels = new float[_w * _h * 3];
+Texture2D* Noise::perlinTexture(const Vector2Int& _size, const Vector2& _offset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
+    float* texels = new float[_size.squaredMagnitude() * 3];
 
     int i = 0;
 
-    for(int x = 0; x < _w; x++) {
-        for(int y = 0; y < _h; y++) {
+    for(int y = 0; y < _size.y; y++) {
+        for(int x = 0; x < _size.x; x++) {
             const float xVal = static_cast<float>(x);
             const float yVal = static_cast<float>(y);
 
             const float val = perlin(
-                (_xOffset + xVal) / _cellSize,
-                (_yOffset + yVal) / _cellSize,
+                (_offset.x + xVal) / _cellSize,
+                (_offset.y + yVal) / _cellSize,
                 0,
                 _octaves,
                 _persistence
@@ -68,10 +68,10 @@ Texture2D* Noise::perlinTexture(const int _w, const int _h, const float _xOffset
         }
     }
 
-    return Texture2D::create(&texels[0], _w, _h, GL_RGB);
+    return Texture2D::create(&texels[0], _size.x, _size.y, GL_RGB);
 }
 
-Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset, const Vector2Int& _cellAmount, const unsigned int _octaves, const float _persistence) {
+Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset, const float _cellSize, const unsigned int _octaves, const float _persistence) {
     float* texels = new float[_size.x * _size.y * 3] {};
 
     unsigned int octaves;
@@ -88,37 +88,35 @@ Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset
     float maxVal = 0.0f;
 
     for(int octave = 0; octave < octaves; octave++) {
-        Vector2Int cellAmount = {
-            _cellAmount.x * static_cast<int>(freq) + 1,
-            _cellAmount.y * static_cast<int>(freq) + 1
-        };
+        const float cellSize = _cellSize / freq;
 
-        const float cellWidth = static_cast<float>(_size.x) / static_cast<float>(cellAmount.y - 1);
-        const float cellHeight = static_cast<float>(_size.y) / static_cast<float>(cellAmount.x - 1);
+        Vector2Int cellAmount = {
+            _size.x / static_cast<int>(cellSize),
+            _size.y / static_cast<int>(cellSize)
+        };
+        cellAmount += { 1, 1 };
 
         Vector2 points[cellAmount.x][cellAmount.y];
 
         for(int x = 0; x < cellAmount.x; x++) {
             for(int y = 0; y < cellAmount.y; y++) {
                 points[x][y] = {
-                    (static_cast<float>(x) - 0.5f) * cellWidth + Random::range(0.0f, cellWidth),
-                    (static_cast<float>(y) - 0.5f) * cellHeight + Random::range(0.0f, cellHeight)
+                    static_cast<float>(x) * cellSize + Random::range(0.0f, cellSize),
+                    static_cast<float>(y) * cellSize + Random::range(0.0f, cellSize)
                 };
             }
         }
 
         int i = 0;
 
-        // Pixel Calc
-        for(int x = 0; x < _size.x; x++) {
-            for(int y = 0; y < _size.y; y++) {
+        for(int y = 0; y < _size.y; y++) {
+            for(int x = 0; x < _size.x; x++) {
                 Vector2 uv = {
-                    static_cast<float>(x) / cellWidth - 0.5f,
-                    static_cast<float>(y) / cellHeight - 0.5f
+                    static_cast<float>(x) / cellSize,
+                    static_cast<float>(y) / cellSize
                 };
 
-                // Cell number
-                Vector2Int grid(
+                const Vector2Int grid(
                     static_cast<int>(std::floor(uv.x)),
                     static_cast<int>(std::floor(uv.y))
                 );
@@ -127,7 +125,7 @@ Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset
 
                 for(int nx = -1; nx <= 1; nx++) {
                     for(int ny = -1; ny <= 1; ny++) {
-                        Vector2Int num = {
+                        const Vector2Int num = {
                             grid.x + nx,
                             grid.y + ny
                         };
@@ -136,10 +134,7 @@ Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset
                             continue;
                         }
 
-                        Vector2 point = {
-                            points[num.x][num.y].x / cellWidth,
-                            points[num.x][num.y].y / cellHeight
-                        };
+                        Vector2 point =  points[num.x][num.y] / cellSize;
 
                         float dist = Vector2::distance(uv, point);
                         pointDistance = std::min(dist, pointDistance);
@@ -153,7 +148,6 @@ Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset
 
                 col *= amp;
 
-                // Apply colors to pixels
                 texels[i]   += col.x;
                 texels[i+1] += col.y;
                 texels[i+2] += col.z;
@@ -175,14 +169,13 @@ Texture2D* Noise::voronoiTexture(const Vector2Int& _size, const Vector2& _offset
     return Texture2D::create(&texels[0], _size.x, _size.y, GL_RGB);
 }
 
-
-Texture2D* Noise::whiteNoiseTexture(const int _w, const int _h) {
-    float* texels = new float[_w * _h * 3];
+Texture2D* Noise::whiteNoiseTexture(const Vector2Int& _size) {
+    float* texels = new float[_size.squaredMagnitude() * 3];
 
     int i = 0;
 
-    for(int x = 0; x < _w; x++) {
-        for(int y = 0; y < _h; y++) {
+    for(int x = 0; x < _size.x; x++) {
+        for(int y = 0; y < _size.y; y++) {
             const float val = Random::range(0.0f, 1.0f);
 
             texels[i] = val;
@@ -193,7 +186,7 @@ Texture2D* Noise::whiteNoiseTexture(const int _w, const int _h) {
         }
     }
 
-    return Texture2D::create(&texels[0], _w, _h, GL_RGB);
+    return Texture2D::create(&texels[0], _size.x, _size.y, GL_RGB);
 }
 
 float Noise::perlin(const float _x, const float _y, const float _z, const unsigned int _octaves, const float _persistence) {
